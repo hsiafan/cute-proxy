@@ -1,13 +1,13 @@
 
 Capture Http/Https/WebSocket traffics via Http Proxy.
 
-![screen shot](https://raw.githubusercontent.com/clearthesky/byproxy/master/images/screenshot.png)
+![screen shot](https://raw.githubusercontent.com/clearthesky/byproxy/master/images/screenshot_0.6.1.png)
 
 ## Download
 [Pre Build Native Releases for macOS](https://github.com/clearthesky/byproxy/releases).
 
 ## Build By Yourself
-Java8+ required To build this project.
+Java8+ required To build this project. ByProxy use lombok to simplify java code, you may want to install lombok plugin to you ide, If you want to do some develop.
 
 ByProxy use [javafx maven plugin](https://github.com/javafx-maven-plugin/javafx-maven-plugin) to distribute.
 
