@@ -64,8 +64,8 @@ public class ConnectProxyHandler implements Handler {
         TLSPlaintextHeader tlsPlaintextHeader = tlsIn.readPlaintextHeader();
 
         boolean ssl;
-        Socket wrappedServerSocket;
-        Socket clientSocket;
+        Socket fromSocket;
+        Socket toSocket;
         if (tlsPlaintextHeader.isValidHandShake()) {
             //TODO: Java8 not support alpn now, it is hard to know if target server support http2 by tls. Wait java9
             HandShakeMessage<?> handShakeMessage = tlsIn.readHandShakeMessage();
@@ -80,21 +80,23 @@ public class ConnectProxyHandler implements Handler {
             SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(wrappedSocket, null, serverSocket.getPort(),
                     false);
             sslSocket.setUseClientMode(false);
-            wrappedServerSocket = sslSocket;
+            fromSocket = sslSocket;
             ssl = true;
 
             try {
-                clientSocket = context.createSSLSocket(host, port);
+                SSLSocket sslClientSocket = context.createSSLSocket(host, port);
+                sslClientSocket.startHandshake();
+                toSocket = sslClientSocket;
             } catch (IOException e) {
                 logger.error("create ssl socket to {}:{} failed", host, port);
                 logger.debug("create ssl socket to {}:{} failed", host, port, e);
                 return;
             }
         } else {
-            wrappedServerSocket = new WrappedSocket(serverSocket, bos.toByteArray());
+            fromSocket = new WrappedSocket(serverSocket, bos.toByteArray());
             ssl = false;
             try {
-                clientSocket = context.createSocket(host, port);
+                toSocket = context.createSocket(host, port);
             } catch (IOException e) {
                 logger.error("create socket to {}:{} failed: {}", host, port, e.getMessage());
                 return;
@@ -102,12 +104,12 @@ public class ConnectProxyHandler implements Handler {
         }
 
         try {
-            handle(wrappedServerSocket, clientSocket, ssl, host + ":" + port, messageListener);
+            handle(fromSocket, toSocket, ssl, host + ":" + port, messageListener);
         } catch (SSLHandshakeException e) {
             // something wrong with ssl
             logger.error("SSL connection error for {}:{}.", host, port, e);
         } finally {
-            Closeables.closeQuietly(clientSocket);
+            Closeables.closeQuietly(toSocket);
         }
 
     }

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.byproxy.ui.component.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -8,8 +7,28 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import net.dongliu.byproxy.ui.component.*?>
 <?import java.net.URL?>
 <VBox xmlns:fx="http://javafx.com/fxml" fx:id="root" fx:controller="net.dongliu.byproxy.ui.MainController">
+    <MenuBar useSystemMenuBar="true">
+        <Menu text="File">
+            <MenuItem text="Save..." onAction="#save"/>
+            <MenuItem text="Open..." onAction="#open"/>
+            <MenuItem text="Clear" onAction="#clearAll"/>
+        </Menu>
+        <Menu text="Proxy">
+            <MenuItem text="Start Proxy" onAction="#startProxy" fx:id="startProxyMenu"/>
+            <MenuItem text="Stop Proxy" onAction="#stopProxy" fx:id="stopProxyMenu" disable="true"/>
+        </Menu>
+        <Menu text="Tools">
+            <MenuItem text="Setting..." onAction="#updateSetting"/>
+            <MenuItem text="Secondary Proxy..." onAction="#setProxy"/>
+            <MenuItem text="Root Certificate..." onAction="#setKeyStore"/>
+            <MenuItem text="Export Cert as CRT..." onAction="#exportCrt"/>
+            <MenuItem text="Export Cert as PEM..." onAction="#exportPem"/>
+        </Menu>
+
+    </MenuBar>
     <ToolBar>
         <SplitMenuButton onAction="#updateSetting" fx:id="proxyConfigureButton">
             <graphic>
@@ -49,8 +68,12 @@
             <tooltipText>Save Messages to File</tooltipText>
         </MyButton>
 
-        <MyButton onAction="#proxyControl" fx:id="proxyControlButton">
+        <MyButton onAction="#startProxy" fx:id="startProxyButton">
             <iconPath>/images/ic_play_circle_outline_black_24dp_1x.png</iconPath>
+            <tooltipText>Start/Stop HTTP Proxy</tooltipText>
+        </MyButton>
+        <MyButton onAction="#stopProxy" fx:id="stopProxyButton" disable="true">
+            <iconPath>/images/ic_stop_black_24dp_1x.png</iconPath>
             <tooltipText>Start/Stop HTTP Proxy</tooltipText>
         </MyButton>
         <MyButton onAction="#clearAll">

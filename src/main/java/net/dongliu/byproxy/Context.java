@@ -6,10 +6,9 @@ import net.dongliu.byproxy.setting.KeyStoreSetting;
 import net.dongliu.byproxy.setting.MainSetting;
 import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.commons.exception.Throwables;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import java.io.IOException;
 import java.net.*;
@@ -111,7 +110,7 @@ public class Context {
     /**
      * create trust-all ssl socket
      */
-    public Socket createSSLSocket(String host, int port) throws IOException {
+    public SSLSocket createSSLSocket(String host, int port) throws IOException {
         SSLContext clientSSlContext;
         try {
             clientSSlContext = SSLUtils.createClientSSlContext();
@@ -119,7 +118,7 @@ public class Context {
             throw Throwables.throwAny(e);
         }
         SSLSocketFactory factory = clientSSlContext.getSocketFactory();
-        return factory.createSocket(createSocket(host, port), proxySetting.getHost(), proxySetting.getPort(), true);
+        return (SSLSocket) factory.createSocket(createSocket(host, port), host, port, true);
     }
 
     public MainSetting getMainSetting() {

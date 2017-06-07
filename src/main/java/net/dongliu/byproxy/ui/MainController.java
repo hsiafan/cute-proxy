@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.VBox;
@@ -38,52 +39,30 @@ import java.util.Optional;
 @Slf4j
 public class MainController {
 
-    @FXML
-    private CatalogPane catalogPane;
-    @FXML
-    private SplitMenuButton setKeyStoreButton;
-    @FXML
-    private MyButton saveFileButton;
-    @FXML
-    private MyButton openFileButton;
-    @FXML
-    private VBox root;
-    @FXML
-    private SplitPane splitPane;
-    @FXML
-    private SplitMenuButton proxyConfigureButton;
-    @FXML
-    private MyButton proxyControlButton;
+    @FXML private MenuItem startProxyMenu;
+    @FXML private MenuItem stopProxyMenu;
+    @FXML private CatalogPane catalogPane;
+    @FXML private SplitMenuButton setKeyStoreButton;
+    @FXML private MyButton saveFileButton;
+    @FXML private MyButton openFileButton;
+    @FXML private VBox root;
+    @FXML private SplitPane splitPane;
+    @FXML private SplitMenuButton proxyConfigureButton;
+    @FXML private MyButton startProxyButton;
+    @FXML private MyButton stopProxyButton;
 
-    @FXML
-    private Label listenedAddressLabel;
+    @FXML private Label listenedAddressLabel;
 
-    @FXML
-    private HttpMessagePane httpMessagePane;
-    @FXML
-    private WebSocketMessagePane webSocketMessagePane;
-
-    private boolean proxyStart;
+    @FXML private HttpMessagePane httpMessagePane;
+    @FXML private WebSocketMessagePane webSocketMessagePane;
 
     private volatile ProxyServer proxyServer;
     private Context context = Context.getInstance();
 
     @FXML
-    void proxyControl(ActionEvent e) {
-        if (proxyStart) {
-            stopProxy();
-        } else {
-            startProxy();
-        }
-    }
-
     private void startProxy() {
-        proxyStart = true;
-        proxyConfigureButton.setDisable(true);
-        proxyControlButton.setDisable(true);
-        openFileButton.setDisable(true);
-        saveFileButton.setDisable(true);
-        setKeyStoreButton.setDisable(true);
+        startProxyButton.setDisable(true);
+        startProxyMenu.setDisable(true);
         try {
             proxyServer = new ProxyServer(context.getMainSetting(), context.getSslContextManager());
             proxyServer.setMessageListener(new UIMessageListener(catalogPane::addTreeItemMessage));
@@ -94,31 +73,28 @@ public class MainController {
             return;
         }
         Platform.runLater(() -> {
-            proxyControlButton.setIconPath("/images/ic_stop_black_24dp_1x.png");
-            proxyControlButton.setDisable(false);
+            stopProxyButton.setDisable(false);
+            stopProxyMenu.setDisable(false);
             updateListenedAddress();
         });
     }
 
+    @FXML
     private void stopProxy() {
-        proxyStart = false;
-        proxyControlButton.setDisable(true);
+        stopProxyButton.setDisable(true);
+        stopProxyMenu.setDisable(true);
         new Thread(() -> {
             proxyServer.stop();
             Platform.runLater(() -> {
-                proxyControlButton.setIconPath("/images/ic_play_circle_outline_black_24dp_1x.png");
-                proxyControlButton.setDisable(false);
-                proxyConfigureButton.setDisable(false);
-                setKeyStoreButton.setDisable(false);
-                openFileButton.setDisable(false);
-                saveFileButton.setDisable(false);
+                startProxyButton.setDisable(false);
+                startProxyMenu.setDisable(false);
                 listenedAddressLabel.setText("");
             });
         }).start();
     }
 
     @FXML
-    void initialize() {
+    private void initialize() {
         ShutdownHooks.registerTask(() -> {
             if (proxyServer != null) {
                 proxyServer.stop();
