@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>net.dongliu</groupId>
+    <artifactId>byproxy</artifactId>
+    <name>ByProxy</name>
+    <packaging>jar</packaging>
+    <version>0.5.1</version>
+
+    <properties>
+    </properties>
+
+    <dependencies>
+        <!-- common libs -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.10</version>
+        </dependency>
+        <dependency>
+            <groupId>net.dongliu</groupId>
+            <artifactId>commons</artifactId>
+            <version>5.5.2</version>
+        </dependency>
+        
+        <!-- decompress -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.13</version>
+        </dependency>
+        <dependency>
+            <groupId>org.brotli</groupId>
+            <artifactId>dec</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+
+        <!-- image support for .ico -->
+        <dependency>
+            <groupId>org.jclarion</groupId>
+            <artifactId>image4j</artifactId>
+            <version>0.7</version>
+        </dependency>
+
+        <!-- for jsse -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.55</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.55</version>
+        </dependency>
+
+        <!-- for beautifying -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.10.2</version>
+        </dependency>
+
+        <!-- log -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.21</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.1.7</version>
+        </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <fork>true</fork>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.zenjava</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>8.7.0</version>
+                <configuration>
+                    <mainClass>net.dongliu.byproxy.Main</mainClass>
+                    <jfxAppOutputDir>${project.build.directory}/app</jfxAppOutputDir>
+                    <nativeOutputDir>${project.build.directory}/native</nativeOutputDir>
+                    <jfxMainAppJarName>${project.artifactId}.jar</jfxMainAppJarName>
+                    <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
+                    <appName>ByProxy</appName>
+                    <vendor>net.dongliu</vendor>
+                    <bundler>${bundler.name}</bundler>
+                    <bundleArguments>
+                        <runtime/>
+                        <launcher-cfg-format>prop</launcher-cfg-format>
+                    </bundleArguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>windows_profile</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <properties>
+                <bundler.name>windows.app</bundler.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>osx_profile</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <bundler.name>dmg</bundler.name>
+            </properties>
+        </profile>
+        <profile>
+            <id>linux_profile</id>
+            <activation>
+                <os>
+                    <name>linux</name>
+                </os>
+            </activation>
+            <properties>
+                <bundler.name>linux.app</bundler.name>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>

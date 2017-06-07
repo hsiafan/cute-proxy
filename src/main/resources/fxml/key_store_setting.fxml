@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import net.dongliu.byproxy.ui.component.KeyStoreSettingDialog?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<fx:root type="net.dongliu.byproxy.ui.component.KeyStoreSettingDialog" xmlns:fx="http://javafx.com/fxml">
+    <title>KeyStore Setting</title>
+    <GridPane hgap="6" vgap="4">
+        <padding>
+            <Insets top="25" right="25" bottom="25" left="25"/>
+        </padding>
+
+        <CheckBox fx:id="useCustomCheckBox" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.columnSpan="2"
+                  text="Use Custom Root CA KeyStore"/>
+
+        <Label text="Root CA KeyStore" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField fx:id="keyStoreField" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="400" disable="true"/>
+        <Button fx:id="chooseFileButton" text="Choose KeyStore File" GridPane.columnIndex="1" GridPane.rowIndex="6"
+                onAction="#choseFile" disable="true"/>
+
+        <Label text="KeyStore Password" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <PasswordField fx:id="keyStorePasswordField" GridPane.columnIndex="1" GridPane.rowIndex="3" prefWidth="250"
+                       disable="true"/>
+    </GridPane>
+</fx:root>

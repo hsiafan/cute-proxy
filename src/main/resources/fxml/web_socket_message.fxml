@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import net.dongliu.byproxy.ui.component.BodyPane?>
+<?import net.dongliu.byproxy.ui.component.WebSocketMessagePane?>
+<?import javafx.scene.text.Text?>
+<fx:root type="net.dongliu.byproxy.ui.component.WebSocketMessagePane" xmlns:fx="http://javafx.com/fxml">
+    <top>
+        <Text fx:id="description"/>
+    </top>
+    <center>
+        <BodyPane fx:id="bodyPane"/>
+    </center>
+</fx:root>

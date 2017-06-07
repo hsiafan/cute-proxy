@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import net.dongliu.byproxy.ui.component.MainSettingDialog?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<fx:root type="net.dongliu.byproxy.ui.component.MainSettingDialog" xmlns:fx="http://javafx.com/fxml">
+    <title>Settings</title>
+    <GridPane xmlns:fx="http://javafx.com/fxml" hgap="6" vgap="4">
+        <padding>
+            <Insets top="25" right="25" bottom="25" left="25"/>
+        </padding>
+
+        <Label text="Listen Host" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <ComboBox fx:id="hostBox" GridPane.columnIndex="1" GridPane.rowIndex="1" maxWidth="400"/>
+
+        <Label text="Listen Port" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField fx:id="portFiled" GridPane.columnIndex="1" GridPane.rowIndex="2" maxWidth="80"/>
+
+        <Label text="Timeout(Seconds)" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <TextField fx:id="timeoutField" GridPane.columnIndex="1" GridPane.rowIndex="3" maxWidth="80"/>
+    </GridPane>
+</fx:root>

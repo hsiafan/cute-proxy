@@ -1,0 +1,16 @@
+.text-area .content{
+  -fx-background-color: #f4f4f4;
+}
+
+.split-pane > .split-pane-divider {  
+    -fx-padding: 0 0.1em 0 0.1em;  
+} 
+
+.scroll-pane {
+    -fx-background-color:transparent;
+}
+
+.tree-view {
+    -fx-border-style: none; 
+    -fx-background-color:transparent;
+}

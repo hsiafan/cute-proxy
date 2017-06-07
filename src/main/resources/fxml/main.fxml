@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import net.dongliu.byproxy.ui.component.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import java.net.URL?>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:id="root" fx:controller="net.dongliu.byproxy.ui.MainController">
+    <ToolBar>
+        <SplitMenuButton onAction="#updateSetting" fx:id="proxyConfigureButton">
+            <graphic>
+                <ImageView>
+                    <Image url="@/images/ic_settings_black_24dp_1x.png"/>
+                </ImageView>
+            </graphic>
+            <tooltip>
+                <Tooltip text="Settings"/>
+            </tooltip>
+            <items>
+                <MenuItem text="External Proxy" onAction="#setProxy"/>
+            </items>
+        </SplitMenuButton>
+        <SplitMenuButton onAction="#setKeyStore" fx:id="setKeyStoreButton">
+            <graphic>
+                <ImageView>
+                    <Image url="@/images/ic_vpn_key_black_24dp_1x.png"/>
+                </ImageView>
+            </graphic>
+            <tooltip>
+                <Tooltip text="Settings"/>
+            </tooltip>
+            <items>
+                <MenuItem text="Export Cert(PEM)" onAction="#exportPem"/>
+                <MenuItem text="Export Cert(CRT)" onAction="#exportCrt"/>
+            </items>
+        </SplitMenuButton>
+
+        <Separator/>
+        <MyButton onAction="#open" fx:id="openFileButton">
+            <iconPath>/images/ic_folder_open_black_24dp_1x.png</iconPath>
+            <tooltipText>Open Saved File</tooltipText>
+        </MyButton>
+        <MyButton onAction="#save" fx:id="saveFileButton">
+            <iconPath>/images/ic_save_black_24dp_1x.png</iconPath>
+            <tooltipText>Save Messages to File</tooltipText>
+        </MyButton>
+
+        <MyButton onAction="#proxyControl" fx:id="proxyControlButton">
+            <iconPath>/images/ic_play_circle_outline_black_24dp_1x.png</iconPath>
+            <tooltipText>Start/Stop HTTP Proxy</tooltipText>
+        </MyButton>
+        <MyButton onAction="#clearAll">
+            <iconPath>/images/ic_clear_all_black_24dp_1x.png</iconPath>
+            <tooltipText>Remove All Messages</tooltipText>
+        </MyButton>
+
+        <Pane HBox.hgrow="ALWAYS"/>
+
+        <Label fx:id="listenedAddressLabel"/>
+    </ToolBar>
+
+    <SplitPane prefHeight="${root.height}" fx:id="splitPane" dividerPositions="0.2">
+        <CatalogPane fx:id="catalogPane"/>
+        <StackPane>
+            <HttpMessagePane fx:id="httpMessagePane" visible="false"/>
+            <WebSocketMessagePane fx:id="webSocketMessagePane" visible="false"/>
+        </StackPane>
+    </SplitPane>
+
+    <stylesheets>
+        <URL value="@/styles/main.css"/>
+    </stylesheets>
+</VBox>

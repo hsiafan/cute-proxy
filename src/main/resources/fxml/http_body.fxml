@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import net.dongliu.byproxy.ui.component.BodyPane?>
+<?import net.dongliu.byproxy.ui.component.MyButton?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
+<fx:root type="net.dongliu.byproxy.ui.component.BodyPane" xmlns:fx="http://javafx.com/fxml">
+    <top>
+        <HBox spacing="4" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="4" bottom="2" left="4" right="4"/>
+            </padding>
+
+            <ComboBox onAction="#setMimeType" fx:id="bodyTypeBox"/>
+            <ComboBox onAction="#setCharset" fx:id="charsetBox"/>
+
+            <ToggleButton onAction="#beautify" fx:id="beautifyButton" text="Beautify">
+                <tooltip>
+                    <Tooltip text="Beautify Text"/>
+                </tooltip>
+            </ToggleButton>
+
+            <MyButton onAction="#exportBody">
+                <tooltipText>Save Content To File</tooltipText>
+                <iconPath>/images/ic_file_download_black_18dp.png</iconPath>
+            </MyButton>
+        </HBox>
+    </top>
+    <center></center>
+</fx:root>

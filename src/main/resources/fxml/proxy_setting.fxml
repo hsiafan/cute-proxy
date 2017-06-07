@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import net.dongliu.byproxy.ui.component.ProxySettingDialog?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<fx:root type="net.dongliu.byproxy.ui.component.ProxySettingDialog" xmlns:fx="http://javafx.com/fxml">
+    <title>Proxy Setting</title>
+    <dialogPane>
+        <DialogPane>
+            <content>
+                <GridPane xmlns:fx="http://javafx.com/fxml" hgap="6" vgap="4">
+                    <padding>
+                        <Insets top="25" right="25" bottom="25" left="25"/>
+                    </padding>
+
+                    <CheckBox fx:id="useProxy" text="Use External Proxy" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                              GridPane.columnSpan="2"/>
+
+                    <fx:define>
+                        <ToggleGroup fx:id="proxyTypeGroup"/>
+                    </fx:define>
+                    <Label text="Proxy Type" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <HBox GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        <RadioButton text="socks5" toggleGroup="$proxyTypeGroup" selected="true" fx:id="socks5Radio"
+                                     userData="socks5"/>
+                        <RadioButton text="http" toggleGroup="$proxyTypeGroup" fx:id="httpRadio" userData="http"/>
+                    </HBox>
+
+                    <Label text="Host" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="3" maxWidth="250"/>
+
+                    <Label text="Port" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                    <TextField fx:id="portFiled" GridPane.columnIndex="1" GridPane.rowIndex="4" maxWidth="80"/>
+
+                    <Label text="User" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                    <TextField fx:id="userField" GridPane.columnIndex="1" GridPane.rowIndex="5" maxWidth="250"/>
+
+                    <Label text="Password" GridPane.columnIndex="0" GridPane.rowIndex="6"/>
+                    <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="6" maxWidth="250"/>
+                </GridPane>
+            </content>
+        </DialogPane>
+    </dialogPane>
+</fx:root>

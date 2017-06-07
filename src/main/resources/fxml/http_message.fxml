@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import net.dongliu.byproxy.ui.component.*?>
+<?import javafx.scene.control.SplitPane?>
+<fx:root type="net.dongliu.byproxy.ui.component.HttpMessagePane" xmlns:fx="http://javafx.com/fxml">
+    <SplitPane orientation="VERTICAL" fx:id="requestPane">
+        <HttpHeadersPane fx:id="requestsHeaderPane"/>
+        <BodyPane fx:id="requestBodyPane"/>
+    </SplitPane>
+    <SplitPane orientation="VERTICAL" fx:id="responsePane">
+        <HttpHeadersPane fx:id="responseHeaderPane"/>
+        <BodyPane fx:id="responseBodyPane"/>
+    </SplitPane>
+</fx:root>
