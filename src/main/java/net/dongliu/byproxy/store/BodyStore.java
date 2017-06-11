@@ -239,30 +239,28 @@ public class BodyStore extends OutputStream implements Serializable {
         return input;
     }
 
-    private void writeObject(ObjectOutputStream out) throws IOException {
+    private synchronized void writeObject(ObjectOutputStream out) throws IOException {
         out.writeBoolean(closed);
         out.writeObject(type);
         out.writeUTF(charset.name());
         out.writeUTF(contentEncoding);
 
         if (closed) {
-            synchronized (this) {
-                if (bos != null) {
-                    out.writeInt(1);
-                    out.writeLong(size());
-                    try (InputStream in = bos.asInputStream()) {
-                        InputStreams.copyTo(in, out);
-                    }
-                } else if (file != null) {
-                    out.writeInt(2);
-                    out.writeLong(size());
-                    try (InputStream in = new FileInputStream(file);
-                         InputStream bin = new BufferedInputStream(in)) {
-                        InputStreams.copyTo(bin, out);
-                    }
-                } else {
-                    throw new IllegalStateException();
+            if (bos != null) {
+                out.writeInt(1);
+                out.writeLong(size());
+                try (InputStream in = bos.asInputStream()) {
+                    InputStreams.copyTo(in, out);
                 }
+            } else if (file != null) {
+                out.writeInt(2);
+                out.writeLong(size());
+                try (InputStream in = new FileInputStream(file);
+                     InputStream bin = new BufferedInputStream(in)) {
+                    InputStreams.copyTo(bin, out);
+                }
+            } else {
+                throw new IllegalStateException();
             }
         }
     }

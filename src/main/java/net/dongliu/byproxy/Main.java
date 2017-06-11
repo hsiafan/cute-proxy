@@ -25,14 +25,7 @@ public class Main extends Application {
         root.requestFocus();
 
         stage.setOnCloseRequest(e -> {
-            Runnable runnable;
-            while ((runnable = ShutdownHooks.tasks.poll()) != null) {
-                try {
-                    runnable.run();
-                } catch (Throwable t) {
-                    logger.error("", t);
-                }
-            }
+            ShutdownHooks.shutdownAll();
             Platform.exit();
         });
     }

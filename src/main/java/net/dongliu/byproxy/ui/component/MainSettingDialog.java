@@ -1,8 +1,5 @@
 package net.dongliu.byproxy.ui.component;
 
-import net.dongliu.byproxy.setting.MainSetting;
-import net.dongliu.byproxy.utils.NetUtils;
-import net.dongliu.byproxy.utils.NetworkInfo;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -11,6 +8,9 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
+import net.dongliu.byproxy.setting.MainSetting;
+import net.dongliu.byproxy.utils.NetUtils;
+import net.dongliu.byproxy.utils.NetworkInfo;
 import net.dongliu.commons.Strings;
 import net.dongliu.commons.collection.Lists;
 import net.dongliu.commons.exception.Throwables;
@@ -84,10 +84,10 @@ public class MainSettingDialog extends MyDialog<MainSetting> {
     }
 
     public void setModel(MainSetting mainSetting) {
-        NetworkInfo networkInfo = Lists.findFirst(hostBox.getItems(), n -> n.getIp().equals(mainSetting.getHost()));
+        NetworkInfo networkInfo = Lists.find(hostBox.getItems(), n -> n.getIp().equals(mainSetting.getHost()));
         if (networkInfo == null) {
             // network interface not found, use default listened-all one
-            networkInfo = Lists.findFirst(hostBox.getItems(), n -> n.getIp().equals(""));
+            networkInfo = Lists.find(hostBox.getItems(), n -> n.getIp().equals(""));
         }
         hostBox.getSelectionModel().select(networkInfo);
         int port = mainSetting.getPort();

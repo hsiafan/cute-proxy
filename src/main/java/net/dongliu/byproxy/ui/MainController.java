@@ -1,6 +1,7 @@
 package net.dongliu.byproxy.ui;
 
 import javafx.application.Platform;
+import javafx.beans.property.Property;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -39,22 +40,24 @@ import java.util.Optional;
 @Slf4j
 public class MainController {
 
-    @FXML private MenuItem startProxyMenu;
-    @FXML private MenuItem stopProxyMenu;
-    @FXML private CatalogPane catalogPane;
-    @FXML private SplitMenuButton setKeyStoreButton;
-    @FXML private MyButton saveFileButton;
-    @FXML private MyButton openFileButton;
-    @FXML private VBox root;
-    @FXML private SplitPane splitPane;
-    @FXML private SplitMenuButton proxyConfigureButton;
-    @FXML private MyButton startProxyButton;
-    @FXML private MyButton stopProxyButton;
+    public MenuItem deleteMenu;
+    public MenuItem copyURLButton;
+    public MenuItem startProxyMenu;
+    public MenuItem stopProxyMenu;
+    public CatalogPane catalogPane;
+    public SplitMenuButton setKeyStoreButton;
+    public MyButton saveFileButton;
+    public MyButton openFileButton;
+    public VBox root;
+    public SplitPane splitPane;
+    public SplitMenuButton proxyConfigureButton;
+    public MyButton startProxyButton;
+    public MyButton stopProxyButton;
 
-    @FXML private Label listenedAddressLabel;
+    public Label listenedAddressLabel;
 
-    @FXML private HttpMessagePane httpMessagePane;
-    @FXML private WebSocketMessagePane webSocketMessagePane;
+    public HttpMessagePane httpMessagePane;
+    public WebSocketMessagePane webSocketMessagePane;
 
     private volatile ProxyServer proxyServer;
     private Context context = Context.getInstance();
@@ -101,13 +104,20 @@ public class MainController {
             }
         });
 
-        catalogPane.setListener(message -> {
+        Property<Message> selectedMessage = catalogPane.getSelectedMessage();
+
+        selectedMessage.addListener((ov, old, message) -> {
             if (message == null) {
                 hideContent();
             } else {
                 showMessage(message);
             }
         });
+
+        copyURLButton.disableProperty().bind(UIUtils.observeNull(selectedMessage));
+
+        val selectedTreeItem = catalogPane.getSelectedTreeItem();
+        deleteMenu.disableProperty().bind(UIUtils.observeNull(selectedTreeItem));
         loadConfigAndKeyStore();
     }
 
@@ -252,5 +262,17 @@ public class MainController {
             return;
         }
         Files.write(file.toPath(), data);
+    }
+
+    public void copyUrl(ActionEvent event) {
+        String url = catalogPane.getSelectedMessage().getValue().getUrl();
+        UIUtils.copyToClipBoard(url);
+    }
+
+    public void deleteTreeNode(ActionEvent event) {
+        val treeItem = catalogPane.getSelectedTreeItem().getValue();
+        if (treeItem != null) {
+            catalogPane.deleteTreeNode(treeItem);
+        }
     }
 }

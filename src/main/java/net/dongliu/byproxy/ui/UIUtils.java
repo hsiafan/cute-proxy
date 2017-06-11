@@ -1,9 +1,8 @@
 package net.dongliu.byproxy.ui;
 
-import net.dongliu.byproxy.store.BodyStoreType;
-import net.dongliu.byproxy.ui.component.ProgressDialog;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
@@ -11,8 +10,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
+import net.dongliu.byproxy.store.BodyStoreType;
+import net.dongliu.byproxy.ui.component.ProgressDialog;
 import net.sf.image4j.codec.ico.ICODecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +85,13 @@ public class UIUtils {
         });
     }
 
+    public static void copyToClipBoard(String text) {
+        Clipboard clipboard = Clipboard.getSystemClipboard();
+        ClipboardContent content = new ClipboardContent();
+        content.putString(text);
+        clipboard.setContent(content);
+    }
+
 
     public static <T> void runBackground(Task<T> task, String failedMessage) {
         ProgressDialog progressDialog = new ProgressDialog();
@@ -98,5 +108,9 @@ public class UIUtils {
         Thread thread = new Thread(task);
         thread.start();
         progressDialog.show();
+    }
+
+    public static ObservableValue<Boolean> observeNull(ObservableValue<?> observable) {
+        return Bindings.createBooleanBinding(() -> observable.getValue() == null, observable);
     }
 }

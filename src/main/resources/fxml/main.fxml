@@ -12,13 +12,15 @@
 <VBox xmlns:fx="http://javafx.com/fxml" fx:id="root" fx:controller="net.dongliu.byproxy.ui.MainController">
     <MenuBar useSystemMenuBar="true">
         <Menu text="File">
-            <MenuItem text="Save..." onAction="#save"/>
-            <MenuItem text="Open..." onAction="#open"/>
-            <MenuItem text="Clear" onAction="#clearAll"/>
-        </Menu>
-        <Menu text="Proxy">
             <MenuItem text="Start Proxy" onAction="#startProxy" fx:id="startProxyMenu"/>
             <MenuItem text="Stop Proxy" onAction="#stopProxy" fx:id="stopProxyMenu" disable="true"/>
+            <MenuItem text="Save..." onAction="#save"/>
+            <MenuItem text="Open..." onAction="#open"/>
+        </Menu>
+        <Menu text="Edit">
+            <MenuItem text="Copy URL" onAction="#copyUrl" disable="true" fx:id="copyURLButton"/>
+            <MenuItem text="Delete" onAction="#deleteTreeNode" disable="true" fx:id="deleteMenu"/>
+            <MenuItem text="Clear All" onAction="#clearAll"/>
         </Menu>
         <Menu text="Tools">
             <MenuItem text="Setting..." onAction="#updateSetting"/>
