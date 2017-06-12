@@ -1,6 +1,10 @@
 package net.dongliu.byproxy.store;
 
+import lombok.Getter;
+import lombok.Setter;
 import net.dongliu.byproxy.parser.ContentType;
+import net.dongliu.commons.Charsets;
+import net.dongliu.commons.MoreObjects;
 import net.dongliu.commons.Strings;
 import net.dongliu.commons.io.InputStreams;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
@@ -13,7 +17,6 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
@@ -36,17 +39,22 @@ public class BodyStore extends OutputStream implements Serializable {
 
     private static final int MAX_BUFFER_SIZE = 1024 * 1024;
 
+    @Getter @Setter
     private volatile BodyStoreType type;
+    @Getter @Setter
     private volatile Charset charset;
+    @Getter
     private String url;
+    @Getter
     private String contentEncoding;
 
+    @Getter @Setter
     private transient boolean beautify;
 
     public BodyStore(@Nullable BodyStoreType type, @Nullable Charset charset,
                      @Nullable String contentEncoding, String url) {
-        this.type = type == null ? BodyStoreType.unknown : type;
-        this.charset = charset == null ? StandardCharsets.UTF_8 : charset;
+        this.type = MoreObjects.elvis(type, BodyStoreType.unknown);
+        this.charset = MoreObjects.elvis(charset, Charsets.UTF_8);
         this.contentEncoding = Strings.nullToEmpty(contentEncoding);
         this.bos = new ByteArrayOutputStreamEx();
         this.url = url;
@@ -58,7 +66,6 @@ public class BodyStore extends OutputStream implements Serializable {
             return new BodyStore(null, null, contentEncoding, url);
         } else {
             BodyStoreType bodyStoreType;
-            String type = contentType.getMimeType().getType();
             String subType = contentType.getMimeType().getSubType();
             if (contentType.isImage()) {
                 if ("png".equals(subType)) {
@@ -306,38 +313,6 @@ public class BodyStore extends OutputStream implements Serializable {
             toCopy = (int) Math.min(buffer.length, remain);
         }
         return size - remain;
-    }
-
-    public BodyStoreType getType() {
-        return type;
-    }
-
-    public void setType(BodyStoreType type) {
-        this.type = type;
-    }
-
-    public Charset getCharset() {
-        return charset;
-    }
-
-    public void setCharset(Charset charset) {
-        this.charset = charset;
-    }
-
-    public boolean isBeautify() {
-        return beautify;
-    }
-
-    public void setBeautify(boolean beautify) {
-        this.beautify = beautify;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getContentEncoding() {
-        return contentEncoding;
     }
 
     @Override

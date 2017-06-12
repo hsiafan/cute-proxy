@@ -20,7 +20,7 @@
         <Menu text="Edit">
             <MenuItem text="Copy URL" onAction="#copyUrl" disable="true" fx:id="copyURLButton"/>
             <MenuItem text="Delete" onAction="#deleteTreeNode" disable="true" fx:id="deleteMenu"/>
-            <MenuItem text="Replay..." onAction="#replay" disable="true" fx:id="replayMenu"/>
+            <!--<MenuItem text="Replay..." onAction="#replay" disable="true" fx:id="replayMenu"/>-->
             <MenuItem text="Clear All" onAction="#clearAll"/>
         </Menu>
         <Menu text="Tools">

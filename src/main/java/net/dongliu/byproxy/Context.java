@@ -1,5 +1,6 @@
 package net.dongliu.byproxy;
 
+import lombok.Getter;
 import net.dongliu.byproxy.proxy.SSLContextManager;
 import net.dongliu.byproxy.proxy.SSLUtils;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
@@ -22,6 +23,7 @@ import java.util.Objects;
  *
  * @author Liu Dong
  */
+@Getter
 public class Context {
     private volatile MainSetting mainSetting;
     private volatile KeyStoreSetting keyStoreSetting;
@@ -116,27 +118,4 @@ public class Context {
         return (SSLSocket) factory.createSocket(createSocket(host, port), host, port, true);
     }
 
-    public MainSetting getMainSetting() {
-        return mainSetting;
-    }
-
-    public KeyStoreSetting getKeyStoreSetting() {
-        return keyStoreSetting;
-    }
-
-    public ProxySetting getProxySetting() {
-        return proxySetting;
-    }
-
-    public SSLContextManager getSslContextManager() {
-        return sslContextManager;
-    }
-
-    public Dialer getDialer() {
-        return dialer;
-    }
-
-    public Proxy getProxy() {
-        return proxy;
-    }
 }
