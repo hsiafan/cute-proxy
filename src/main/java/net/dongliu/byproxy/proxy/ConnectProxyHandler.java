@@ -189,7 +189,7 @@ public class ConnectProxyHandler implements Handler {
         boolean shouldClose = requestHeaders.shouldClose();
 
         BodyStore requestBodyStore = readRequestBody(fromIn, requestHeaders, url);
-        messageListener.onHttpRequest(id, host, url, requestHeaders, requestBodyStore);
+        messageListener.onHttpRequest(id, host, url, new HttpMessage(requestHeaders, requestBodyStore));
         toOut.writeRequestHeaders(filterChunkedHeader(requestHeaders, requestBodyStore.size()));
         if (requestBodyStore.size() > 0) {
             InputStreams.copyTo(requestBodyStore.originInput(), toOut);
@@ -203,7 +203,7 @@ public class ConnectProxyHandler implements Handler {
         int code = responseHeaders.getStatusLine().getCode();
 
         BodyStore responseBodyStore = readResponseBody(responseHeaders, toIn, url, method);
-        messageListener.onHttpResponse(id, responseHeaders, responseBodyStore);
+        messageListener.onHttpResponse(id, new HttpMessage(responseHeaders, responseBodyStore));
         fromOut.writeResponseHeaders(filterChunkedHeader(responseHeaders, responseBodyStore.size()));
         if (responseBodyStore.size() > 0) {
             InputStreams.copyTo(responseBodyStore.originInput(), fromOut);

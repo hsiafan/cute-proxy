@@ -1,8 +1,7 @@
 package net.dongliu.byproxy.ui.beautifier;
 
-import net.dongliu.commons.exception.Throwables;
+import lombok.SneakyThrows;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -39,11 +38,8 @@ public class FormEncodedBeautifier implements Beautifier {
         return String.join("\n", lines);
     }
 
+    @SneakyThrows
     private String decode(String item, Charset charset) {
-        try {
-            return URLDecoder.decode(item, charset.name());
-        } catch (UnsupportedEncodingException e) {
-            throw Throwables.throwAny(e);
-        }
+        return URLDecoder.decode(item, charset.name());
     }
 }

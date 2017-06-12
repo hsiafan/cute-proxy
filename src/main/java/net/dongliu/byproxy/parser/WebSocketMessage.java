@@ -24,7 +24,7 @@ public class WebSocketMessage extends Message implements Serializable {
     }
 
     @Override
-    public String getDisplay() {
+    public String displayText() {
         return getUrl();
     }
 

@@ -6,6 +6,7 @@ import net.dongliu.byproxy.parser.WebSocketOutputStream;
 import net.dongliu.byproxy.store.BodyStore;
 import net.dongliu.byproxy.store.BodyStoreType;
 import net.dongliu.commons.exception.Throwables;
+import net.dongliu.commons.functional.UnChecked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,11 +56,8 @@ public class WebSocketHandler {
         } finally {
             Utils.shutdownOneWay(fromSocket, toSocket, toOut);
         }
-        try {
-            future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw Throwables.throwAny(e);
-        }
+
+        UnChecked.run(future::get);
     }
 
     private void readWebSocket(InputStream input, OutputStream out, String host, String url,

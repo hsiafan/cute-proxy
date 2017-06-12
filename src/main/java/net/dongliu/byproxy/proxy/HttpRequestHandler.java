@@ -2,13 +2,12 @@ package net.dongliu.byproxy.proxy;
 
 import net.dongliu.byproxy.parser.*;
 import net.dongliu.commons.collection.Lists;
-import net.dongliu.commons.exception.Throwables;
+import net.dongliu.commons.functional.UnChecked;
 import net.dongliu.commons.io.InputStreams;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
-import java.security.cert.CertificateEncodingException;
 
 /**
  * Handler to server http request
@@ -56,23 +55,13 @@ public class HttpRequestHandler implements Handler {
 
     private void sendCrt(HttpOutputStream out) throws IOException {
         AppKeyStoreGenerator appKeyStoreGenerator = sslContextManager.getAppKeyStoreGenerator();
-        byte[] data;
-        try {
-            data = appKeyStoreGenerator.exportCACertificate(false);
-        } catch (CertificateEncodingException e) {
-            throw Throwables.throwAny(e);
-        }
+        byte[] data = UnChecked.call(() -> appKeyStoreGenerator.exportCACertificate(false));
         sendResponse(out, "application/x-x509-ca-cert", data);
     }
 
     private void sendPem(HttpOutputStream out) throws IOException {
         AppKeyStoreGenerator appKeyStoreGenerator = sslContextManager.getAppKeyStoreGenerator();
-        byte[] data;
-        try {
-            data = appKeyStoreGenerator.exportCACertificate(true);
-        } catch (CertificateEncodingException e) {
-            throw Throwables.throwAny(e);
-        }
+        byte[] data = UnChecked.call(() -> appKeyStoreGenerator.exportCACertificate(true));
         sendResponse(out, "application/x-pem-file", data);
     }
 

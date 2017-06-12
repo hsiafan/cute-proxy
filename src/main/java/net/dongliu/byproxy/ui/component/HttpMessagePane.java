@@ -5,30 +5,24 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextArea;
+import net.dongliu.byproxy.parser.Headers;
 import net.dongliu.byproxy.parser.HttpMessage;
-import net.dongliu.byproxy.parser.ResponseHeaders;
 import net.dongliu.byproxy.store.BodyStore;
+import net.dongliu.commons.Joiner;
 import net.dongliu.commons.functional.UnChecked;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.stream.Collectors;
 
 /**
+ * Show one single http request or response
+ *
  * @author Liu Dong
  */
 public class HttpMessagePane extends SplitPane {
-    private static final Logger logger = LoggerFactory.getLogger(HttpMessagePane.class);
-    @FXML
-    private SplitPane requestPane;
-    @FXML
-    private SplitPane responsePane;
-    @FXML
-    private HttpHeadersPane responseHeaderPane;
-    @FXML
-    private BodyPane requestBodyPane;
-    @FXML
-    private HttpHeadersPane requestsHeaderPane;
-    @FXML
-    private BodyPane responseBodyPane;
+    public TextArea cookieText;
+    public TextArea rawHeadersText;
+    public BodyPane bodyPane;
 
     private ObjectProperty<HttpMessage> httpMessage = new SimpleObjectProperty<>();
 
@@ -39,44 +33,38 @@ public class HttpMessagePane extends SplitPane {
         UnChecked.run(fxmlLoader::load);
     }
 
+    private static Joiner joiner = Joiner.of("\n");
+
     @FXML
     void initialize() {
-        httpMessage.addListener((o, old, newValue) -> {
-            requestsHeaderPane.setHeaders(newValue.getRequestHeaders());
-            BodyStore requestBody = newValue.getRequestBody();
-            if (requestBody == null || requestBody.size() == 0) {
-                requestPane.getItems().remove(requestBodyPane);
-            } else {
-                requestBodyPane.setBody(requestBody);
-                if (!requestPane.getItems().contains(requestBodyPane)) {
-                    requestPane.getItems().add(requestBodyPane);
-                }
+        httpMessage.addListener((o, old, message) -> {
+            if (message == null) {
+                rawHeadersText.clear();
+                cookieText.clear();
+                getItems().remove(bodyPane);
+                return;
             }
-            ResponseHeaders responseHeaders = newValue.getResponseHeaders();
-            if (responseHeaders != null) {
-                responseHeaderPane.setHeaders(responseHeaders);
-                BodyStore responseBody = newValue.getResponseBody();
-                if (responseBody == null || (responseBody.isClosed() && responseBody.size() == 0)) {
-                    responsePane.getItems().remove(responseBodyPane);
-                } else {
-                    responseBodyPane.setBody(responseBody);
-                    if (!responsePane.getItems().contains(responseBodyPane)) {
-                        responsePane.getItems().add(responseBodyPane);
-                    }
+            Headers headers = message.getHeaders();
+            rawHeadersText.setText(joiner.join(headers.toRawLines()));
+            String s = headers.getCookieValues().stream()
+                    .map(c -> c.getName() + "=" + c.getValue())
+                    .collect(Collectors.joining("\n"));
+            cookieText.setText(s);
+
+            BodyStore body = message.getBody();
+
+            if (body == null || body.size() == 0) {
+                getItems().remove(bodyPane);
+            } else {
+                bodyPane.setBody(body);
+                if (!getItems().contains(bodyPane)) {
+                    getItems().add(bodyPane);
                 }
             }
         });
     }
 
-    public HttpMessage getHttpMessage() {
-        return httpMessage.get();
-    }
-
-    public ObjectProperty<HttpMessage> httpMessageProperty() {
-        return httpMessage;
-    }
-
-    public void setHttpMessage(HttpMessage httpMessage) {
-        this.httpMessage.set(httpMessage);
+    public void setHttpMessage(HttpMessage message) {
+        this.httpMessage.set(message);
     }
 }

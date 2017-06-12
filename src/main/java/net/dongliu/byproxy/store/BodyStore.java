@@ -148,7 +148,8 @@ public class BodyStore extends OutputStream implements Serializable {
         }
         if (bos.size() > MAX_BUFFER_SIZE) {
             try {
-                newTempFile();
+                createAndSetTempFile();
+                bos.close();
                 try (InputStream in = bos.asInputStream()) {
                     InputStreams.copyTo(in, fos);
                 }
@@ -162,11 +163,10 @@ public class BodyStore extends OutputStream implements Serializable {
         return bos;
     }
 
-    private void newTempFile() throws IOException {
+    private void createAndSetTempFile() throws IOException {
         file = File.createTempFile("ByProxy_tmp", ".tmp");
         file.deleteOnExit();
         fos = new BufferedOutputStream(new FileOutputStream(file));
-        bos.close();
     }
 
     /**
@@ -279,20 +279,20 @@ public class BodyStore extends OutputStream implements Serializable {
                 bos = new ByteArrayOutputStreamEx();
                 out = bos;
             } else if (store == 2) {
-                newTempFile();
+                createAndSetTempFile();
                 out = fos;
             } else {
                 throw new IllegalStateException();
             }
-            copyWithSize(in, out, size);
+            long copied = copyWithSize(in, out, size);
         }
     }
 
 
     /**
-     * Copy input stream to output stream, and close input
+     * Copy input stream to output stream, and close input, return actually read count
      */
-    private static void copyWithSize(InputStream input, OutputStream output, long size) throws IOException {
+    private static long copyWithSize(InputStream input, OutputStream output, long size) throws IOException {
         byte[] buffer = new byte[1024 * 4];
         long remain = size;
         int toCopy = (int) Math.min(buffer.length, remain);
@@ -305,6 +305,7 @@ public class BodyStore extends OutputStream implements Serializable {
             }
             toCopy = (int) Math.min(buffer.length, remain);
         }
+        return size - remain;
     }
 
     public BodyStoreType getType() {

@@ -1,8 +1,9 @@
 package net.dongliu.byproxy.proxy;
 
+import lombok.val;
 import net.dongliu.commons.Elapsed;
-import net.dongliu.commons.exception.Throwables;
 import net.dongliu.commons.functional.Lambdas;
+import net.dongliu.commons.functional.UnChecked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +34,7 @@ public class SSLContextManager {
     public SSLContextManager(String keyStorePath, char[] keyStorePassword) {
         this.keyStorePath = keyStorePath;
         Elapsed elapsed = Elapsed.create();
-        AppKeyStoreGenerator appKeyStoreGenerator;
-        try {
-            appKeyStoreGenerator = new AppKeyStoreGenerator(keyStorePath, keyStorePassword);
-        } catch (Exception e) {
-            throw Throwables.throwAny(e);
-        }
+        val appKeyStoreGenerator = UnChecked.call(() -> new AppKeyStoreGenerator(keyStorePath, keyStorePassword));
         logger.info("Initialize AppKeyStoreGenerator cost {} ms", elapsed.millis());
         BigInteger caCertSerialNumber = appKeyStoreGenerator.getCACertSerialNumber();
 

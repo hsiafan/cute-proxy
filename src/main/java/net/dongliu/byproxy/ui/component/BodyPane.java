@@ -19,12 +19,9 @@ import net.dongliu.byproxy.ui.beautifier.*;
 import net.dongliu.commons.Strings;
 import net.dongliu.commons.collection.Maps;
 import net.dongliu.commons.collection.Pair;
-import net.dongliu.commons.exception.Throwables;
 import net.dongliu.commons.functional.UnChecked;
 import net.dongliu.commons.io.InputStreams;
 import net.dongliu.commons.io.Readers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -38,7 +35,6 @@ import java.util.Map;
  * @author Liu Dong
  */
 public class BodyPane extends BorderPane {
-    private static final Logger logger = LoggerFactory.getLogger(BodyPane.class);
     @FXML
     private ComboBox<BodyStoreType> bodyTypeBox;
     @FXML
@@ -57,13 +53,7 @@ public class BodyPane extends BorderPane {
 
     @FXML
     void initialize() {
-        body.addListener((o, old, newValue) -> {
-            try {
-                refreshBody(newValue);
-            } catch (IOException e) {
-                throw Throwables.throwAny(e);
-            }
-        });
+        body.addListener((o, old, newValue) -> UnChecked.run(() -> refreshBody(newValue)));
 
         charsetBox.getItems().addAll(StandardCharsets.UTF_8, StandardCharsets.UTF_16, StandardCharsets.US_ASCII,
                 StandardCharsets.ISO_8859_1,

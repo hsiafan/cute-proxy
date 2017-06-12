@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.proxy;
 
-import net.dongliu.commons.exception.Throwables;
+import net.dongliu.commons.functional.UnChecked;
 import net.dongliu.commons.io.InputStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
@@ -37,11 +36,7 @@ class Utils {
         } finally {
             shutdownOneWay(socket2, socket1, output1);
         }
-        try {
-            future.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw Throwables.throwAny(e);
-        }
+        UnChecked.run(future::get);
     }
 
     static void shutdownOneWay(Socket srcSocket, Socket dstSocket, OutputStream dstOutput) {

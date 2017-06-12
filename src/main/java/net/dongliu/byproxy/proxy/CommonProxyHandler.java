@@ -93,7 +93,8 @@ public class CommonProxyHandler implements Handler {
         }
 
         BodyStore requestBodyStore = readRequestBody(input, requestHeaders, url);
-        messageListener.onHttpRequest(messageId, new URL(url).getHost(), url, requestHeaders, requestBodyStore);
+        messageListener.onHttpRequest(messageId, new URL(url).getHost(), url, new HttpMessage(requestHeaders,
+                requestBodyStore));
 
         if (requestBodyStore.size() > 0) {
             conn.setDoOutput(true);
@@ -145,7 +146,7 @@ public class CommonProxyHandler implements Handler {
         fromOut.writeLine(statusLine);
         ResponseHeaders responseHeaders = toResponseHeaders(statusLine, headerList);
         BodyStore responseBodyStore = readResponseBody(responseHeaders, responseInput, url);
-        messageListener.onHttpResponse(messageId, responseHeaders, responseBodyStore);
+        messageListener.onHttpResponse(messageId, new HttpMessage(responseHeaders, responseBodyStore));
         List<Header> newResponseHeaders = filterResponseHeaders(shouldClose, responseHeaders, responseBodyStore.size());
         fromOut.writeHeaders(newResponseHeaders);
         if (responseBodyStore.size() > 0) {

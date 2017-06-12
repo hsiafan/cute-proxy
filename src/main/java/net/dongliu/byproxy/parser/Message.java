@@ -22,7 +22,7 @@ public abstract class Message implements Serializable {
     /**
      * For show in abstract
      */
-    public abstract String getDisplay();
+    public abstract String displayText();
 
     public String getId() {
         return id;

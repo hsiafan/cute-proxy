@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import net.dongliu.byproxy.Context;
 import net.dongliu.byproxy.ShutdownHooks;
-import net.dongliu.byproxy.parser.HttpMessage;
+import net.dongliu.byproxy.parser.HttpRoundTripMessage;
 import net.dongliu.byproxy.parser.Message;
 import net.dongliu.byproxy.parser.WebSocketMessage;
 import net.dongliu.byproxy.proxy.AppKeyStoreGenerator;
@@ -55,7 +55,7 @@ public class MainController {
 
     public Label listenedAddressLabel;
 
-    public HttpMessagePane httpMessagePane;
+    public HttpRoundTripMessagePane httpRoundTripMessagePane;
     public WebSocketMessagePane webSocketMessagePane;
     public MenuItem replayMenu;
 
@@ -178,13 +178,13 @@ public class MainController {
      * Show message content in right area
      */
     private void showMessage(Message message) {
-        if (message instanceof HttpMessage) {
-            httpMessagePane.setHttpMessage((HttpMessage) message);
-            httpMessagePane.setVisible(true);
+        if (message instanceof HttpRoundTripMessage) {
+            httpRoundTripMessagePane.setRoundTripMessage((HttpRoundTripMessage) message);
+            httpRoundTripMessagePane.setVisible(true);
             webSocketMessagePane.setVisible(false);
         } else if (message instanceof WebSocketMessage) {
             webSocketMessagePane.setMessage((WebSocketMessage) message);
-            httpMessagePane.setVisible(false);
+            httpRoundTripMessagePane.setVisible(false);
             webSocketMessagePane.setVisible(true);
         }
     }
@@ -193,7 +193,7 @@ public class MainController {
      * hide right area
      */
     private void hideContent() {
-        httpMessagePane.setVisible(false);
+        httpRoundTripMessagePane.setVisible(false);
         webSocketMessagePane.setVisible(false);
     }
 
@@ -268,6 +268,15 @@ public class MainController {
     }
 
     public void replay(ActionEvent event) {
-
+        val selectedMessage = catalogPane.getSelectedMessage().getValue();
+        if (selectedMessage == null) {
+            UIUtils.showMessageDialog("No selected request");
+            return;
+        }
+        if (!(selectedMessage instanceof HttpRoundTripMessage)) {
+            UIUtils.showMessageDialog("Not http request, not supported yet");
+            return;
+        }
+        HttpRoundTripMessage message = (HttpRoundTripMessage) selectedMessage;
     }
 }

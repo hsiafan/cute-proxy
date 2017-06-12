@@ -1,7 +1,6 @@
 package net.dongliu.byproxy.proxy;
 
-import net.dongliu.byproxy.parser.RequestHeaders;
-import net.dongliu.byproxy.parser.ResponseHeaders;
+import net.dongliu.byproxy.parser.HttpMessage;
 import net.dongliu.byproxy.store.BodyStore;
 
 /**
@@ -13,13 +12,12 @@ public interface MessageListener {
     /**
      * Http request received
      */
-    void onHttpRequest(String messageId, String host, String url, RequestHeaders requestHeaders,
-                       BodyStore body);
+    void onHttpRequest(String messageId, String host, String url, HttpMessage requestMessage);
 
     /**
      * On response received
      */
-    void onHttpResponse(String messageId, ResponseHeaders responseHeaders, BodyStore body);
+    void onHttpResponse(String messageId, HttpMessage message);
 
     /**
      * One receive a websocket message

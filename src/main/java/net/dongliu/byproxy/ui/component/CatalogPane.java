@@ -59,7 +59,7 @@ public class CatalogPane extends BorderPane {
                 if (empty) {
                     setText(null);
                 } else {
-                    setText(item.getDisplay());
+                    setText(item.displayText());
                 }
             }
         });
@@ -153,7 +153,7 @@ public class CatalogPane extends BorderPane {
                                     item).getCount() + ")";
                         } else if (item instanceof RTreeItemValue.Leaf) {
                             Message message = ((RTreeItemValue.Leaf) item).getMessage();
-                            text = message.getDisplay();
+                            text = message.displayText();
                         } else {
                             text = "BUG..";
                         }

@@ -92,7 +92,7 @@
     <SplitPane prefHeight="${root.height}" fx:id="splitPane" dividerPositions="0.2">
         <CatalogPane fx:id="catalogPane"/>
         <StackPane>
-            <HttpMessagePane fx:id="httpMessagePane" visible="false"/>
+            <HttpRoundTripMessagePane fx:id="httpRoundTripMessagePane" visible="false"/>
             <WebSocketMessagePane fx:id="webSocketMessagePane" visible="false"/>
         </StackPane>
     </SplitPane>

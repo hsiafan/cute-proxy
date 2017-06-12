@@ -18,6 +18,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 
 /**
  * Proxy workers
@@ -62,6 +63,8 @@ public class ProxyWorker implements Runnable {
                 return;
             }
             handleHttp(b, input);
+        } catch (RejectedExecutionException e) {
+            logger.debug("server thread pool shutdown", e);
         } catch (HttpParserException e) {
             logger.error("Illegal http data", e);
         } catch (SocketTimeoutException e) {
