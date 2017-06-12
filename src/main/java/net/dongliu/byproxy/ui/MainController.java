@@ -57,7 +57,7 @@ public class MainController {
 
     public HttpRoundTripMessagePane httpRoundTripMessagePane;
     public WebSocketMessagePane webSocketMessagePane;
-    public MenuItem replayMenu;
+//    public MenuItem replayMenu;
 
     private volatile ProxyServer proxyServer;
     private Context context = Context.getInstance();
@@ -113,7 +113,7 @@ public class MainController {
 
         val messageSelected = UIUtils.observeNull(selectedMessage);
         copyURLButton.disableProperty().bind(messageSelected);
-        replayMenu.disableProperty().bind(messageSelected);
+//        replayMenu.disableProperty().bind(messageSelected);
 
         val selectedTreeItem = catalogPane.getSelectedTreeItem();
         deleteMenu.disableProperty().bind(UIUtils.observeNull(selectedTreeItem));
