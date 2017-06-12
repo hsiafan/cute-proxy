@@ -24,17 +24,15 @@
  */
 package net.dongliu.byproxy.ui.component;
 
-import net.dongliu.byproxy.setting.ProxySetting;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.*;
+import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.commons.Strings;
-import net.dongliu.commons.exception.Throwables;
-
-import java.io.IOException;
+import net.dongliu.commons.functional.UnChecked;
 
 /**
  * Show second proxy setting.
@@ -64,11 +62,7 @@ public class ProxySettingDialog extends MyDialog<ProxySetting> {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/proxy_setting.fxml"));
         loader.setRoot(this);
         loader.setController(this);
-        try {
-            loader.load();
-        } catch (IOException e) {
-            throw Throwables.throwAny(e);
-        }
+        UnChecked.run(loader::load);
 
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         setResultConverter((dialogButton) -> {

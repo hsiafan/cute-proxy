@@ -13,9 +13,8 @@ import net.dongliu.byproxy.utils.NetUtils;
 import net.dongliu.byproxy.utils.NetworkInfo;
 import net.dongliu.commons.Strings;
 import net.dongliu.commons.collection.Lists;
-import net.dongliu.commons.exception.Throwables;
+import net.dongliu.commons.functional.UnChecked;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -36,11 +35,7 @@ public class MainSettingDialog extends MyDialog<MainSetting> {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main_setting.fxml"));
         loader.setRoot(this);
         loader.setController(this);
-        try {
-            loader.load();
-        } catch (IOException e) {
-            throw Throwables.throwAny(e);
-        }
+        UnChecked.run(loader::load);
 
         setResultConverter((dialogButton) -> {
             ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
@@ -49,10 +44,6 @@ public class MainSettingDialog extends MyDialog<MainSetting> {
 
         mainSetting.addListener((o, old, n) -> setModel(n));
 
-    }
-
-    public MainSetting getMainSetting() {
-        return mainSetting.get();
     }
 
     public ObjectProperty<MainSetting> mainSettingProperty() {

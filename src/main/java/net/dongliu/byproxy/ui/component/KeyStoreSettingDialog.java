@@ -1,6 +1,5 @@
 package net.dongliu.byproxy.ui.component;
 
-import net.dongliu.byproxy.setting.KeyStoreSetting;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -12,10 +11,10 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
-import net.dongliu.commons.exception.Throwables;
+import net.dongliu.byproxy.setting.KeyStoreSetting;
+import net.dongliu.commons.functional.UnChecked;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * Show proxy configure.
@@ -41,11 +40,7 @@ public class KeyStoreSettingDialog extends MyDialog<KeyStoreSetting> {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/key_store_setting.fxml"));
         loader.setRoot(this);
         loader.setController(this);
-        try {
-            loader.load();
-        } catch (IOException e) {
-            throw Throwables.throwAny(e);
-        }
+        UnChecked.run(loader::load);
 
         setResultConverter((dialogButton) -> {
             ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();

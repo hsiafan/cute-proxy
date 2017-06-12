@@ -1,17 +1,15 @@
 package net.dongliu.byproxy.ui.component;
 
-import net.dongliu.byproxy.parser.WebSocketMessage;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
-import net.dongliu.commons.exception.Throwables;
+import net.dongliu.byproxy.parser.WebSocketMessage;
+import net.dongliu.commons.functional.UnChecked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * @author Liu Dong
@@ -29,11 +27,7 @@ public class WebSocketMessagePane extends BorderPane {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/web_socket_message.fxml"));
         loader.setRoot(this);
         loader.setController(this);
-        try {
-            loader.load();
-        } catch (IOException e) {
-            throw Throwables.throwAny(e);
-        }
+        UnChecked.run(loader::load);
     }
 
     @FXML

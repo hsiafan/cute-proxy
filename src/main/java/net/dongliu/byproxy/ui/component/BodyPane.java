@@ -1,9 +1,5 @@
 package net.dongliu.byproxy.ui.component;
 
-import net.dongliu.byproxy.store.BodyStore;
-import net.dongliu.byproxy.store.BodyStoreType;
-import net.dongliu.byproxy.ui.UIUtils;
-import net.dongliu.byproxy.ui.beautifier.*;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -16,10 +12,15 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import net.dongliu.byproxy.store.BodyStore;
+import net.dongliu.byproxy.store.BodyStoreType;
+import net.dongliu.byproxy.ui.UIUtils;
+import net.dongliu.byproxy.ui.beautifier.*;
 import net.dongliu.commons.Strings;
 import net.dongliu.commons.collection.Maps;
 import net.dongliu.commons.collection.Pair;
 import net.dongliu.commons.exception.Throwables;
+import net.dongliu.commons.functional.UnChecked;
 import net.dongliu.commons.io.InputStreams;
 import net.dongliu.commons.io.Readers;
 import org.slf4j.Logger;
@@ -51,11 +52,7 @@ public class BodyPane extends BorderPane {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_body.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
-        try {
-            fxmlLoader.load();
-        } catch (IOException e) {
-            throw Throwables.throwAny(e);
-        }
+        UnChecked.run(fxmlLoader::load);
     }
 
     @FXML

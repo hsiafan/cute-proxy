@@ -1,18 +1,17 @@
 package net.dongliu.byproxy.ui.component;
 
-import net.dongliu.byproxy.parser.Headers;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
+import net.dongliu.byproxy.parser.Headers;
 import net.dongliu.commons.Joiner;
-import net.dongliu.commons.exception.Throwables;
+import net.dongliu.commons.functional.UnChecked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.stream.Collectors;
 
 /**
@@ -31,11 +30,7 @@ public class HttpHeadersPane extends BorderPane {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_headers.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
-        try {
-            fxmlLoader.load();
-        } catch (IOException e) {
-            throw Throwables.throwAny(e);
-        }
+        UnChecked.run(fxmlLoader::load);
     }
 
     private static Joiner joiner = Joiner.of("\n");

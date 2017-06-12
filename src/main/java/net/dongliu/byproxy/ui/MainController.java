@@ -3,7 +3,6 @@ package net.dongliu.byproxy.ui;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitMenuButton;
@@ -58,12 +57,12 @@ public class MainController {
 
     public HttpMessagePane httpMessagePane;
     public WebSocketMessagePane webSocketMessagePane;
+    public MenuItem replayMenu;
 
     private volatile ProxyServer proxyServer;
     private Context context = Context.getInstance();
 
-    @FXML
-    private void startProxy() {
+    public void startProxy() {
         startProxyButton.setDisable(true);
         startProxyMenu.setDisable(true);
         try {
@@ -82,8 +81,7 @@ public class MainController {
         });
     }
 
-    @FXML
-    private void stopProxy() {
+    public void stopProxy() {
         stopProxyButton.setDisable(true);
         stopProxyMenu.setDisable(true);
         new Thread(() -> {
@@ -96,8 +94,7 @@ public class MainController {
         }).start();
     }
 
-    @FXML
-    private void initialize() {
+    public void initialize() {
         ShutdownHooks.registerTask(() -> {
             if (proxyServer != null) {
                 proxyServer.stop();
@@ -114,7 +111,9 @@ public class MainController {
             }
         });
 
-        copyURLButton.disableProperty().bind(UIUtils.observeNull(selectedMessage));
+        val messageSelected = UIUtils.observeNull(selectedMessage);
+        copyURLButton.disableProperty().bind(messageSelected);
+        replayMenu.disableProperty().bind(messageSelected);
 
         val selectedTreeItem = catalogPane.getSelectedTreeItem();
         deleteMenu.disableProperty().bind(UIUtils.observeNull(selectedTreeItem));
@@ -132,8 +131,7 @@ public class MainController {
     /**
      * Handle setting menu
      */
-    @FXML
-    void updateSetting(ActionEvent e) {
+    public void updateSetting(ActionEvent e) {
         MainSettingDialog dialog = new MainSettingDialog();
         dialog.mainSettingProperty().setValue(context.getMainSetting());
         Optional<MainSetting> newConfig = dialog.showAndWait();
@@ -144,8 +142,7 @@ public class MainController {
         }
     }
 
-    @FXML
-    void setKeyStore(ActionEvent e) {
+    public void setKeyStore(ActionEvent e) {
         KeyStoreSettingDialog dialog = new KeyStoreSettingDialog();
         dialog.keyStoreSettingProperty().setValue(context.getKeyStoreSetting());
         Optional<KeyStoreSetting> newConfig = dialog.showAndWait();
@@ -156,8 +153,7 @@ public class MainController {
         }
     }
 
-    @FXML
-    void setProxy(ActionEvent e) {
+    public void setProxy(ActionEvent e) {
         ProxySettingDialog dialog = new ProxySettingDialog();
         dialog.proxySettingProperty().setValue(context.getProxySetting());
         Optional<ProxySetting> newConfig = dialog.showAndWait();
@@ -201,13 +197,11 @@ public class MainController {
         webSocketMessagePane.setVisible(false);
     }
 
-    @FXML
-    private void clearAll(ActionEvent e) {
+    public void clearAll(ActionEvent e) {
         catalogPane.clearAll();
     }
 
-    @FXML
-    void open(ActionEvent e) {
+    public void open(ActionEvent e) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ByProxy data", "*.bpd"));
         File file = fileChooser.showOpenDialog(this.root.getScene().getWindow());
@@ -221,8 +215,7 @@ public class MainController {
     }
 
     // save captured data to file
-    @FXML
-    void save(ActionEvent e) throws IOException {
+    public void save(ActionEvent e) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ByProxy data", "*.bpd"));
         fileChooser.setInitialFileName("ByProxy.bpd");
@@ -236,8 +229,7 @@ public class MainController {
     }
 
 
-    @FXML
-    void exportPem(ActionEvent e) throws CertificateEncodingException, IOException {
+    public void exportPem(ActionEvent e) throws CertificateEncodingException, IOException {
         AppKeyStoreGenerator generator = Context.getInstance().getSslContextManager().getAppKeyStoreGenerator();
         byte[] data = generator.exportCACertificate(true);
         FileChooser fileChooser = new FileChooser();
@@ -250,8 +242,7 @@ public class MainController {
         Files.write(file.toPath(), data);
     }
 
-    @FXML
-    void exportCrt(ActionEvent e) throws CertificateEncodingException, IOException {
+    public void exportCrt(ActionEvent e) throws CertificateEncodingException, IOException {
         AppKeyStoreGenerator generator = Context.getInstance().getSslContextManager().getAppKeyStoreGenerator();
         byte[] data = generator.exportCACertificate(false);
         FileChooser fileChooser = new FileChooser();
@@ -274,5 +265,9 @@ public class MainController {
         if (treeItem != null) {
             catalogPane.deleteTreeNode(treeItem);
         }
+    }
+
+    public void replay(ActionEvent event) {
+
     }
 }

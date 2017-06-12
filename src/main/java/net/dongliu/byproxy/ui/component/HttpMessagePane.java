@@ -1,18 +1,16 @@
 package net.dongliu.byproxy.ui.component;
 
-import net.dongliu.byproxy.parser.HttpMessage;
-import net.dongliu.byproxy.parser.ResponseHeaders;
-import net.dongliu.byproxy.store.BodyStore;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.SplitPane;
-import net.dongliu.commons.exception.Throwables;
+import net.dongliu.byproxy.parser.HttpMessage;
+import net.dongliu.byproxy.parser.ResponseHeaders;
+import net.dongliu.byproxy.store.BodyStore;
+import net.dongliu.commons.functional.UnChecked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 /**
  * @author Liu Dong
@@ -38,11 +36,7 @@ public class HttpMessagePane extends SplitPane {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_message.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
-        try {
-            fxmlLoader.load();
-        } catch (IOException e) {
-            throw Throwables.throwAny(e);
-        }
+        UnChecked.run(fxmlLoader::load);
     }
 
     @FXML

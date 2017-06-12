@@ -19,9 +19,8 @@ import net.dongliu.byproxy.parser.Message;
 import net.dongliu.byproxy.ui.RTreeItemValue;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.utils.NetUtils;
-import net.dongliu.commons.exception.Throwables;
+import net.dongliu.commons.functional.UnChecked;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -48,11 +47,7 @@ public class CatalogPane extends BorderPane {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/catalog_view.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
-        try {
-            fxmlLoader.load();
-        } catch (IOException e) {
-            throw Throwables.throwAny(e);
-        }
+        UnChecked.run(fxmlLoader::load);
     }
 
     @FXML
