@@ -1,7 +1,7 @@
 
 Capture Http/Https/WebSocket traffics via Http Proxy.
 
-![screen shot](https://raw.githubusercontent.com/clearthesky/byproxy/master/images/screenshot_0.6.1.png)
+![screen shot](https://raw.githubusercontent.com/clearthesky/byproxy/master/images/screenshot_800.png)
 
 ## Download
 [Pre Build Native Releases for macOS](https://github.com/clearthesky/byproxy/releases).
