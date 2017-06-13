@@ -1,6 +1,7 @@
 package net.dongliu.byproxy.parser;
 
 import net.dongliu.byproxy.exception.HttpParserException;
+import net.dongliu.byproxy.utils.IOUtils;
 import net.dongliu.commons.Strings;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -9,7 +10,6 @@ import java.io.InputStream;
 
 /**
  * Http1.1 chunked input data.
- * TODO: should use decorator instead of extend?
  *
  * @author Liu Dong
  */
@@ -34,7 +34,7 @@ class ChunkedInputStream extends RichInputStream {
     private void nextChunk() throws IOException {
         if (!firstChunk) {
             // read one empty line
-            String line = readLine();
+            String line = IOUtils.readLine(in);
             if (line == null) {
                 throw new HttpParserException("chunked stream unexpected end");
             }
@@ -43,7 +43,7 @@ class ChunkedInputStream extends RichInputStream {
                 throw new HttpParserException("chunked not end with empty line");
             }
         }
-        String line = readLine();
+        String line = IOUtils.readLine(in);
         if (line == null) {
             throw new HttpParserException("chunked stream unexpected end");
         }
@@ -53,7 +53,7 @@ class ChunkedInputStream extends RichInputStream {
             end = true;
             // read trailers
             String tline;
-            while ((tline = readLine()) != null) {
+            while ((tline = IOUtils.readLine(in)) != null) {
                 // add one line
                 if (tline.isEmpty()) {
                     break;

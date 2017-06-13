@@ -50,6 +50,9 @@ public class HttpInputStream extends RichInputStream {
         return ResponseHeaders.parse(line, rawHeaders);
     }
 
+    /**
+     * Read http headers
+     */
     public synchronized List<String> readHeaders() throws IOException {
         String line;
         List<String> rawHeaders = new ArrayList<>();

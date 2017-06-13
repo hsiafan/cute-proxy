@@ -1,5 +1,6 @@
 package net.dongliu.byproxy.parser;
 
+import net.dongliu.byproxy.utils.IOUtils;
 import net.dongliu.commons.io.InputStreams;
 
 import javax.annotation.Nullable;
@@ -15,7 +16,7 @@ import java.io.InputStream;
  */
 public class RichInputStream extends InputStream {
 
-    private InputStream input;
+    protected InputStream in;
 
     // only for mark & reset
     private byte[] buffer;
@@ -23,8 +24,8 @@ public class RichInputStream extends InputStream {
     private int count = 0;
     private boolean mark;
 
-    public RichInputStream(InputStream input) {
-        this.input = input;
+    public RichInputStream(InputStream in) {
+        this.in = in;
     }
 
     /**
@@ -47,7 +48,7 @@ public class RichInputStream extends InputStream {
     @Override
     public synchronized int read(byte[] b, int off, int len) throws IOException {
         if (mark) {
-            int read = input.read(b, off, len);
+            int read = in.read(b, off, len);
             if (read <= 0) {
                 return read;
             }
@@ -61,14 +62,14 @@ public class RichInputStream extends InputStream {
             pos += toRead;
             return toRead;
         }
-        return input.read(b, off, len);
+        return in.read(b, off, len);
     }
 
     @Override
     public synchronized long skip(long n) throws IOException {
         if (mark) {
             int toSkip = (int) Math.min(buffer.length - count, n);
-            int read = input.read(buffer, count, toSkip);
+            int read = in.read(buffer, count, toSkip);
             if (read == -1) {
                 return 0;
             }
@@ -80,7 +81,7 @@ public class RichInputStream extends InputStream {
             pos += toSkip;
             return toSkip;
         }
-        return input.skip(n);
+        return in.skip(n);
     }
 
     @Override
@@ -88,7 +89,7 @@ public class RichInputStream extends InputStream {
         if (!mark && pos < count) {
             return count - pos;
         }
-        return input.available();
+        return in.available();
     }
 
     @Override
@@ -96,7 +97,7 @@ public class RichInputStream extends InputStream {
         buffer = null;
         pos = count = 0;
         mark = false;
-        input.close();
+        in.close();
     }
 
     @Override
@@ -120,7 +121,19 @@ public class RichInputStream extends InputStream {
 
     @Override
     public synchronized int read() throws IOException {
-        return _read();
+        if (mark) {
+            int b = in.read();
+            if (b == -1) {
+                return b;
+            }
+            buffer[count++] = (byte) b;
+            return b;
+        }
+
+        if (pos < count) {
+            return Byte.toUnsignedInt(buffer[pos++]);
+        }
+        return in.read();
     }
 
     public synchronized int readUnsignedInt8() throws IOException {
@@ -140,25 +153,9 @@ public class RichInputStream extends InputStream {
     }
 
 
-    public synchronized int _read() throws IOException {
-        if (mark) {
-            int b = input.read();
-            if (b == -1) {
-                return b;
-            }
-            buffer[count++] = (byte) b;
-            return b;
-        }
-
-        if (pos < count) {
-            return Byte.toUnsignedInt(buffer[pos++]);
-        }
-        return input.read();
-    }
-
     public void enableBuffered() {
-        if (!(input instanceof BufferedInputStream)) {
-            input = new BufferedInputStream(input);
+        if (!(in instanceof BufferedInputStream)) {
+            in = new BufferedInputStream(in);
         }
     }
 
@@ -167,37 +164,6 @@ public class RichInputStream extends InputStream {
      */
     @Nullable
     public synchronized String readLine() throws IOException {
-        StringBuilder sb = new StringBuilder(32);
-        boolean flag = false;
-        while (true) {
-            int c = _read();
-            if (c == -1) {
-                if (sb.length() == 0) {
-                    return null;
-                }
-                break;
-            }
-            if (c == '\r') {
-                if (flag) {
-                    sb.append('\r');
-                }
-                flag = true;
-            } else if (flag) {
-                if (c == '\n') {
-                    break;
-                } else {
-                    flag = false;
-                    sb.append('\r').append((char) c);
-                }
-            } else {
-                sb.append((char) c);
-            }
-        }
-
-        if (sb.length() == 0) {
-            return "";
-        }
-        return sb.toString();
+        return IOUtils.readLine(this);
     }
-
 }
