@@ -1,8 +1,7 @@
 package net.dongliu.byproxy.proxy;
 
+import lombok.SneakyThrows;
 import net.dongliu.byproxy.setting.MainSetting;
-import net.dongliu.commons.functional.Lambdas;
-import net.dongliu.commons.io.Closeables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +49,7 @@ public class ProxyServer {
             return t;
         });
 
-        masterThread = new Thread(Lambdas.runnable(this::run));
+        masterThread = new Thread(this::run);
         masterThread.setName("proxy-server-master");
         masterThread.setDaemon(true);
         masterThread.start();
@@ -66,7 +65,8 @@ public class ProxyServer {
     /**
      * Start proxy
      */
-    private void run() throws IOException {
+    @SneakyThrows
+    private void run() {
         if (mainSetting.getHost().isEmpty()) {
             serverSocket = new ServerSocket(mainSetting.getPort(), 128);
         } else {
@@ -91,7 +91,10 @@ public class ProxyServer {
                 socket.setSoTimeout(mainSetting.getTimeout() * 1000);
                 worker = new ProxyWorker(socket, sslContextManager, messageListener, executor);
             } catch (Exception e) {
-                Closeables.closeQuietly(socket);
+                try {
+                    socket.close();
+                } catch (IOException ignore) {
+                }
                 logger.error("Create new proxy worker failed.", e);
                 continue;
             }
@@ -110,7 +113,10 @@ public class ProxyServer {
         if (!masterThread.isInterrupted()) {
             logger.info("Stopping proxy server...");
             masterThread.interrupt();
-            Closeables.closeQuietly(serverSocket);
+            try {
+                serverSocket.close();
+            } catch (IOException ignore) {
+            }
             executor.shutdownNow();
         }
     }

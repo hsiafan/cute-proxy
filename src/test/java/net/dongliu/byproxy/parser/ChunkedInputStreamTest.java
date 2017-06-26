@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.parser;
 
-import net.dongliu.commons.io.InputStreams;
+import com.google.common.io.ByteStreams;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -22,7 +22,7 @@ public class ChunkedInputStreamTest {
                 "\r\n";
         try (ByteArrayInputStream input = new ByteArrayInputStream(data.getBytes());
              ChunkedInputStream stream = new ChunkedInputStream(input)) {
-            byte[] bytes = InputStreams.readAll(stream);
+            byte[] bytes = ByteStreams.toByteArray(stream);
             assertEquals("0123456789012345", new String(bytes, StandardCharsets.UTF_8));
         }
     }

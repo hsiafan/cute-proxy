@@ -1,9 +1,10 @@
 package net.dongliu.byproxy.parser;
 
-import net.dongliu.commons.collection.Lists;
+import com.google.common.collect.Lists;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -24,7 +25,7 @@ public class RequestHeaders extends Headers implements Serializable {
     }
 
     public static RequestHeaders parse(String rawRequestLine, List<String> rawHeaders) {
-        return new RequestHeaders(RequestLine.parse(rawRequestLine), Lists.mapTo(rawHeaders, Header::parse));
+        return new RequestHeaders(RequestLine.parse(rawRequestLine), Lists.transform(rawHeaders, Header::parse));
     }
 
     @Override
@@ -36,7 +37,7 @@ public class RequestHeaders extends Headers implements Serializable {
     public List<String> toRawLines() {
         List<String> rawLines = new ArrayList<>(getHeaders().size() + 1);
         rawLines.add(requestLine.raw());
-        rawLines.addAll(Lists.mapAs(getHeaders(), Header::raw));
+        rawLines.addAll(Lists.transform(getHeaders(), Header::raw));
         return rawLines;
     }
 
@@ -53,7 +54,7 @@ public class RequestHeaders extends Headers implements Serializable {
     public List<KeyValue> getCookieValues() {
         String value = getFirst("Cookie");
         if (value == null || value.isEmpty()) {
-            return Lists.of();
+            return Collections.emptyList();
         }
         return Stream.of(value.split(";")).map(String::trim).map(Parameter::parse).collect(toList());
     }

@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.parser;
 
-import net.dongliu.commons.io.InputStreams;
+import com.google.common.io.ByteStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +93,7 @@ public class WebSocketInputStream extends RichInputStream implements NumberReade
         }
         logger.debug("fin: {}, opcode: {}, mask: {}, payloadLen: {}", fin, opcode, mask, payloadLen);
         byte[] data = new byte[(int) payloadLen];
-        InputStreams.readExact(this, data);
+        ByteStreams.readFully(this, data);
         return new WebSocketFrame(fin, opcode, payloadLen, mask, maskData, data);
     }
 

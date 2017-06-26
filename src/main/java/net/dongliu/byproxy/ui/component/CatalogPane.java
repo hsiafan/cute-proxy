@@ -14,13 +14,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.val;
 import net.dongliu.byproxy.parser.Message;
 import net.dongliu.byproxy.ui.ItemValue;
 import net.dongliu.byproxy.ui.TreeNodeValue;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.utils.NetUtils;
-import net.dongliu.commons.functional.UnChecked;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,11 +44,12 @@ public class CatalogPane extends BorderPane {
     @Getter
     private Property<TreeItem<ItemValue>> selectedTreeItem = new SimpleObjectProperty<>();
 
+    @SneakyThrows
     public CatalogPane() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/catalog_view.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
-        UnChecked.run(fxmlLoader::load);
+        fxmlLoader.load();
     }
 
     @FXML

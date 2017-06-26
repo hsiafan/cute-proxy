@@ -1,12 +1,11 @@
 package net.dongliu.byproxy.store;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
+import com.google.common.io.ByteStreams;
 import lombok.Getter;
 import lombok.Setter;
 import net.dongliu.byproxy.parser.ContentType;
-import net.dongliu.commons.Charsets;
-import net.dongliu.commons.MoreObjects;
-import net.dongliu.commons.Strings;
-import net.dongliu.commons.io.InputStreams;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.z.ZCompressorInputStream;
 import org.brotli.dec.BrotliInputStream;
@@ -17,6 +16,7 @@ import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
@@ -53,8 +53,8 @@ public class BodyStore extends OutputStream implements Serializable {
 
     public BodyStore(@Nullable BodyStoreType type, @Nullable Charset charset,
                      @Nullable String contentEncoding, String url) {
-        this.type = MoreObjects.elvis(type, BodyStoreType.unknown);
-        this.charset = MoreObjects.elvis(charset, Charsets.UTF_8);
+        this.type = MoreObjects.firstNonNull(type, BodyStoreType.unknown);
+        this.charset = MoreObjects.firstNonNull(charset, StandardCharsets.UTF_8);
         this.contentEncoding = Strings.nullToEmpty(contentEncoding);
         this.bos = new ByteArrayOutputStreamEx();
         this.url = url;
@@ -158,7 +158,7 @@ public class BodyStore extends OutputStream implements Serializable {
                 createAndSetTempFile();
                 bos.close();
                 try (InputStream in = bos.asInputStream()) {
-                    InputStreams.copyTo(in, fos);
+                    ByteStreams.copy(in, fos);
                 }
             } catch (IOException e) {
                 logger.error("Create tmp file for http body failed", e);
@@ -257,14 +257,14 @@ public class BodyStore extends OutputStream implements Serializable {
                 out.writeInt(1);
                 out.writeLong(size());
                 try (InputStream in = bos.asInputStream()) {
-                    InputStreams.copyTo(in, out);
+                    ByteStreams.copy(in, out);
                 }
             } else if (file != null) {
                 out.writeInt(2);
                 out.writeLong(size());
                 try (InputStream in = new FileInputStream(file);
                      InputStream bin = new BufferedInputStream(in)) {
-                    InputStreams.copyTo(bin, out);
+                    ByteStreams.copy(bin, out);
                 }
             } else {
                 throw new IllegalStateException();

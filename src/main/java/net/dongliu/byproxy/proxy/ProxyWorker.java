@@ -6,7 +6,6 @@ import net.dongliu.byproxy.parser.HttpOutputStream;
 import net.dongliu.byproxy.parser.RequestLine;
 import net.dongliu.byproxy.parser.RichInputStream;
 import net.dongliu.byproxy.utils.NetUtils;
-import net.dongliu.commons.io.Closeables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +77,10 @@ public class ProxyWorker implements Runnable {
         } catch (Throwable e) {
             logger.error("", e);
         } finally {
-            Closeables.closeQuietly(serverSocket);
+            try {
+                serverSocket.close();
+            } catch (IOException ignore) {
+            }
         }
     }
 

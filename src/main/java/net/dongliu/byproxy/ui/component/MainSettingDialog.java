@@ -1,5 +1,6 @@
 package net.dongliu.byproxy.ui.component;
 
+import com.google.common.collect.Iterables;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -8,12 +9,11 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
+import lombok.SneakyThrows;
 import net.dongliu.byproxy.setting.MainSetting;
 import net.dongliu.byproxy.utils.NetUtils;
 import net.dongliu.byproxy.utils.NetworkInfo;
-import net.dongliu.commons.Strings;
-import net.dongliu.commons.collection.Lists;
-import net.dongliu.commons.functional.UnChecked;
+import net.dongliu.byproxy.utils.StringUtils;
 
 import java.util.List;
 
@@ -31,11 +31,12 @@ public class MainSettingDialog extends MyDialog<MainSetting> {
 
     private final ObjectProperty<MainSetting> mainSetting = new SimpleObjectProperty<>();
 
+    @SneakyThrows
     public MainSettingDialog() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main_setting.fxml"));
         loader.setRoot(this);
         loader.setController(this);
-        UnChecked.run(loader::load);
+        loader.load();
 
         setResultConverter((dialogButton) -> {
             ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
@@ -75,10 +76,10 @@ public class MainSettingDialog extends MyDialog<MainSetting> {
     }
 
     public void setModel(MainSetting mainSetting) {
-        NetworkInfo networkInfo = Lists.find(hostBox.getItems(), n -> n.getIp().equals(mainSetting.getHost()));
+        NetworkInfo networkInfo = Iterables.find(hostBox.getItems(), n -> n.getIp().equals(mainSetting.getHost()));
         if (networkInfo == null) {
             // network interface not found, use default listened-all one
-            networkInfo = Lists.find(hostBox.getItems(), n -> n.getIp().equals(""));
+            networkInfo = Iterables.find(hostBox.getItems(), n -> n.getIp().equals(""));
         }
         hostBox.getSelectionModel().select(networkInfo);
         int port = mainSetting.getPort();
@@ -89,8 +90,8 @@ public class MainSettingDialog extends MyDialog<MainSetting> {
     public MainSetting getModel() {
         NetworkInfo networkInfo = hostBox.getSelectionModel().getSelectedItem();
         return new MainSetting(networkInfo.getIp(),
-                Strings.toInt(portFiled.getText()),
-                Strings.toInt(timeoutField.getText()));
+                StringUtils.toInt(portFiled.getText()),
+                StringUtils.toInt(timeoutField.getText()));
     }
 
 }

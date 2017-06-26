@@ -1,9 +1,7 @@
 package net.dongliu.byproxy.proxy;
 
+import lombok.SneakyThrows;
 import lombok.val;
-import net.dongliu.commons.Elapsed;
-import net.dongliu.commons.functional.Lambdas;
-import net.dongliu.commons.functional.UnChecked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,11 +29,12 @@ public class SSLContextManager {
     private final ConcurrentHashMap<String, SSLContext> sslContextCache = new ConcurrentHashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
+    @SneakyThrows
     public SSLContextManager(String keyStorePath, char[] keyStorePassword) {
         this.keyStorePath = keyStorePath;
-        Elapsed elapsed = Elapsed.create();
-        val appKeyStoreGenerator = UnChecked.call(() -> new AppKeyStoreGenerator(keyStorePath, keyStorePassword));
-        logger.info("Initialize AppKeyStoreGenerator cost {} ms", elapsed.millis());
+        long start = System.currentTimeMillis();
+        val appKeyStoreGenerator = new AppKeyStoreGenerator(keyStorePath, keyStorePassword);
+        logger.info("Initialize AppKeyStoreGenerator cost {} ms", System.currentTimeMillis() - start);
         BigInteger caCertSerialNumber = appKeyStoreGenerator.getCACertSerialNumber();
 
         lock.writeLock().lock();
@@ -55,22 +54,23 @@ public class SSLContextManager {
     public SSLContext createSSlContext(String host) {
         lock.readLock().lock();
         try {
-            return sslContextCache.computeIfAbsent(host, Lambdas.function(this::getSslContextInner));
+            return sslContextCache.computeIfAbsent(host, this::getSslContextInner);
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    private SSLContext getSslContextInner(String host) throws Exception {
+    @SneakyThrows
+    private SSLContext getSslContextInner(String host) {
         char[] appKeyStorePassword = "123456".toCharArray();
-        Elapsed elapsed = Elapsed.create();
+        long start = System.currentTimeMillis();
         KeyStore keyStore = appKeyStoreGenerator.generateKeyStore(host, 365, appKeyStorePassword);
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         keyManagerFactory.init(keyStore, appKeyStorePassword);
         KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
         SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
         sslContext.init(keyManagers, null, new SecureRandom());
-        logger.info("Create ssh context for {}, cost {} ms", host, elapsed.millis());
+        logger.info("Create ssh context for {}, cost {} ms", host, System.currentTimeMillis() - start);
         return sslContext;
     }
 

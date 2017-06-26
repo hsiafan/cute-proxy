@@ -1,5 +1,8 @@
 package net.dongliu.byproxy.proxy;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.io.ByteStreams;
 import net.dongliu.byproxy.Context;
 import net.dongliu.byproxy.parser.*;
 import net.dongliu.byproxy.parser.TLSInputStream.ClientHello;
@@ -7,11 +10,8 @@ import net.dongliu.byproxy.parser.TLSInputStream.HandShakeMessage;
 import net.dongliu.byproxy.parser.TLSInputStream.TLSPlaintextHeader;
 import net.dongliu.byproxy.store.BodyStore;
 import net.dongliu.byproxy.utils.NetUtils;
-import net.dongliu.commons.Strings;
-import net.dongliu.commons.collection.Sets;
-import net.dongliu.commons.io.Closeables;
-import net.dongliu.commons.io.InputStreams;
-import net.dongliu.commons.io.TeeInputStream;
+import net.dongliu.byproxy.utils.StringUtils;
+import net.dongliu.byproxy.utils.TeeInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +109,7 @@ public class ConnectProxyHandler implements Handler {
             // something wrong with ssl
             logger.error("SSL connection error for {}:{}.", host, port, e);
         } finally {
-            Closeables.closeQuietly(toSocket);
+            toSocket.close();
         }
 
     }
@@ -133,7 +133,7 @@ public class ConnectProxyHandler implements Handler {
 
     }
 
-    private static final Set<String> methods = Sets.of("GET", "POST", "HEAD", "PUT", "TRACE", "DELETE", "PATCH",
+    private static final Set<String> methods = ImmutableSet.of("GET", "POST", "HEAD", "PUT", "TRACE", "DELETE", "PATCH",
             "OPTIONS");
 
     private boolean handleOneRequest(HttpInputStream fromIn, HttpOutputStream fromOut, Socket fromSocket,
@@ -154,7 +154,7 @@ public class ConnectProxyHandler implements Handler {
             return true;
         }
 
-        String method = Strings.before(firstLine, " ");
+        String method = StringUtils.before(firstLine, " ");
         if (!methods.contains(method)) {
             // not http request
             logger.debug("non-http traffic proxy via http tunnel");
@@ -192,7 +192,9 @@ public class ConnectProxyHandler implements Handler {
         messageListener.onHttpRequest(id, host, url, new HttpMessage(requestHeaders, requestBodyStore));
         toOut.writeRequestHeaders(filterChunkedHeader(requestHeaders, requestBodyStore.size()));
         if (requestBodyStore.size() > 0) {
-            InputStreams.copyTo(requestBodyStore.originInput(), toOut);
+            try (InputStream in = requestBodyStore.originInput()) {
+                ByteStreams.copy(in, toOut);
+            }
         }
 
         ResponseHeaders responseHeaders = toIn.readResponseHeaders();
@@ -206,7 +208,9 @@ public class ConnectProxyHandler implements Handler {
         messageListener.onHttpResponse(id, new HttpMessage(responseHeaders, responseBodyStore));
         fromOut.writeResponseHeaders(filterChunkedHeader(responseHeaders, responseBodyStore.size()));
         if (responseBodyStore.size() > 0) {
-            InputStreams.copyTo(responseBodyStore.originInput(), fromOut);
+            try (InputStream in = responseBodyStore.originInput()) {
+                ByteStreams.copy(in, fromOut);
+            }
         }
         fromOut.flush();
 
@@ -264,7 +268,9 @@ public class ConnectProxyHandler implements Handler {
             }
 
             if (requestBody != null) {
-                InputStreams.copyTo(requestBody, bodyStore);
+                try (InputStream in = requestBody) {
+                    ByteStreams.copy(in, bodyStore);
+                }
             }
             return bodyStore;
         }
@@ -284,7 +290,9 @@ public class ConnectProxyHandler implements Handler {
                 responseBody = null;
             }
             if (responseBody != null) {
-                InputStreams.copyTo(responseBody, bodyStore);
+                try (InputStream in = responseBody) {
+                    ByteStreams.copy(in, bodyStore);
+                }
             }
             return bodyStore;
         }

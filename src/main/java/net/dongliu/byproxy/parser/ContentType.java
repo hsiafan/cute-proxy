@@ -1,6 +1,7 @@
 package net.dongliu.byproxy.parser;
 
-import net.dongliu.commons.collection.Sets;
+
+import com.google.common.collect.ImmutableSet;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -60,8 +61,8 @@ public class ContentType {
         }
     }
 
-    private Set<String> textTypes = Sets.of("text");
-    private Set<String> textSubTypes = Sets.of("json", "x-www-form-urlencoded", "xml", "x-javascript",
+    private Set<String> textTypes = ImmutableSet.of("text");
+    private Set<String> textSubTypes = ImmutableSet.of("json", "x-www-form-urlencoded", "xml", "x-javascript",
             "javascript", "html");
 
     public boolean isText() {

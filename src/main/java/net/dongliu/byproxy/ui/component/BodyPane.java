@@ -1,5 +1,8 @@
 package net.dongliu.byproxy.ui.component;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteStreams;
+import com.google.common.io.CharStreams;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -12,16 +15,12 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import lombok.SneakyThrows;
 import net.dongliu.byproxy.store.BodyStore;
 import net.dongliu.byproxy.store.BodyStoreType;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.ui.beautifier.*;
-import net.dongliu.commons.Strings;
-import net.dongliu.commons.collection.Maps;
-import net.dongliu.commons.collection.Pair;
-import net.dongliu.commons.functional.UnChecked;
-import net.dongliu.commons.io.InputStreams;
-import net.dongliu.commons.io.Readers;
+import net.dongliu.byproxy.utils.StringUtils;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -44,16 +43,17 @@ public class BodyPane extends BorderPane {
 
     private ObjectProperty<BodyStore> body = new SimpleObjectProperty<>();
 
+    @SneakyThrows
     public BodyPane() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_body.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
-        UnChecked.run(fxmlLoader::load);
+        fxmlLoader.load();
     }
 
     @FXML
     void initialize() {
-        body.addListener((o, old, newValue) -> UnChecked.run(() -> refreshBody(newValue)));
+        body.addListener((o, old, newValue) -> refreshBody(newValue));
 
         charsetBox.getItems().addAll(StandardCharsets.UTF_8, StandardCharsets.UTF_16, StandardCharsets.US_ASCII,
                 StandardCharsets.ISO_8859_1,
@@ -62,14 +62,15 @@ public class BodyPane extends BorderPane {
         bodyTypeBox.getItems().addAll(BodyStoreType.values());
     }
 
-    private static final Map<BodyStoreType, Beautifier> beautifiers = Maps.of(
-            Pair.of(BodyStoreType.json, new JsonBeautifier()),
-            Pair.of(BodyStoreType.www_form, new FormEncodedBeautifier()),
-            Pair.of(BodyStoreType.xml, new XMLBeautifier()),
-            Pair.of(BodyStoreType.html, new HtmlBeautifier())
+    private static final Map<BodyStoreType, Beautifier> beautifiers = ImmutableMap.of(
+            BodyStoreType.json, new JsonBeautifier(),
+            BodyStoreType.www_form, new FormEncodedBeautifier(),
+            BodyStoreType.xml, new XMLBeautifier(),
+            BodyStoreType.html, new HtmlBeautifier()
     );
 
-    private void refreshBody(@Nullable BodyStore bodyStore) throws IOException {
+    @SneakyThrows
+    private void refreshBody(@Nullable BodyStore bodyStore) {
         if (bodyStore == null) {
             this.setCenter(new Text());
             return;
@@ -109,7 +110,7 @@ public class BodyPane extends BorderPane {
         if (storeType.isText()) {
             String text;
             try (Reader reader = new InputStreamReader(bodyStore.finalInputStream(), bodyStore.getCharset())) {
-                text = Readers.readAll(reader);
+                text = CharStreams.toString(reader);
             }
 
             // beautify
@@ -151,18 +152,18 @@ public class BodyPane extends BorderPane {
         }
         try (InputStream in = bodyStore.finalInputStream();
              OutputStream out = new FileOutputStream(file)) {
-            InputStreams.copyTo(in, out);
+            ByteStreams.copy(in, out);
         }
         UIUtils.showMessageDialog("Export Finished!");
     }
 
 
     static String suggestFileName(String url, BodyStoreType type) {
-        url = Strings.before(url, "?");
-        String fileName = Strings.afterLast(url, "/");
+        url = StringUtils.before(url, "?");
+        String fileName = StringUtils.afterLast(url, "/");
         if (fileName.isEmpty()) {
-            fileName = Strings.beforeLast(url, "/");
-            fileName = Strings.afterLast(fileName, "/");
+            fileName = StringUtils.beforeLast(url, "/");
+            fileName = StringUtils.afterLast(fileName, "/");
             fileName = fileName.replace(".", "_");
         }
         if (!fileName.contains(".")) {

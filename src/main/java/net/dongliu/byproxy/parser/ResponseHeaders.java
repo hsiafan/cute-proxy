@@ -1,7 +1,7 @@
 package net.dongliu.byproxy.parser;
 
+import com.google.common.collect.Lists;
 import jdk.nashorn.internal.ir.annotations.Immutable;
-import net.dongliu.commons.collection.Lists;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class ResponseHeaders extends Headers implements Serializable {
     }
 
     public static ResponseHeaders parse(String rawStatueLine, List<String> rawHeaders) {
-        return new ResponseHeaders(StatusLine.parse(rawStatueLine), Lists.mapTo(rawHeaders, Header::parse));
+        return new ResponseHeaders(StatusLine.parse(rawStatueLine), Lists.transform(rawHeaders, Header::parse));
     }
 
     @Override
@@ -35,7 +35,7 @@ public class ResponseHeaders extends Headers implements Serializable {
     public List<String> toRawLines() {
         List<String> rawLines = new ArrayList<>(getHeaders().size() + 1);
         rawLines.add(statusLine.raw());
-        rawLines.addAll(Lists.mapAs(getHeaders(), Header::raw));
+        rawLines.addAll(Lists.transform(getHeaders(), Header::raw));
         return rawLines;
     }
 

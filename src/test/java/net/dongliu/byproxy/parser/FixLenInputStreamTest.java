@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.parser;
 
-import net.dongliu.commons.io.InputStreams;
+import com.google.common.io.ByteStreams;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -24,10 +24,10 @@ public class FixLenInputStreamTest {
                 "}).listen(9090, '127.0.0.1');";
         ByteArrayInputStream bos = new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8));
         FixLenInputStream input = new FixLenInputStream(bos, 64);
-        byte[] bytes = InputStreams.readAll(input);
+        byte[] bytes = ByteStreams.toByteArray(input);
         assertEquals(64, bytes.length);
         assertEquals("require('net').createServer(function(sock) {\n    sock.on('data',", new String(bytes));
-        assertEquals(s.length() - 64, InputStreams.readAll(bos).length);
+        assertEquals(s.length() - 64, ByteStreams.toByteArray(bos).length);
     }
 
 

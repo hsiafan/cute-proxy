@@ -1,11 +1,9 @@
 package net.dongliu.byproxy.utils;
 
 
-import net.dongliu.commons.reflect.Beans;
+import lombok.ToString;
 
-/**
- * @author Liu Dong
- */
+@ToString
 public class NetworkInfo {
     private String name;
     private String ip;
@@ -23,8 +21,4 @@ public class NetworkInfo {
         return ip;
     }
 
-    @Override
-    public String toString() {
-        return Beans.toString(this);
-    }
 }

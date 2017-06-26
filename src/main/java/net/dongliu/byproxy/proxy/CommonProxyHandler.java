@@ -1,11 +1,11 @@
 package net.dongliu.byproxy.proxy;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
+import com.google.common.io.ByteStreams;
 import net.dongliu.byproxy.Context;
 import net.dongliu.byproxy.parser.*;
 import net.dongliu.byproxy.store.BodyStore;
-import net.dongliu.commons.collection.Lists;
-import net.dongliu.commons.collection.Sets;
-import net.dongliu.commons.io.InputStreams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +73,7 @@ public class CommonProxyHandler implements Handler {
 
         String messageId = MessageIdGenerator.getInstance().nextId();
         String method = requestLine.getMethod();
-        List<Header> newRequestHeaders = Lists.filter(requestHeaders.getHeaders(),
+        Iterable<Header> newRequestHeaders = Iterables.filter(requestHeaders.getHeaders(),
                 h -> !proxyRemoveHeaders.contains(h.getName()));
         String url = requestLine.getPath();
         boolean shouldClose = requestHeaders.shouldClose();
@@ -106,7 +106,9 @@ public class CommonProxyHandler implements Handler {
             return true;
         }
         if (requestBodyStore.size() > 0) {
-            InputStreams.copyTo(requestBodyStore.originInput(), conn.getOutputStream());
+            try (InputStream in = requestBodyStore.originInput()) {
+                ByteStreams.copy(in, conn.getOutputStream());
+            }
         }
 
         int statusCode;
@@ -150,7 +152,9 @@ public class CommonProxyHandler implements Handler {
         List<Header> newResponseHeaders = filterResponseHeaders(shouldClose, responseHeaders, responseBodyStore.size());
         fromOut.writeHeaders(newResponseHeaders);
         if (responseBodyStore.size() > 0) {
-            InputStreams.copyTo(responseBodyStore.originInput(), fromOut);
+            try (InputStream in = responseBodyStore.originInput()) {
+                ByteStreams.copy(in, fromOut);
+            }
         }
 
         return shouldClose;
@@ -172,7 +176,9 @@ public class CommonProxyHandler implements Handler {
             }
 
             if (requestBody != null) {
-                InputStreams.copyTo(requestBody, bodyStore);
+                try (InputStream in = requestBody) {
+                    ByteStreams.copy(in, bodyStore);
+                }
             }
             return bodyStore;
         }
@@ -182,7 +188,9 @@ public class CommonProxyHandler implements Handler {
             throws IOException {
         try (BodyStore bodyStore = BodyStore.create(headers.contentType(), headers.contentEncoding(), url)) {
             if (responseIn != null) {
-                InputStreams.copyTo(responseIn, bodyStore);
+                try (InputStream in = responseIn) {
+                    ByteStreams.copy(responseIn, bodyStore);
+                }
             }
             return bodyStore;
         }
@@ -191,7 +199,7 @@ public class CommonProxyHandler implements Handler {
 
     private List<Header> filterResponseHeaders(boolean shouldClose, ResponseHeaders responseHeaders, long contentLen) {
         List<Header> newResponseHeaders = new ArrayList<>(responseHeaders.getHeaders());
-        Set<String> removeHeaders = Sets.of("Transfer-Encoding", "Connection", "Content-Length");
+        Set<String> removeHeaders = ImmutableSet.of("Transfer-Encoding", "Connection", "Content-Length");
         newResponseHeaders.removeIf(h -> removeHeaders.contains(h.getName()));
         if (!shouldClose) {
             newResponseHeaders.add(new Header("Connection", "Keep-Alive"));
@@ -202,7 +210,7 @@ public class CommonProxyHandler implements Handler {
         return newResponseHeaders;
     }
 
-    private Set<String> proxyRemoveHeaders = Sets.of("Connection", "Proxy-Authenticate", "Proxy-Connection",
+    private Set<String> proxyRemoveHeaders = ImmutableSet.of("Connection", "Proxy-Authenticate", "Proxy-Connection",
             "Transfer-Encoding");
 
 

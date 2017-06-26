@@ -1,5 +1,7 @@
 package net.dongliu.byproxy.proxy;
 
+import lombok.SneakyThrows;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -10,7 +12,8 @@ import java.security.SecureRandom;
  */
 public class SSLUtils {
 
-    public static SSLContext createClientSSlContext() throws Exception {
+    @SneakyThrows
+    public static SSLContext createClientSSlContext() {
         TrustManager[] trustAllManagers = new TrustManager[]{
                 new X509TrustManager() {
                     public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {

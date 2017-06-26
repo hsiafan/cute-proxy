@@ -2,7 +2,7 @@ package net.dongliu.byproxy.parser;
 
 import net.dongliu.byproxy.exception.HttpParserException;
 import net.dongliu.byproxy.utils.IOUtils;
-import net.dongliu.commons.Strings;
+import net.dongliu.byproxy.utils.StringUtils;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
@@ -47,7 +47,7 @@ class ChunkedInputStream extends RichInputStream {
         if (line == null) {
             throw new HttpParserException("chunked stream unexpected end");
         }
-        line = Strings.before(line, ";");
+        line = StringUtils.before(line, ";");
         long chunkLen = Long.parseLong(line, 16);
         if (chunkLen == 0) {
             end = true;

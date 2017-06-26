@@ -1,11 +1,10 @@
 package net.dongliu.byproxy.parser;
 
+import com.google.common.io.ByteStreams;
 import net.dongliu.byproxy.utils.IOUtils;
-import net.dongliu.commons.io.InputStreams;
 
 import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -33,10 +32,7 @@ public class RichInputStream extends InputStream {
      */
     public byte[] readExact(int size) throws IOException {
         byte[] buffer = new byte[size];
-        int read = InputStreams.readExact(this, buffer);
-        if (read != size) {
-            throw new EOFException("Unexpected end of stream");
-        }
+        ByteStreams.readFully(this, buffer);
         return buffer;
     }
 

@@ -11,8 +11,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
+import lombok.SneakyThrows;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
-import net.dongliu.commons.functional.UnChecked;
 
 import java.io.File;
 
@@ -36,11 +36,12 @@ public class KeyStoreSettingDialog extends MyDialog<KeyStoreSetting> {
         return keyStoreSetting;
     }
 
+    @SneakyThrows
     public KeyStoreSettingDialog() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/key_store_setting.fxml"));
         loader.setRoot(this);
         loader.setController(this);
-        UnChecked.run(loader::load);
+        loader.load();
 
         setResultConverter((dialogButton) -> {
             ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();

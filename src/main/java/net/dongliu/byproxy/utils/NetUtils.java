@@ -1,13 +1,12 @@
 package net.dongliu.byproxy.utils;
 
-import net.dongliu.commons.Strings;
-import net.dongliu.commons.collection.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class NetUtils {
 
 
     public static String getHost(String target) {
-        return Strings.before(target, ":");
+        return StringUtils.before(target, ":");
     }
 
     public static int getPort(String target) {
@@ -68,7 +67,7 @@ public class NetUtils {
             networkInterfaces = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException e) {
             logger.warn("cannot get local network interface ip address", e);
-            return Lists.of();
+            return Collections.emptyList();
         }
         List<NetworkInfo> list = new ArrayList<>();
         while (networkInterfaces.hasMoreElements()) {

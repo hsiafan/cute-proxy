@@ -1,12 +1,11 @@
 package net.dongliu.byproxy.proxy;
 
+import com.google.common.base.Throwables;
 import net.dongliu.byproxy.parser.WebSocketFrame;
 import net.dongliu.byproxy.parser.WebSocketInputStream;
 import net.dongliu.byproxy.parser.WebSocketOutputStream;
 import net.dongliu.byproxy.store.BodyStore;
 import net.dongliu.byproxy.store.BodyStoreType;
-import net.dongliu.commons.exception.Throwables;
-import net.dongliu.commons.functional.UnChecked;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +55,14 @@ public class WebSocketHandler {
         } finally {
             Utils.shutdownOneWay(fromSocket, toSocket, toOut);
         }
-
-        UnChecked.run(future::get);
+        try {
+            future.get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (ExecutionException e) {
+            Throwables.throwIfUnchecked(e.getCause());
+            Throwables.throwIfInstanceOf(e.getCause(), IOException.class);
+        }
     }
 
     private void readWebSocket(InputStream input, OutputStream out, String host, String url,

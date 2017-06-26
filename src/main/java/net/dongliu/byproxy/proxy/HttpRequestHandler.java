@@ -1,9 +1,9 @@
 package net.dongliu.byproxy.proxy;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.io.ByteStreams;
+import lombok.SneakyThrows;
 import net.dongliu.byproxy.parser.*;
-import net.dongliu.commons.collection.Lists;
-import net.dongliu.commons.functional.UnChecked;
-import net.dongliu.commons.io.InputStreams;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,28 +53,30 @@ public class HttpRequestHandler implements Handler {
         }
     }
 
+    @SneakyThrows
     private void sendCrt(HttpOutputStream out) throws IOException {
         AppKeyStoreGenerator appKeyStoreGenerator = sslContextManager.getAppKeyStoreGenerator();
-        byte[] data = UnChecked.call(() -> appKeyStoreGenerator.exportCACertificate(false));
+        byte[] data = appKeyStoreGenerator.exportCACertificate(false);
         sendResponse(out, "application/x-x509-ca-cert", data);
     }
 
+    @SneakyThrows
     private void sendPem(HttpOutputStream out) throws IOException {
         AppKeyStoreGenerator appKeyStoreGenerator = sslContextManager.getAppKeyStoreGenerator();
-        byte[] data = UnChecked.call(() -> appKeyStoreGenerator.exportCACertificate(true));
+        byte[] data = appKeyStoreGenerator.exportCACertificate(true);
         sendResponse(out, "application/x-pem-file", data);
     }
 
     private void sendIndexHtml(HttpOutputStream out) throws IOException {
         try (InputStream in = getClass().getResourceAsStream("/www/html/index.html")) {
-            byte[] data = InputStreams.readAll(in);
+            byte[] data = ByteStreams.toByteArray(in);
             sendResponse(out, "text/html; charset=utf-8", data);
         }
     }
 
     private void sendResponse(HttpOutputStream out, String contentType, byte[] body) throws IOException {
         out.writeLine("HTTP/1.1 200 OK");
-        out.writeHeaders(Lists.of(
+        out.writeHeaders(ImmutableList.of(
                 new Header("Content-Type", contentType),
                 new Header("Content-Length", String.valueOf(body.length)),
                 new Header("Connection", "close")

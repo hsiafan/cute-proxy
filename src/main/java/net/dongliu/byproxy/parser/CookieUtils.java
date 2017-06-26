@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.parser;
 
-import net.dongliu.commons.Strings;
+import com.google.common.base.Strings;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;

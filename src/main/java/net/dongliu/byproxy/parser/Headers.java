@@ -1,7 +1,8 @@
 package net.dongliu.byproxy.parser;
 
-import net.dongliu.commons.Joiner;
-import net.dongliu.commons.collection.Lists;
+
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
@@ -27,7 +28,10 @@ public abstract class Headers implements Serializable {
 
     @Override
     public String toString() {
-        return Joiner.of(",", "Headers(", ")").join(Lists.mapAs(headers, Header::raw));
+        StringBuilder sb = new StringBuilder("Headers(");
+        Joiner.on(",").appendTo(sb, Lists.transform(headers, Header::raw));
+        sb.append(")");
+        return sb.toString();
     }
 
     /**

@@ -6,11 +6,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
+import lombok.SneakyThrows;
 import net.dongliu.byproxy.parser.Headers;
 import net.dongliu.byproxy.parser.HttpMessage;
 import net.dongliu.byproxy.store.BodyStore;
-import net.dongliu.commons.Joiner;
-import net.dongliu.commons.functional.UnChecked;
 
 import java.util.stream.Collectors;
 
@@ -26,14 +25,13 @@ public class HttpMessagePane extends SplitPane {
 
     private ObjectProperty<HttpMessage> httpMessage = new SimpleObjectProperty<>();
 
+    @SneakyThrows
     public HttpMessagePane() {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_message.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
-        UnChecked.run(fxmlLoader::load);
+        fxmlLoader.load();
     }
-
-    private static Joiner joiner = Joiner.of("\n");
 
     @FXML
     void initialize() {
@@ -45,7 +43,7 @@ public class HttpMessagePane extends SplitPane {
                 return;
             }
             Headers headers = message.getHeaders();
-            rawHeadersText.setText(joiner.join(headers.toRawLines()));
+            rawHeadersText.setText(String.join("\n", headers.toRawLines()));
             String s = headers.getCookieValues().stream()
                     .map(c -> c.getName() + "=" + c.getValue())
                     .collect(Collectors.joining("\n"));
