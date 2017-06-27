@@ -25,7 +25,8 @@ public class RequestHeaders extends Headers implements Serializable {
     }
 
     public static RequestHeaders parse(String rawRequestLine, List<String> rawHeaders) {
-        return new RequestHeaders(RequestLine.parse(rawRequestLine), Lists.transform(rawHeaders, Header::parse));
+        return new RequestHeaders(RequestLine.parse(rawRequestLine),
+                rawHeaders.stream().map(Header::parse).collect(toList()));
     }
 
     @Override

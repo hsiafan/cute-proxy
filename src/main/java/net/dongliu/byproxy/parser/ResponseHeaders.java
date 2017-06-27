@@ -23,7 +23,8 @@ public class ResponseHeaders extends Headers implements Serializable {
     }
 
     public static ResponseHeaders parse(String rawStatueLine, List<String> rawHeaders) {
-        return new ResponseHeaders(StatusLine.parse(rawStatueLine), Lists.transform(rawHeaders, Header::parse));
+        return new ResponseHeaders(StatusLine.parse(rawStatueLine),
+                rawHeaders.stream().map(Header::parse).collect(toList()));
     }
 
     @Override
