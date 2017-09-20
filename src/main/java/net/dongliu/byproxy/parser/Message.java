@@ -1,6 +1,5 @@
 package net.dongliu.byproxy.parser;
 
-import lombok.Getter;
 import net.dongliu.byproxy.ui.ItemValue;
 
 import java.io.Serializable;
@@ -10,7 +9,6 @@ import java.io.Serializable;
  *
  * @author Liu Dong
  */
-@Getter
 public abstract class Message implements ItemValue, Serializable {
     private static final long serialVersionUID = 434844783179505084L;
     private String id;
@@ -27,4 +25,16 @@ public abstract class Message implements ItemValue, Serializable {
      * For show in abstract
      */
     public abstract String displayText();
+
+    public String getId() {
+        return id;
+    }
+
+    public String getHost() {
+        return host;
+    }
+
+    public String getUrl() {
+        return url;
+    }
 }

@@ -15,7 +15,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import lombok.SneakyThrows;
 import net.dongliu.byproxy.store.BodyStore;
 import net.dongliu.byproxy.store.BodyStoreType;
 import net.dongliu.byproxy.ui.UIUtils;
@@ -43,8 +42,7 @@ public class BodyPane extends BorderPane {
 
     private ObjectProperty<BodyStore> body = new SimpleObjectProperty<>();
 
-    @SneakyThrows
-    public BodyPane() {
+    public BodyPane() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_body.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -53,7 +51,13 @@ public class BodyPane extends BorderPane {
 
     @FXML
     void initialize() {
-        body.addListener((o, old, newValue) -> refreshBody(newValue));
+        body.addListener((o, old, newValue) -> {
+            try {
+                refreshBody(newValue);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
 
         charsetBox.getItems().addAll(StandardCharsets.UTF_8, StandardCharsets.UTF_16, StandardCharsets.US_ASCII,
                 StandardCharsets.ISO_8859_1,
@@ -69,8 +73,7 @@ public class BodyPane extends BorderPane {
             BodyStoreType.html, new HtmlBeautifier()
     );
 
-    @SneakyThrows
-    private void refreshBody(@Nullable BodyStore bodyStore) {
+    private void refreshBody(@Nullable BodyStore bodyStore) throws IOException {
         if (bodyStore == null) {
             this.setCenter(new Text());
             return;

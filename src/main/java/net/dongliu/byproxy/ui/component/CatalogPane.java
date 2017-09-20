@@ -1,7 +1,9 @@
 package net.dongliu.byproxy.ui.component;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -13,18 +15,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
-import lombok.Getter;
-import lombok.SneakyThrows;
-import lombok.val;
 import net.dongliu.byproxy.parser.Message;
 import net.dongliu.byproxy.ui.ItemValue;
 import net.dongliu.byproxy.ui.TreeNodeValue;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.utils.NetUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static javafx.beans.binding.Bindings.createStringBinding;
 
 /**
  * @author Liu Dong
@@ -39,13 +41,10 @@ public class CatalogPane extends BorderPane {
     @FXML
     private ToggleGroup viewTypeGroup;
 
-    @Getter
     private Property<Message> selectedMessage = new SimpleObjectProperty<>();
-    @Getter
     private Property<TreeItem<ItemValue>> selectedTreeItem = new SimpleObjectProperty<>();
 
-    @SneakyThrows
-    public CatalogPane() {
+    public CatalogPane() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/catalog_view.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -67,13 +66,13 @@ public class CatalogPane extends BorderPane {
         });
         messageList.getSelectionModel().selectedItemProperty().addListener((ov, o, n) -> selectedMessage.setValue(n));
 
-        val root = new TreeItem<ItemValue>(new TreeNodeValue(""));
+        TreeItem<ItemValue> root = new TreeItem<>(new TreeNodeValue(""));
         root.setExpanded(true);
         messageTree.setRoot(root);
         messageTree.setShowRoot(false);
         messageTree.setCellFactory(new TreeCellFactory());
         messageTree.setOnMouseClicked(new TreeViewMouseHandler());
-        val selectTreeNode = messageTree.getSelectionModel().selectedItemProperty();
+        ReadOnlyObjectProperty<TreeItem<ItemValue>> selectTreeNode = messageTree.getSelectionModel().selectedItemProperty();
         selectTreeNode.addListener((ov, o, n) -> {
             if (n == null || n.getValue() instanceof TreeNodeValue) {
                 selectedMessage.setValue(null);
@@ -83,8 +82,8 @@ public class CatalogPane extends BorderPane {
             }
         });
 
-        val toggleProperty = viewTypeGroup.selectedToggleProperty();
-        val typeProperty = Bindings.createStringBinding(() -> (String) toggleProperty.get().getUserData(), toggleProperty);
+        ReadOnlyObjectProperty<Toggle> toggleProperty = viewTypeGroup.selectedToggleProperty();
+        StringBinding typeProperty = createStringBinding(() -> (String) toggleProperty.get().getUserData(), toggleProperty);
 
         selectedTreeItem.bind(Bindings.createObjectBinding(() -> {
             if (!"tree".equals(typeProperty.get())) {
@@ -205,5 +204,13 @@ public class CatalogPane extends BorderPane {
             }
         }
         messageList.getItems().removeAll(removed);
+    }
+
+    public Property<Message> selectedMessageProperty() {
+        return selectedMessage;
+    }
+
+    public Property<TreeItem<ItemValue>> selectedTreeItemProperty() {
+        return selectedTreeItem;
     }
 }

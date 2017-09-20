@@ -1,9 +1,6 @@
 package net.dongliu.byproxy.utils;
 
 
-import lombok.ToString;
-
-@ToString
 public class NetworkInfo {
     private String name;
     private String ip;
@@ -21,4 +18,11 @@ public class NetworkInfo {
         return ip;
     }
 
+    @Override
+    public String toString() {
+        return "NetworkInfo{" +
+                "name='" + name + '\'' +
+                ", ip='" + ip + '\'' +
+                '}';
+    }
 }

@@ -1,7 +1,7 @@
 package net.dongliu.byproxy.ui.beautifier;
 
-import lombok.SneakyThrows;
-
+import java.io.UncheckedIOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -38,8 +38,11 @@ public class FormEncodedBeautifier implements Beautifier {
         return String.join("\n", lines);
     }
 
-    @SneakyThrows
     private String decode(String item, Charset charset) {
-        return URLDecoder.decode(item, charset.name());
+        try {
+            return URLDecoder.decode(item, charset.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

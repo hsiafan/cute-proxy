@@ -1,8 +1,5 @@
 package net.dongliu.byproxy.parser;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import javax.annotation.Nullable;
 import java.io.Serializable;
 
@@ -11,12 +8,10 @@ import java.io.Serializable;
  *
  * @author Liu Dong
  */
-@Getter
 public class HttpRoundTripMessage extends Message implements Serializable {
     private static final long serialVersionUID = -8007788167253549079L;
     private HttpMessage request;
     @Nullable
-    @Setter
     private volatile HttpMessage response;
 
     public HttpRoundTripMessage(String id, String host, String url, HttpMessage request) {
@@ -29,4 +24,16 @@ public class HttpRoundTripMessage extends Message implements Serializable {
         return getUrl();
     }
 
+    public HttpMessage getRequest() {
+        return request;
+    }
+
+    @Nullable
+    public HttpMessage getResponse() {
+        return response;
+    }
+
+    public void setResponse(HttpMessage response) {
+        this.response = response;
+    }
 }

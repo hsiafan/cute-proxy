@@ -30,9 +30,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.*;
-import lombok.SneakyThrows;
 import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.utils.StringUtils;
+
+import java.io.IOException;
 
 /**
  * Show second proxy setting.
@@ -58,8 +59,7 @@ public class ProxySettingDialog extends MyDialog<ProxySetting> {
 
     private final ObjectProperty<ProxySetting> proxySetting = new SimpleObjectProperty<>();
 
-    @SneakyThrows
-    public ProxySettingDialog() {
+    public ProxySettingDialog() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/proxy_setting.fxml"));
         loader.setRoot(this);
         loader.setController(this);

@@ -11,10 +11,10 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
-import lombok.SneakyThrows;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Show proxy configure.
@@ -36,8 +36,7 @@ public class KeyStoreSettingDialog extends MyDialog<KeyStoreSetting> {
         return keyStoreSetting;
     }
 
-    @SneakyThrows
-    public KeyStoreSettingDialog() {
+    public KeyStoreSettingDialog() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/key_store_setting.fxml"));
         loader.setRoot(this);
         loader.setController(this);

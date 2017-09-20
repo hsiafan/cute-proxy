@@ -1,6 +1,7 @@
 package net.dongliu.byproxy;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,9 +9,8 @@ import java.util.List;
 /**
  * @author Liu Dong
  */
-@Slf4j
 public class ShutdownHooks {
-
+    private static final Logger logger = LoggerFactory.getLogger(ShutdownHooks.class);
     private static final List<Runnable> tasks = new ArrayList<>();
     private static boolean shutdown = false;
 

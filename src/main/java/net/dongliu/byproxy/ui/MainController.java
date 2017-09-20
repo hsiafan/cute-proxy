@@ -2,15 +2,14 @@ package net.dongliu.byproxy.ui;
 
 import javafx.application.Platform;
 import javafx.beans.property.Property;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitMenuButton;
-import javafx.scene.control.SplitPane;
+import javafx.scene.control.TreeItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import net.dongliu.byproxy.Context;
 import net.dongliu.byproxy.ShutdownHooks;
 import net.dongliu.byproxy.parser.HttpRoundTripMessage;
@@ -26,43 +25,54 @@ import net.dongliu.byproxy.ui.task.InitContextTask;
 import net.dongliu.byproxy.ui.task.LoadTask;
 import net.dongliu.byproxy.ui.task.SaveSettingTask;
 import net.dongliu.byproxy.ui.task.SaveTrafficDataTask;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.cert.CertificateEncodingException;
+import java.util.Collection;
 import java.util.Optional;
 
 /**
+ * The main UI Controller
+ *
  * @author Liu Dong
  */
-@Slf4j
 public class MainController {
+    private static final Logger logger = LoggerFactory.getLogger(MainController.class);
+    @FXML
+    private MenuItem deleteMenu;
+    @FXML
+    private MenuItem copyURLButton;
+    @FXML
+    private MenuItem startProxyMenu;
+    @FXML
+    private MenuItem stopProxyMenu;
+    @FXML
+    private CatalogPane catalogPane;
+    @FXML
+    private VBox root;
+    @FXML
+    private MyButton startProxyButton;
+    @FXML
+    private MyButton stopProxyButton;
 
-    public MenuItem deleteMenu;
-    public MenuItem copyURLButton;
-    public MenuItem startProxyMenu;
-    public MenuItem stopProxyMenu;
-    public CatalogPane catalogPane;
-    public SplitMenuButton setKeyStoreButton;
-    public MyButton saveFileButton;
-    public MyButton openFileButton;
-    public VBox root;
-    public SplitPane splitPane;
-    public SplitMenuButton proxyConfigureButton;
-    public MyButton startProxyButton;
-    public MyButton stopProxyButton;
+    @FXML
+    private Label listenedAddressLabel;
 
-    public Label listenedAddressLabel;
-
-    public HttpRoundTripMessagePane httpRoundTripMessagePane;
-    public WebSocketMessagePane webSocketMessagePane;
+    @FXML
+    private HttpRoundTripMessagePane httpRoundTripMessagePane;
+    @FXML
+    private WebSocketMessagePane webSocketMessagePane;
 //    public MenuItem replayMenu;
 
     private volatile ProxyServer proxyServer;
     private Context context = Context.getInstance();
 
-    public void startProxy() {
+    @FXML
+    private void startProxy() {
         startProxyButton.setDisable(true);
         startProxyMenu.setDisable(true);
         try {
@@ -81,7 +91,8 @@ public class MainController {
         });
     }
 
-    public void stopProxy() {
+    @FXML
+    private void stopProxy() {
         stopProxyButton.setDisable(true);
         stopProxyMenu.setDisable(true);
         new Thread(() -> {
@@ -94,14 +105,15 @@ public class MainController {
         }).start();
     }
 
-    public void initialize() {
+    @FXML
+    private void initialize() {
         ShutdownHooks.registerTask(() -> {
             if (proxyServer != null) {
                 proxyServer.stop();
             }
         });
 
-        Property<Message> selectedMessage = catalogPane.getSelectedMessage();
+        Property<Message> selectedMessage = catalogPane.selectedMessageProperty();
 
         selectedMessage.addListener((ov, old, message) -> {
             if (message == null) {
@@ -111,11 +123,11 @@ public class MainController {
             }
         });
 
-        val messageSelected = UIUtils.observeNull(selectedMessage);
+        ObservableValue<Boolean> messageSelected = UIUtils.observeNull(selectedMessage);
         copyURLButton.disableProperty().bind(messageSelected);
 //        replayMenu.disableProperty().bind(messageSelected);
 
-        val selectedTreeItem = catalogPane.getSelectedTreeItem();
+        Property<TreeItem<ItemValue>> selectedTreeItem = catalogPane.selectedTreeItemProperty();
         deleteMenu.disableProperty().bind(UIUtils.observeNull(selectedTreeItem));
         loadConfigAndKeyStore();
     }
@@ -131,7 +143,8 @@ public class MainController {
     /**
      * Handle setting menu
      */
-    public void updateSetting(ActionEvent e) {
+    @FXML
+    private void updateSetting(ActionEvent e) throws IOException {
         MainSettingDialog dialog = new MainSettingDialog();
         dialog.mainSettingProperty().setValue(context.getMainSetting());
         Optional<MainSetting> newConfig = dialog.showAndWait();
@@ -142,7 +155,8 @@ public class MainController {
         }
     }
 
-    public void setKeyStore(ActionEvent e) {
+    @FXML
+    private void setKeyStore(ActionEvent e) throws IOException {
         KeyStoreSettingDialog dialog = new KeyStoreSettingDialog();
         dialog.keyStoreSettingProperty().setValue(context.getKeyStoreSetting());
         Optional<KeyStoreSetting> newConfig = dialog.showAndWait();
@@ -153,7 +167,8 @@ public class MainController {
         }
     }
 
-    public void setProxy(ActionEvent e) {
+    @FXML
+    private void setProxy(ActionEvent e) throws IOException {
         ProxySettingDialog dialog = new ProxySettingDialog();
         dialog.proxySettingProperty().setValue(context.getProxySetting());
         Optional<ProxySetting> newConfig = dialog.showAndWait();
@@ -197,11 +212,13 @@ public class MainController {
         webSocketMessagePane.setVisible(false);
     }
 
-    public void clearAll(ActionEvent e) {
+    @FXML
+    private void clearAll(ActionEvent e) {
         catalogPane.clearAll();
     }
 
-    public void open(ActionEvent e) {
+    @FXML
+    private void open(ActionEvent e) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ByProxy data", "*.bpd"));
         File file = fileChooser.showOpenDialog(this.root.getScene().getWindow());
@@ -215,7 +232,8 @@ public class MainController {
     }
 
     // save captured data to file
-    public void save(ActionEvent e) throws IOException {
+    @FXML
+    private void save(ActionEvent e) throws IOException {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ByProxy data", "*.bpd"));
         fileChooser.setInitialFileName("ByProxy.bpd");
@@ -223,13 +241,14 @@ public class MainController {
         if (file == null) {
             return;
         }
-        val messages = catalogPane.getMessages();
+        Collection<Message> messages = catalogPane.getMessages();
         SaveTrafficDataTask saveTask = new SaveTrafficDataTask(file.getPath(), messages);
         UIUtils.runBackground(saveTask, "Save data failed!");
     }
 
 
-    public void exportPem(ActionEvent e) throws CertificateEncodingException, IOException {
+    @FXML
+    private void exportPem(ActionEvent e) throws CertificateEncodingException, IOException {
         AppKeyStoreGenerator generator = Context.getInstance().getSslContextManager().getAppKeyStoreGenerator();
         byte[] data = generator.exportCACertificate(true);
         FileChooser fileChooser = new FileChooser();
@@ -242,7 +261,8 @@ public class MainController {
         Files.write(file.toPath(), data);
     }
 
-    public void exportCrt(ActionEvent e) throws CertificateEncodingException, IOException {
+    @FXML
+    private void exportCrt(ActionEvent e) throws CertificateEncodingException, IOException {
         AppKeyStoreGenerator generator = Context.getInstance().getSslContextManager().getAppKeyStoreGenerator();
         byte[] data = generator.exportCACertificate(false);
         FileChooser fileChooser = new FileChooser();
@@ -255,28 +275,17 @@ public class MainController {
         Files.write(file.toPath(), data);
     }
 
-    public void copyUrl(ActionEvent event) {
-        String url = catalogPane.getSelectedMessage().getValue().getUrl();
+    @FXML
+    private void copyUrl(ActionEvent event) {
+        String url = catalogPane.selectedMessageProperty().getValue().getUrl();
         UIUtils.copyToClipBoard(url);
     }
 
-    public void deleteTreeNode(ActionEvent event) {
-        val treeItem = catalogPane.getSelectedTreeItem().getValue();
+    @FXML
+    private void deleteTreeNode(ActionEvent event) {
+        TreeItem<ItemValue> treeItem = catalogPane.selectedTreeItemProperty().getValue();
         if (treeItem != null) {
             catalogPane.deleteTreeNode(treeItem);
         }
-    }
-
-    public void replay(ActionEvent event) {
-        val selectedMessage = catalogPane.getSelectedMessage().getValue();
-        if (selectedMessage == null) {
-            UIUtils.showMessageDialog("No selected request");
-            return;
-        }
-        if (!(selectedMessage instanceof HttpRoundTripMessage)) {
-            UIUtils.showMessageDialog("Not http request, not supported yet");
-            return;
-        }
-        HttpRoundTripMessage message = (HttpRoundTripMessage) selectedMessage;
     }
 }

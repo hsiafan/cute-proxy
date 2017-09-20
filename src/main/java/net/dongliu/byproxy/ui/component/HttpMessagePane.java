@@ -6,11 +6,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
-import lombok.SneakyThrows;
 import net.dongliu.byproxy.parser.Headers;
 import net.dongliu.byproxy.parser.HttpMessage;
 import net.dongliu.byproxy.store.BodyStore;
 
+import java.io.IOException;
 import java.util.stream.Collectors;
 
 /**
@@ -25,8 +25,7 @@ public class HttpMessagePane extends SplitPane {
 
     private ObjectProperty<HttpMessage> httpMessage = new SimpleObjectProperty<>();
 
-    @SneakyThrows
-    public HttpMessagePane() {
+    public HttpMessagePane() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_message.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);

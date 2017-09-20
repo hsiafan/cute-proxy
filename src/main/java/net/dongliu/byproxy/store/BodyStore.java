@@ -3,8 +3,6 @@ package net.dongliu.byproxy.store;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
-import lombok.Getter;
-import lombok.Setter;
 import net.dongliu.byproxy.parser.ContentType;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.z.ZCompressorInputStream;
@@ -39,16 +37,11 @@ public class BodyStore extends OutputStream implements Serializable {
 
     private static final int MAX_BUFFER_SIZE = 1024 * 1024;
 
-    @Getter @Setter
     private volatile BodyStoreType type;
-    @Getter @Setter
     private volatile Charset charset;
-    @Getter
     private String url;
-    @Getter
     private String contentEncoding;
 
-    @Getter @Setter
     private transient boolean beautify;
 
     public BodyStore(@Nullable BodyStoreType type, @Nullable Charset charset,
@@ -222,14 +215,7 @@ public class BodyStore extends OutputStream implements Serializable {
             } else if ("gzip".equalsIgnoreCase(contentEncoding)) {
                 input = new GZIPInputStream(input);
             } else if ("deflate".equalsIgnoreCase(contentEncoding)) {
-                // note: Some incorrect implementations send the "deflate" compressed data without the zlib wrapper,
-                // read one byte to test
-                try (InputStream in = new InflaterInputStream(input)) {
-                    in.read();
-                    input = new InflaterInputStream(originInput(), new Inflater(true));
-                } catch (ZipException e) {
-                    input = new InflaterInputStream(originInput(), new Inflater(true));
-                }
+                input = new InflaterInputStream(originInput(), new Inflater(true));
             } else if (contentEncoding.equalsIgnoreCase("compress")) {
                 input = new ZCompressorInputStream(input);
             } else if ("br".equalsIgnoreCase(contentEncoding)) {
@@ -318,5 +304,37 @@ public class BodyStore extends OutputStream implements Serializable {
     @Override
     public String toString() {
         return "BodyStore{size=" + size() + "}";
+    }
+
+    public BodyStoreType getType() {
+        return type;
+    }
+
+    public Charset getCharset() {
+        return charset;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getContentEncoding() {
+        return contentEncoding;
+    }
+
+    public boolean isBeautify() {
+        return beautify;
+    }
+
+    public void setCharset(Charset charset) {
+        this.charset = charset;
+    }
+
+    public void setType(BodyStoreType type) {
+        this.type = type;
+    }
+
+    public void setBeautify(boolean beautify) {
+        this.beautify = beautify;
     }
 }

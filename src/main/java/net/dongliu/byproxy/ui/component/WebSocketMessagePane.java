@@ -6,10 +6,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
-import lombok.SneakyThrows;
 import net.dongliu.byproxy.parser.WebSocketMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * @author Liu Dong
@@ -23,8 +24,7 @@ public class WebSocketMessagePane extends BorderPane {
 
     private ObjectProperty<WebSocketMessage> message = new SimpleObjectProperty<>();
 
-    @SneakyThrows
-    public WebSocketMessagePane() {
+    public WebSocketMessagePane() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/web_socket_message.fxml"));
         loader.setRoot(this);
         loader.setController(this);

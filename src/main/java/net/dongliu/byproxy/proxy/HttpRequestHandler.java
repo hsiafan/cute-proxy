@@ -2,12 +2,13 @@ package net.dongliu.byproxy.proxy;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
-import lombok.SneakyThrows;
 import net.dongliu.byproxy.parser.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateEncodingException;
 
 /**
  * Handler to server http request
@@ -53,17 +54,27 @@ public class HttpRequestHandler implements Handler {
         }
     }
 
-    @SneakyThrows
     private void sendCrt(HttpOutputStream out) throws IOException {
         AppKeyStoreGenerator appKeyStoreGenerator = sslContextManager.getAppKeyStoreGenerator();
-        byte[] data = appKeyStoreGenerator.exportCACertificate(false);
+        byte[] data;
+        try {
+            data = appKeyStoreGenerator.exportCACertificate(false);
+        } catch (CertificateEncodingException e) {
+            sendResponse(out, "text/plain; charset=utf-8", e.getMessage().getBytes(StandardCharsets.UTF_8));
+            return;
+        }
         sendResponse(out, "application/x-x509-ca-cert", data);
     }
 
-    @SneakyThrows
     private void sendPem(HttpOutputStream out) throws IOException {
         AppKeyStoreGenerator appKeyStoreGenerator = sslContextManager.getAppKeyStoreGenerator();
-        byte[] data = appKeyStoreGenerator.exportCACertificate(true);
+        byte[] data;
+        try {
+            data = appKeyStoreGenerator.exportCACertificate(true);
+        } catch (CertificateEncodingException e) {
+            sendResponse(out, "text/plain; charset=utf-8", e.getMessage().getBytes(StandardCharsets.UTF_8));
+            return;
+        }
         sendResponse(out, "application/x-pem-file", data);
     }
 

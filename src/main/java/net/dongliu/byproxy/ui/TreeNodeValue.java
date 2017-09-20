@@ -1,7 +1,5 @@
 package net.dongliu.byproxy.ui;
 
-import lombok.Getter;
-
 import java.io.Serializable;
 
 /**
@@ -12,9 +10,7 @@ import java.io.Serializable;
 public class TreeNodeValue implements ItemValue, Serializable {
 
     private static final long serialVersionUID = -3691517330281517901L;
-    @Getter
     private final String pattern;
-    @Getter
     private int count;
 
     public TreeNodeValue(String pattern) {
@@ -28,5 +24,13 @@ public class TreeNodeValue implements ItemValue, Serializable {
     @Override
     public String displayText() {
         return pattern;
+    }
+
+    public String getPattern() {
+        return pattern;
+    }
+
+    public int getCount() {
+        return count;
     }
 }

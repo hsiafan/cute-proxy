@@ -6,12 +6,10 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Liu Dong
  */
-@Slf4j
 public class Main extends Application {
 
     @Override

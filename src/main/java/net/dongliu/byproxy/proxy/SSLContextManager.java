@@ -1,7 +1,5 @@
 package net.dongliu.byproxy.proxy;
 
-import lombok.SneakyThrows;
-import lombok.val;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +27,15 @@ public class SSLContextManager {
     private final ConcurrentHashMap<String, SSLContext> sslContextCache = new ConcurrentHashMap<>();
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    @SneakyThrows
     public SSLContextManager(String keyStorePath, char[] keyStorePassword) {
         this.keyStorePath = keyStorePath;
         long start = System.currentTimeMillis();
-        val appKeyStoreGenerator = new AppKeyStoreGenerator(keyStorePath, keyStorePassword);
+        AppKeyStoreGenerator appKeyStoreGenerator;
+        try {
+            appKeyStoreGenerator = new AppKeyStoreGenerator(keyStorePath, keyStorePassword);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         logger.info("Initialize AppKeyStoreGenerator cost {} ms", System.currentTimeMillis() - start);
         BigInteger caCertSerialNumber = appKeyStoreGenerator.getCACertSerialNumber();
 
@@ -54,14 +56,19 @@ public class SSLContextManager {
     public SSLContext createSSlContext(String host) {
         lock.readLock().lock();
         try {
-            return sslContextCache.computeIfAbsent(host, this::getSslContextInner);
+            return sslContextCache.computeIfAbsent(host, host1 -> {
+                try {
+                    return getSslContextInner(host1);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    @SneakyThrows
-    private SSLContext getSslContextInner(String host) {
+    private SSLContext getSslContextInner(String host) throws Exception {
         char[] appKeyStorePassword = "123456".toCharArray();
         long start = System.currentTimeMillis();
         KeyStore keyStore = appKeyStoreGenerator.generateKeyStore(host, 365, appKeyStorePassword);

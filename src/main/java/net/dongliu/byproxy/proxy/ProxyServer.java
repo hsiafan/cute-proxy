@@ -1,12 +1,12 @@
 package net.dongliu.byproxy.proxy;
 
-import lombok.SneakyThrows;
 import net.dongliu.byproxy.setting.MainSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -49,7 +49,13 @@ public class ProxyServer {
             return t;
         });
 
-        masterThread = new Thread(this::run);
+        masterThread = new Thread(() -> {
+            try {
+                run();
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
         masterThread.setName("proxy-server-master");
         masterThread.setDaemon(true);
         masterThread.start();
@@ -65,8 +71,7 @@ public class ProxyServer {
     /**
      * Start proxy
      */
-    @SneakyThrows
-    private void run() {
+    private void run() throws IOException {
         if (mainSetting.getHost().isEmpty()) {
             serverSocket = new ServerSocket(mainSetting.getPort(), 128);
         } else {

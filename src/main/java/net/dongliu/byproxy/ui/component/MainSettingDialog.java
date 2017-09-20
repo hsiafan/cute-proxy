@@ -1,6 +1,5 @@
 package net.dongliu.byproxy.ui.component;
 
-import com.google.common.collect.Iterables;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -9,12 +8,12 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
-import lombok.SneakyThrows;
 import net.dongliu.byproxy.setting.MainSetting;
 import net.dongliu.byproxy.utils.NetUtils;
 import net.dongliu.byproxy.utils.NetworkInfo;
 import net.dongliu.byproxy.utils.StringUtils;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -31,8 +30,7 @@ public class MainSettingDialog extends MyDialog<MainSetting> {
 
     private final ObjectProperty<MainSetting> mainSetting = new SimpleObjectProperty<>();
 
-    @SneakyThrows
-    public MainSettingDialog() {
+    public MainSettingDialog() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/main_setting.fxml"));
         loader.setRoot(this);
         loader.setController(this);
@@ -52,7 +50,7 @@ public class MainSettingDialog extends MyDialog<MainSetting> {
     }
 
     @FXML
-    void initialize() {
+    private void initialize() {
         List<NetworkInfo> networkInfos = NetUtils.getNetworkInfoList();
         hostBox.getItems().add(new NetworkInfo("all network interface", ""));
         hostBox.getItems().addAll(networkInfos);
@@ -76,10 +74,11 @@ public class MainSettingDialog extends MyDialog<MainSetting> {
     }
 
     public void setModel(MainSetting mainSetting) {
-        NetworkInfo networkInfo = Iterables.find(hostBox.getItems(), n -> n.getIp().equals(mainSetting.getHost()));
+        NetworkInfo networkInfo = hostBox.getItems().stream().filter(n -> n.getIp().equals(mainSetting.getHost()))
+                .findFirst().orElse(null);
         if (networkInfo == null) {
             // network interface not found, use default listened-all one
-            networkInfo = Iterables.find(hostBox.getItems(), n -> n.getIp().equals(""));
+            networkInfo = hostBox.getItems().stream().filter(n -> n.getIp().equals("")).findFirst().get();
         }
         hostBox.getSelectionModel().select(networkInfo);
         int port = mainSetting.getPort();
