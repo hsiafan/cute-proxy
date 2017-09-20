@@ -8,7 +8,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
 import net.dongliu.byproxy.parser.Headers;
 import net.dongliu.byproxy.parser.HttpMessage;
-import net.dongliu.byproxy.store.BodyStore;
+import net.dongliu.byproxy.store.HttpBody;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
@@ -48,7 +48,7 @@ public class HttpMessagePane extends SplitPane {
                     .collect(Collectors.joining("\n"));
             cookieText.setText(s);
 
-            BodyStore body = message.getBody();
+            HttpBody body = message.getBody();
 
             if (body == null || body.size() == 0) {
                 getItems().remove(bodyPane);

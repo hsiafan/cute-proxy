@@ -4,8 +4,8 @@ import com.google.common.base.Throwables;
 import net.dongliu.byproxy.parser.WebSocketFrame;
 import net.dongliu.byproxy.parser.WebSocketInputStream;
 import net.dongliu.byproxy.parser.WebSocketOutputStream;
-import net.dongliu.byproxy.store.BodyStore;
-import net.dongliu.byproxy.store.BodyStoreType;
+import net.dongliu.byproxy.store.HttpBody;
+import net.dongliu.byproxy.store.HttpBodyType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -85,14 +86,13 @@ public class WebSocketHandler {
                 String messageId = MessageIdGenerator.getInstance().nextId();
                 WebSocketFrame firstFrame = dataFrameBuffer.get(0);
                 int type = firstFrame.getOpcode();
-                BodyStoreType bodyStoreType = type == 1 ? BodyStoreType.text : BodyStoreType.binary;
-                try (BodyStore bodyStore = new BodyStore(bodyStoreType, UTF_8, null, url)) {
-                    for (WebSocketFrame webSocketFrame : dataFrameBuffer) {
-                        bodyStore.write(webSocketFrame.getFinalData());
-                    }
-                    bodyStore.close();
-                    messageListener.onWebSocket(messageId, host, url, type, isRequest, bodyStore);
+                HttpBodyType httpBodyType = type == 1 ? HttpBodyType.text : HttpBodyType.binary;
+                HttpBody httpBody = new HttpBody(httpBodyType, UTF_8, null);
+                for (WebSocketFrame webSocketFrame : dataFrameBuffer) {
+                    httpBody.append(ByteBuffer.wrap(webSocketFrame.getFinalData()));
                 }
+                httpBody.finish();
+                messageListener.onWebSocket(messageId, host, url, type, isRequest, httpBody);
                 dataFrameBuffer.clear();
             }
         }

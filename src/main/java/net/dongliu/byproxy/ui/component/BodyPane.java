@@ -15,8 +15,8 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import net.dongliu.byproxy.store.BodyStore;
-import net.dongliu.byproxy.store.BodyStoreType;
+import net.dongliu.byproxy.store.HttpBody;
+import net.dongliu.byproxy.store.HttpBodyType;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.ui.beautifier.*;
 import net.dongliu.byproxy.utils.StringUtils;
@@ -34,13 +34,13 @@ import java.util.Map;
  */
 public class BodyPane extends BorderPane {
     @FXML
-    private ComboBox<BodyStoreType> bodyTypeBox;
+    private ComboBox<HttpBodyType> bodyTypeBox;
     @FXML
     private ComboBox<Charset> charsetBox;
     @FXML
     private ToggleButton beautifyButton;
 
-    private ObjectProperty<BodyStore> body = new SimpleObjectProperty<>();
+    private ObjectProperty<HttpBody> body = new SimpleObjectProperty<>();
 
     public BodyPane() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_body.fxml"));
@@ -63,48 +63,48 @@ public class BodyPane extends BorderPane {
                 StandardCharsets.ISO_8859_1,
                 Charset.forName("GB18030"), Charset.forName("GBK"), Charset.forName("GB2312"),
                 Charset.forName("BIG5"));
-        bodyTypeBox.getItems().addAll(BodyStoreType.values());
+        bodyTypeBox.getItems().addAll(HttpBodyType.values());
     }
 
-    private static final Map<BodyStoreType, Beautifier> beautifiers = ImmutableMap.of(
-            BodyStoreType.json, new JsonBeautifier(),
-            BodyStoreType.www_form, new FormEncodedBeautifier(),
-            BodyStoreType.xml, new XMLBeautifier(),
-            BodyStoreType.html, new HtmlBeautifier()
+    private static final Map<HttpBodyType, Beautifier> beautifiers = ImmutableMap.of(
+            HttpBodyType.json, new JsonBeautifier(),
+            HttpBodyType.www_form, new FormEncodedBeautifier(),
+            HttpBodyType.xml, new XMLBeautifier(),
+            HttpBodyType.html, new HtmlBeautifier()
     );
 
-    private void refreshBody(@Nullable BodyStore bodyStore) throws IOException {
-        if (bodyStore == null) {
+    private void refreshBody(@Nullable HttpBody httpBody) throws IOException {
+        if (httpBody == null) {
             this.setCenter(new Text());
             return;
         }
 
-        BodyStoreType storeType = bodyStore.getType();
+        HttpBodyType storeType = httpBody.getType();
 
-        charsetBox.setValue(bodyStore.getCharset());
+        charsetBox.setValue(httpBody.getCharset());
         charsetBox.setManaged(storeType.isText());
         charsetBox.setVisible(storeType.isText());
 
         boolean showBeautify = beautifiers.containsKey(storeType);
-        beautifyButton.setSelected(bodyStore.isBeautify());
+        beautifyButton.setSelected(httpBody.isBeautify());
         beautifyButton.setManaged(showBeautify);
         beautifyButton.setVisible(showBeautify);
 
         bodyTypeBox.setValue(storeType);
 
-        if (!bodyStore.isClosed()) {
+        if (!httpBody.isFinished()) {
             this.setCenter(new Text("Still reading..."));
             return;
         }
 
-        if (bodyStore.size() == 0) {
+        if (httpBody.size() == 0) {
             this.setCenter(new Text());
             return;
         }
 
         // handle images
         if (storeType.isImage()) {
-            Node imagePane = UIUtils.getImagePane(bodyStore.finalInputStream(), storeType);
+            Node imagePane = UIUtils.getImagePane(httpBody.getDecodedInputStream(), storeType);
             this.setCenter(imagePane);
             return;
         }
@@ -112,14 +112,15 @@ public class BodyPane extends BorderPane {
         // textual body
         if (storeType.isText()) {
             String text;
-            try (Reader reader = new InputStreamReader(bodyStore.finalInputStream(), bodyStore.getCharset())) {
+            try (InputStream input = httpBody.getDecodedInputStream();
+                 Reader reader = new InputStreamReader(input, httpBody.getCharset())) {
                 text = CharStreams.toString(reader);
             }
 
             // beautify
-            if (bodyStore.isBeautify()) {
+            if (httpBody.isBeautify()) {
                 Beautifier beautifier = beautifiers.get(storeType);
-                text = beautifier.beautify(text, bodyStore.getCharset());
+                text = beautifier.beautify(text, httpBody.getCharset());
             }
 
             TextArea textArea = new TextArea();
@@ -131,7 +132,7 @@ public class BodyPane extends BorderPane {
 
         // do not know how to handle
         Text t = new Text();
-        long size = bodyStore.size();
+        long size = httpBody.size();
         if (size > 0) {
             t.setText("Binary Body");
         }
@@ -140,20 +141,23 @@ public class BodyPane extends BorderPane {
 
     @FXML
     void exportBody(ActionEvent e) throws IOException {
-        BodyStore bodyStore = body.get();
-        if (bodyStore == null || bodyStore.size() == 0) {
+        HttpBody httpBody = body.get();
+        if (httpBody == null || httpBody.size() == 0) {
             UIUtils.showMessageDialog("This http message has nobody");
             return;
         }
 
-        String fileName = suggestFileName(bodyStore.getUrl(), bodyStore.getType());
+//        String fileName = suggestFileName(httpBody.getUrl(), httpBody.getType());
+        //TODO: get url here
+        String fileName = addExtension("", httpBody.getType());
+
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialFileName(fileName);
         File file = fileChooser.showSaveDialog(this.getScene().getWindow());
         if (file == null) {
             return;
         }
-        try (InputStream in = bodyStore.finalInputStream();
+        try (InputStream in = httpBody.getDecodedInputStream();
              OutputStream out = new FileOutputStream(file)) {
             ByteStreams.copy(in, out);
         }
@@ -161,7 +165,7 @@ public class BodyPane extends BorderPane {
     }
 
 
-    static String suggestFileName(String url, BodyStoreType type) {
+    private static String suggestFileName(String url, HttpBodyType type) {
         url = StringUtils.before(url, "?");
         String fileName = StringUtils.afterLast(url, "/");
         if (fileName.isEmpty()) {
@@ -175,7 +179,7 @@ public class BodyPane extends BorderPane {
         return fileName;
     }
 
-    private static String addExtension(String fileName, BodyStoreType type) {
+    private static String addExtension(String fileName, HttpBodyType type) {
         switch (type) {
             case html:
                 return fileName + ".html";
@@ -202,49 +206,49 @@ public class BodyPane extends BorderPane {
 
     @FXML
     void setMimeType(ActionEvent e) throws IOException {
-        BodyStore bodyStore = body.get();
-        if (bodyStore == null) {
+        HttpBody httpBody = body.get();
+        if (httpBody == null) {
             return;
         }
-        bodyStore.setType(bodyTypeBox.getSelectionModel().getSelectedItem());
-        if (bodyStore.isClosed() && bodyStore.size() != 0) {
-            refreshBody(bodyStore);
+        httpBody.setType(bodyTypeBox.getSelectionModel().getSelectedItem());
+        if (httpBody.isFinished() && httpBody.size() != 0) {
+            refreshBody(httpBody);
         }
     }
 
     @FXML
     void setCharset(ActionEvent e) throws IOException {
-        BodyStore bodyStore = body.get();
-        if (bodyStore == null) {
+        HttpBody httpBody = body.get();
+        if (httpBody == null) {
             return;
         }
-        bodyStore.setCharset(charsetBox.getSelectionModel().getSelectedItem());
-        if (bodyStore.isClosed() && bodyStore.size() != 0 && bodyStore.getType().isText()) {
-            refreshBody(bodyStore);
+        httpBody.setCharset(charsetBox.getSelectionModel().getSelectedItem());
+        if (httpBody.isFinished() && httpBody.size() != 0 && httpBody.getType().isText()) {
+            refreshBody(httpBody);
         }
     }
 
     @FXML
     void beautify(ActionEvent e) throws IOException {
-        BodyStore bodyStore = body.get();
-        if (bodyStore == null) {
+        HttpBody httpBody = body.get();
+        if (httpBody == null) {
             return;
         }
-        bodyStore.setBeautify(beautifyButton.isSelected());
-        if (bodyStore.isClosed() && bodyStore.size() != 0 && bodyStore.getType().isText()) {
-            refreshBody(bodyStore);
+        httpBody.setBeautify(beautifyButton.isSelected());
+        if (httpBody.isFinished() && httpBody.size() != 0 && httpBody.getType().isText()) {
+            refreshBody(httpBody);
         }
     }
 
-    public BodyStore getBody() {
+    public HttpBody getBody() {
         return body.get();
     }
 
-    public ObjectProperty<BodyStore> bodyProperty() {
+    public ObjectProperty<HttpBody> bodyProperty() {
         return body;
     }
 
-    public void setBody(BodyStore body) {
+    public void setBody(HttpBody body) {
         this.body.set(body);
     }
 }

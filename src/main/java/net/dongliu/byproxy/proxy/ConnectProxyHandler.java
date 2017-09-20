@@ -8,7 +8,7 @@ import net.dongliu.byproxy.parser.*;
 import net.dongliu.byproxy.parser.TLSInputStream.ClientHello;
 import net.dongliu.byproxy.parser.TLSInputStream.HandShakeMessage;
 import net.dongliu.byproxy.parser.TLSInputStream.TLSPlaintextHeader;
-import net.dongliu.byproxy.store.BodyStore;
+import net.dongliu.byproxy.store.HttpBody;
 import net.dongliu.byproxy.utils.NetUtils;
 import net.dongliu.byproxy.utils.StringUtils;
 import net.dongliu.byproxy.utils.TeeInputStream;
@@ -188,11 +188,11 @@ public class ConnectProxyHandler implements Handler {
         String url = getUrl(ssl, upgrade, host, port, requestLine.getPath());
         boolean shouldClose = requestHeaders.shouldClose();
 
-        BodyStore requestBodyStore = readRequestBody(fromIn, requestHeaders, url);
-        messageListener.onHttpRequest(id, host, url, new HttpMessage(requestHeaders, requestBodyStore));
-        toOut.writeRequestHeaders(filterChunkedHeader(requestHeaders, requestBodyStore.size()));
-        if (requestBodyStore.size() > 0) {
-            try (InputStream in = requestBodyStore.originInput()) {
+        HttpBody requestHttpBody = readRequestBody(fromIn, requestHeaders);
+        messageListener.onHttpRequest(id, host, url, new HttpMessage(requestHeaders, requestHttpBody));
+        toOut.writeRequestHeaders(filterChunkedHeader(requestHeaders, requestHttpBody.size()));
+        if (requestHttpBody.size() > 0) {
+            try (InputStream in = requestHttpBody.getInputStream()) {
                 ByteStreams.copy(in, toOut);
             }
         }
@@ -204,11 +204,11 @@ public class ConnectProxyHandler implements Handler {
         }
         int code = responseHeaders.getStatusLine().getCode();
 
-        BodyStore responseBodyStore = readResponseBody(responseHeaders, toIn, url, method);
-        messageListener.onHttpResponse(id, new HttpMessage(responseHeaders, responseBodyStore));
-        fromOut.writeResponseHeaders(filterChunkedHeader(responseHeaders, responseBodyStore.size()));
-        if (responseBodyStore.size() > 0) {
-            try (InputStream in = responseBodyStore.originInput()) {
+        HttpBody responseHttpBody = readResponseBody(responseHeaders, toIn, method);
+        messageListener.onHttpResponse(id, new HttpMessage(responseHeaders, responseHttpBody));
+        fromOut.writeResponseHeaders(filterChunkedHeader(responseHeaders, responseHttpBody.size()));
+        if (responseHttpBody.size() > 0) {
+            try (InputStream in = responseHttpBody.getInputStream()) {
                 ByteStreams.copy(in, fromOut);
             }
         }
@@ -252,51 +252,53 @@ public class ConnectProxyHandler implements Handler {
         return sb.toString();
     }
 
-    private BodyStore readRequestBody(HttpInputStream input, RequestHeaders requestHeaders, String url)
+    private HttpBody readRequestBody(HttpInputStream input, RequestHeaders requestHeaders)
             throws IOException {
-        try (BodyStore bodyStore = BodyStore.create(requestHeaders.contentType(),
-                requestHeaders.contentEncoding(), url)) {
-            InputStream requestBody;
-            if (requestHeaders.chunked()) {
-                requestBody = input.getChunkedBody();
-            } else if (requestHeaders.contentLen() >= 0) {
-                requestBody = input.getFixLenBody(requestHeaders.contentLen());
-            } else if (!requestHeaders.hasBody()) {
-                requestBody = null;
-            } else {
-                requestBody = null;
-            }
-
-            if (requestBody != null) {
-                try (InputStream in = requestBody) {
-                    ByteStreams.copy(in, bodyStore);
-                }
-            }
-            return bodyStore;
+        InputStream requestBody;
+        long len = requestHeaders.contentLen();
+        if (requestHeaders.chunked()) {
+            requestBody = input.getChunkedBody();
+        } else if (len >= 0) {
+            requestBody = input.getFixLenBody(len);
+        } else if (!requestHeaders.hasBody()) {
+            requestBody = null;
+        } else {
+            requestBody = null;
         }
+
+        HttpBody httpBody = HttpBody.create(requestHeaders.contentType(), requestHeaders.contentEncoding());
+        if (requestBody != null) {
+            try (InputStream in = requestBody) {
+                httpBody.loadFromInput(in, len);
+            }
+        }
+        httpBody.finish();
+        return httpBody;
     }
 
-    private BodyStore readResponseBody(ResponseHeaders headers, HttpInputStream dstIn, String url, String method)
+    private HttpBody readResponseBody(ResponseHeaders headers, HttpInputStream dstIn, String method)
             throws IOException {
-        try (BodyStore bodyStore = BodyStore.create(headers.contentType(), headers.contentEncoding(), url)) {
-            InputStream responseBody;
-            if (headers.chunked()) {
-                responseBody = dstIn.getChunkedBody();
-            } else if (headers.contentLen() >= 0) {
-                responseBody = dstIn.getFixLenBody(headers.contentLen());
-            } else if (!headers.hasBody() || method.equals("HEAD")) {
-                responseBody = null;
-            } else {
-                responseBody = null;
-            }
-            if (responseBody != null) {
-                try (InputStream in = responseBody) {
-                    ByteStreams.copy(in, bodyStore);
-                }
-            }
-            return bodyStore;
+        long len = headers.contentLen();
+        InputStream responseBody;
+        if (headers.chunked()) {
+            responseBody = dstIn.getChunkedBody();
+        } else if (len >= 0) {
+            responseBody = dstIn.getFixLenBody(len);
+        } else if (!headers.hasBody() || method.equals("HEAD")) {
+            responseBody = null;
+        } else {
+            responseBody = null;
         }
+        HttpBody httpBody = HttpBody.create(headers.contentType(), headers.contentEncoding());
+        if (responseBody != null) {
+            try (InputStream in = responseBody) {
+                httpBody.loadFromInput(in, len);
+            }
+        }
+        httpBody.finish();
+        return httpBody;
     }
+
 
     private ResponseHeaders filterChunkedHeader(ResponseHeaders responseHeaders, long contentLen) {
         List<Header> headers = responseHeaders.getHeaders();

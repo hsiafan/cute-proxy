@@ -6,7 +6,7 @@ import net.dongliu.byproxy.parser.HttpRoundTripMessage;
 import net.dongliu.byproxy.parser.Message;
 import net.dongliu.byproxy.parser.WebSocketMessage;
 import net.dongliu.byproxy.proxy.MessageListener;
-import net.dongliu.byproxy.store.BodyStore;
+import net.dongliu.byproxy.store.HttpBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,9 +48,9 @@ public class UIMessageListener implements MessageListener {
     }
 
     @Override
-    public void onWebSocket(String messageId, String host, String url, int type, boolean request, BodyStore body) {
+    public void onWebSocket(String messageId, String host, String url, int type, boolean request, HttpBody body) {
         WebSocketMessage message = new WebSocketMessage(messageId, host, url, type, request);
-        message.setBodyStore(body);
+        message.setHttpBody(body);
         Platform.runLater(() -> consumer.accept(message));
     }
 }

@@ -1,11 +1,10 @@
 package net.dongliu.byproxy.proxy;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.common.io.ByteStreams;
 import net.dongliu.byproxy.Context;
 import net.dongliu.byproxy.parser.*;
-import net.dongliu.byproxy.store.BodyStore;
+import net.dongliu.byproxy.store.HttpBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Non-connect http proxy request handler
@@ -73,8 +74,8 @@ public class CommonProxyHandler implements Handler {
 
         String messageId = MessageIdGenerator.getInstance().nextId();
         String method = requestLine.getMethod();
-        Iterable<Header> newRequestHeaders = Iterables.filter(requestHeaders.getHeaders(),
-                h -> !proxyRemoveHeaders.contains(h.getName()));
+        Iterable<Header> newRequestHeaders = requestHeaders.getHeaders().stream()
+                .filter(h -> !proxyRemoveHeaders.contains(h.getName())).collect(toList());
         String url = requestLine.getPath();
         boolean shouldClose = requestHeaders.shouldClose();
 
@@ -92,11 +93,11 @@ public class CommonProxyHandler implements Handler {
             conn.setRequestProperty("Connection", "close");
         }
 
-        BodyStore requestBodyStore = readRequestBody(input, requestHeaders, url);
+        HttpBody requestHttpBody = readRequestBody(input, requestHeaders);
         messageListener.onHttpRequest(messageId, new URL(url).getHost(), url, new HttpMessage(requestHeaders,
-                requestBodyStore));
+                requestHttpBody));
 
-        if (requestBodyStore.size() > 0) {
+        if (requestHttpBody.size() > 0) {
             conn.setDoOutput(true);
         }
         try {
@@ -105,8 +106,8 @@ public class CommonProxyHandler implements Handler {
             logger.error("connect to {} failed: {}", url, e.getMessage());
             return true;
         }
-        if (requestBodyStore.size() > 0) {
-            try (InputStream in = requestBodyStore.originInput()) {
+        if (requestHttpBody.size() > 0) {
+            try (InputStream in = requestHttpBody.getInputStream()) {
                 ByteStreams.copy(in, conn.getOutputStream());
             }
         }
@@ -147,12 +148,12 @@ public class CommonProxyHandler implements Handler {
         Objects.requireNonNull(statusLine);
         fromOut.writeLine(statusLine);
         ResponseHeaders responseHeaders = toResponseHeaders(statusLine, headerList);
-        BodyStore responseBodyStore = readResponseBody(responseHeaders, responseInput, url);
-        messageListener.onHttpResponse(messageId, new HttpMessage(responseHeaders, responseBodyStore));
-        List<Header> newResponseHeaders = filterResponseHeaders(shouldClose, responseHeaders, responseBodyStore.size());
+        HttpBody responseHttpBody = readResponseBody(responseHeaders, responseInput);
+        messageListener.onHttpResponse(messageId, new HttpMessage(responseHeaders, responseHttpBody));
+        List<Header> newResponseHeaders = filterResponseHeaders(shouldClose, responseHeaders, responseHttpBody.size());
         fromOut.writeHeaders(newResponseHeaders);
-        if (responseBodyStore.size() > 0) {
-            try (InputStream in = responseBodyStore.originInput()) {
+        if (responseHttpBody.size() > 0) {
+            try (InputStream in = responseHttpBody.getInputStream()) {
                 ByteStreams.copy(in, fromOut);
             }
         }
@@ -160,40 +161,39 @@ public class CommonProxyHandler implements Handler {
         return shouldClose;
     }
 
-    private BodyStore readRequestBody(HttpInputStream input, RequestHeaders requestHeaders, String url)
-            throws IOException {
-        try (BodyStore bodyStore = BodyStore.create(requestHeaders.contentType(),
-                requestHeaders.contentEncoding(), url)) {
-            InputStream requestBody;
-            if (requestHeaders.chunked()) {
-                requestBody = input.getChunkedBody();
-            } else if (requestHeaders.contentLen() >= 0) {
-                requestBody = input.getFixLenBody(requestHeaders.contentLen());
-            } else if (!requestHeaders.hasBody()) {
-                requestBody = null;
-            } else {
-                requestBody = null;
-            }
-
-            if (requestBody != null) {
-                try (InputStream in = requestBody) {
-                    ByteStreams.copy(in, bodyStore);
-                }
-            }
-            return bodyStore;
+    private HttpBody readRequestBody(HttpInputStream input, RequestHeaders requestHeaders) throws IOException {
+        HttpBody httpBody = HttpBody.create(requestHeaders.contentType(), requestHeaders.contentEncoding());
+        InputStream requestBody;
+        long len = requestHeaders.contentLen();
+        if (requestHeaders.chunked()) {
+            requestBody = input.getChunkedBody();
+        } else if (len >= 0) {
+            requestBody = input.getFixLenBody(len);
+        } else if (!requestHeaders.hasBody()) {
+            requestBody = null;
+        } else {
+            requestBody = null;
         }
+
+        if (requestBody != null) {
+            try (InputStream in = requestBody) {
+                httpBody.loadFromInput(in, len);
+            }
+        }
+        httpBody.finish();
+        return httpBody;
     }
 
-    private BodyStore readResponseBody(ResponseHeaders headers, @Nullable InputStream responseIn, String url)
+    private HttpBody readResponseBody(ResponseHeaders headers, @Nullable InputStream responseIn)
             throws IOException {
-        try (BodyStore bodyStore = BodyStore.create(headers.contentType(), headers.contentEncoding(), url)) {
-            if (responseIn != null) {
-                try (InputStream in = responseIn) {
-                    ByteStreams.copy(responseIn, bodyStore);
-                }
+        HttpBody httpBody = HttpBody.create(headers.contentType(), headers.contentEncoding());
+        if (responseIn != null) {
+            try (InputStream in = responseIn) {
+                httpBody.loadFromInput(in, headers.contentLen());
             }
-            return bodyStore;
         }
+        httpBody.finish();
+        return httpBody;
     }
 
 

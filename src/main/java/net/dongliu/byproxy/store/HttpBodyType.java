@@ -1,9 +1,11 @@
 package net.dongliu.byproxy.store;
 
 /**
+ * Http body type
+ *
  * @author Liu Dong
  */
-public enum BodyStoreType {
+public enum HttpBodyType {
 
     text(0), html(0), xml(0), json(0), css(0), javascript(0), www_form(0),
     jpeg(1), png(1), bmp(1), gif(1), icon(1), otherImage(1),
@@ -12,7 +14,7 @@ public enum BodyStoreType {
     private static final long serialVersionUID = 1L;
     private final int type;
 
-    BodyStoreType(int type) {
+    HttpBodyType(int type) {
         this.type = type;
     }
 

@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.parser;
 
-import net.dongliu.byproxy.store.BodyStore;
+import net.dongliu.byproxy.store.HttpBody;
 
 import java.io.Serializable;
 
@@ -15,7 +15,7 @@ public class WebSocketMessage extends Message implements Serializable {
     // type: 2 binary
     private int type;
     private boolean request;
-    private volatile BodyStore bodyStore;
+    private volatile HttpBody httpBody;
 
     public WebSocketMessage(String id, String host, String url, int type, boolean request) {
         super(id, host, url);
@@ -36,11 +36,11 @@ public class WebSocketMessage extends Message implements Serializable {
         return request;
     }
 
-    public BodyStore getBodyStore() {
-        return bodyStore;
+    public HttpBody getHttpBody() {
+        return httpBody;
     }
 
-    public void setBodyStore(BodyStore bodyStore) {
-        this.bodyStore = bodyStore;
+    public void setHttpBody(HttpBody httpBody) {
+        this.httpBody = httpBody;
     }
 }
