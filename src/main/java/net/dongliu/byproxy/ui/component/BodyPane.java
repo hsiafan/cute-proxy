@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
@@ -20,6 +21,7 @@ import net.dongliu.byproxy.store.HttpBodyType;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.ui.beautifier.*;
 import net.dongliu.byproxy.utils.StringUtils;
+import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -33,6 +35,8 @@ import java.util.Map;
  * @author Liu Dong
  */
 public class BodyPane extends BorderPane {
+    @FXML
+    private Label sizeLabel;
     @FXML
     private ComboBox<HttpBodyType> bodyTypeBox;
     @FXML
@@ -84,6 +88,7 @@ public class BodyPane extends BorderPane {
         charsetBox.setValue(httpBody.getCharset());
         charsetBox.setManaged(storeType.isText());
         charsetBox.setVisible(storeType.isText());
+        sizeLabel.setText(FileUtils.byteCountToDisplaySize(httpBody.size()));
 
         boolean showBeautify = beautifiers.containsKey(storeType);
         beautifyButton.setSelected(httpBody.isBeautify());

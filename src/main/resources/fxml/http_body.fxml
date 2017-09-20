@@ -7,6 +7,8 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
 <fx:root type="net.dongliu.byproxy.ui.component.BodyPane" xmlns:fx="http://javafx.com/fxml">
     <top>
         <HBox spacing="4" alignment="CENTER_LEFT">
@@ -27,6 +29,8 @@
                 <tooltipText>Save Content To File</tooltipText>
                 <iconPath>/images/ic_file_download_black_18dp.png</iconPath>
             </MyButton>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="sizeLabel"/>
         </HBox>
     </top>
     <center></center>
