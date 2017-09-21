@@ -10,6 +10,7 @@ import net.dongliu.byproxy.parser.TLSInputStream.HandShakeMessage;
 import net.dongliu.byproxy.parser.TLSInputStream.TLSPlaintextHeader;
 import net.dongliu.byproxy.store.HttpBody;
 import net.dongliu.byproxy.struct.*;
+import net.dongliu.byproxy.utils.NetAddress;
 import net.dongliu.byproxy.utils.NetUtils;
 import net.dongliu.byproxy.utils.StringUtils;
 import org.slf4j.Logger;
@@ -180,10 +181,11 @@ public class ConnectProxyHandler implements Handler {
         String id = MessageIdGenerator.getInstance().nextId();
         String upgrade = requestHeaders.getFirst("Upgrade");
         String host = requestHeaders.getFirst("Host");
+        NetAddress address = NetUtils.parseAddress(target);
         if (host == null) {
-            host = NetUtils.getHost(target);
+            host = address.getHost();
         }
-        int port = NetUtils.getPort(target);
+        int port = address.getPort();
 
         String url = getUrl(ssl, upgrade, host, port, requestLine.getPath());
         boolean shouldClose = requestHeaders.shouldClose();

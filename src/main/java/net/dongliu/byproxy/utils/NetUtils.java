@@ -46,17 +46,15 @@ public class NetUtils {
         return type == HOST_TYPE_DOMAIN;
     }
 
-
-    public static String getHost(String target) {
-        return StringUtils.before(target, ":");
-    }
-
-    public static int getPort(String target) {
-        int idx = target.indexOf(":");
+    public static NetAddress parseAddress(String address) {
+        int idx = address.indexOf(":");
         if (idx > 0) {
-            return Integer.parseInt(target.substring(idx + 1));
+            String host = address.substring(0, idx);
+            int port = Integer.parseInt(address.substring(idx + 1));
+            return new NetAddress(host, port);
+        } else {
+            return new NetAddress(address, -1);
         }
-        throw new RuntimeException("Target has no port: " + target);
     }
 
 

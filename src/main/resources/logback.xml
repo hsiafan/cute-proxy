@@ -5,6 +5,8 @@
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %level %logger - %msg%n</pattern>
         </encoder>
     </appender>
+    <!--<logger name="net.dongliu.byproxy.netty" level="DEBUG">-->
+    <!--</logger>-->
     <logger name="net.dongliu.byproxy" level="INFO">
     </logger>
     <root level="WARN">

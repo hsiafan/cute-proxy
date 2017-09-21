@@ -14,16 +14,13 @@ public class NetUtilsTest {
 
     }
 
-
     @Test
-    public void getHostFromTarget() throws Exception {
-        assertEquals("mvnrepository.com", NetUtils.getHost("mvnrepository.com:443"));
-        assertEquals("mvnrepository.com", NetUtils.getHost("mvnrepository.com"));
-    }
-
-    @Test
-    public void getPortFromTarget() throws Exception {
-        assertEquals(443, NetUtils.getPort("mvnrepository.com:443"));
+    public void parseAddress() throws Exception {
+        NetAddress address = NetUtils.parseAddress("mvnrepository.com:443");
+        assertEquals("mvnrepository.com", address.getHost());
+        assertEquals(443, address.getPort());
+        NetAddress netAddress = NetUtils.parseAddress("mvnrepository.com");
+        assertEquals("mvnrepository.com", netAddress.getHost());
     }
 
     @Test

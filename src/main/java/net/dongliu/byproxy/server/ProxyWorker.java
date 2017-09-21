@@ -5,6 +5,7 @@ import net.dongliu.byproxy.parser.HttpInputStream;
 import net.dongliu.byproxy.parser.HttpOutputStream;
 import net.dongliu.byproxy.struct.RequestLine;
 import net.dongliu.byproxy.parser.RichInputStream;
+import net.dongliu.byproxy.utils.NetAddress;
 import net.dongliu.byproxy.utils.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,14 +163,13 @@ public class ProxyWorker implements Runnable {
             }
             String target = requestLine.getPath();
             logger.debug("Receive connect request to {}", target);
-            String host = NetUtils.getHost(target);
-            int port = NetUtils.getPort(target);
+            NetAddress address = NetUtils.parseAddress(target);
             // just tell client ok..
             HttpOutputStream output = new HttpOutputStream(serverSocket.getOutputStream());
             output.writeLine("HTTP/1.1 200 OK\r\n");
             output.flush();
-            Handler handler = new ConnectProxyHandler(serverSocket, messageListener, host, port, sslContextManager,
-                    executor);
+            Handler handler = new ConnectProxyHandler(serverSocket, messageListener, address.getHost(),
+                    address.getPort(), sslContextManager, executor);
             handler.handle();
         } else if (path.startsWith("/")) {
             Handler handler = new HttpRequestHandler(serverSocket, new HttpInputStream(input), sslContextManager);
