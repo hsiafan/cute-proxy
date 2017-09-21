@@ -10,7 +10,7 @@ public class MMappedStoreTest {
     @Test
     public void write() throws Exception {
         ByteBuffer bb = ByteBuffer.wrap(new byte[]{1, 2, 3, 4, 5, 6});
-        MMappedStore store = new MMappedStore();
+        MMappedStore store = new MMappedStore(1024);
         int pos = store.write(bb);
         assertEquals(0, pos);
         bb.rewind();
