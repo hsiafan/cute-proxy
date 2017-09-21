@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.utils;
+package net.dongliu.byproxy.server;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,7 +10,7 @@ import java.io.OutputStream;
  *
  * @author Liu Dong
  */
-public class TeeInputStream extends InputStream {
+class TeeInputStream extends InputStream {
     private final InputStream in;
     private final OutputStream out;
 

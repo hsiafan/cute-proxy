@@ -33,35 +33,8 @@ public class WebSocketFrame {
     }
 
     public boolean isControlFrame() {
-        return ((opcode >> 3) & 1) == 1;
+        return Bits.bitSet(opcode, 3);
     }
-
-//        void copyTo(OutputStream os) throws IOException {
-//            int bufferSize = (int) Math.min(payloadLen, 1024 * 8);
-//            byte[] buffer = new byte[bufferSize];
-//            long total = 0;
-//            while (true) {
-//                int toRead = (int) Math.min(payloadLen - total, bufferSize);
-//                int read = read(buffer, 0, toRead);
-//                if (read == -1) {
-//                    break;
-//                }
-//                if (maskData != null) {
-//                    unmask(buffer, read, maskData, total);
-//                }
-//                total += read;
-//                os.write(buffer, 0, read);
-//                if (total >= payloadLen) {
-//                    break;
-//                }
-//            }
-//        }
-//
-//        private void unmask(byte[] buffer, int read, byte[] mask, long total) {
-//            for (int i = 0; i < read; i++) {
-//                buffer[i] = (byte) (buffer[i] ^ mask[(int) ((i + total) % mask.length)]);
-//            }
-//        }
 
     // unmask data if need
     public byte[] getFinalData() {

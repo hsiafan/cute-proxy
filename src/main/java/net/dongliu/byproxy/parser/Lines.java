@@ -1,10 +1,10 @@
-package net.dongliu.byproxy.utils;
+package net.dongliu.byproxy.parser;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class IOUtils {
+public class Lines {
 
     /**
      * Read ascii line, separated by '\r\n'

@@ -1,7 +1,6 @@
 package net.dongliu.byproxy.parser;
 
-import net.dongliu.byproxy.exception.HttpParserException;
-import net.dongliu.byproxy.utils.IOUtils;
+import net.dongliu.byproxy.exception.HttpDecodeException;
 import net.dongliu.byproxy.utils.StringUtils;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -34,18 +33,18 @@ class ChunkedInputStream extends RichInputStream {
     private void nextChunk() throws IOException {
         if (!firstChunk) {
             // read one empty line
-            String line = IOUtils.readLine(in);
+            String line = Lines.readLine(in);
             if (line == null) {
-                throw new HttpParserException("chunked stream unexpected end");
+                throw new HttpDecodeException("chunked stream unexpected end");
             }
             if (!line.isEmpty()) {
                 // chunk should end with empty line
-                throw new HttpParserException("chunked not end with empty line");
+                throw new HttpDecodeException("chunked not end with empty line");
             }
         }
-        String line = IOUtils.readLine(in);
+        String line = Lines.readLine(in);
         if (line == null) {
-            throw new HttpParserException("chunked stream unexpected end");
+            throw new HttpDecodeException("chunked stream unexpected end");
         }
         line = StringUtils.before(line, ";");
         long chunkLen = Long.parseLong(line, 16);
@@ -53,7 +52,7 @@ class ChunkedInputStream extends RichInputStream {
             end = true;
             // read trailers
             String tline;
-            while ((tline = IOUtils.readLine(in)) != null) {
+            while ((tline = Lines.readLine(in)) != null) {
                 // add one line
                 if (tline.isEmpty()) {
                     break;
@@ -73,7 +72,7 @@ class ChunkedInputStream extends RichInputStream {
         }
         int read = super.read();
         if (read == -1) {
-            throw new HttpParserException("Unexpected end of chunked stream");
+            throw new HttpDecodeException("Unexpected end of chunked stream");
         }
         remainLen -= 1;
         return read;
@@ -94,7 +93,7 @@ class ChunkedInputStream extends RichInputStream {
         int toRead = (int) Math.min(this.remainLen, len);
         int read = super.read(b, off, toRead);
         if (read == -1) {
-            throw new HttpParserException("Unexpected end of chunked stream");
+            throw new HttpDecodeException("Unexpected end of chunked stream");
         }
         this.remainLen -= read;
         return read;

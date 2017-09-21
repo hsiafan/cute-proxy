@@ -1,7 +1,6 @@
 package net.dongliu.byproxy.parser;
 
 import com.google.common.io.ByteStreams;
-import net.dongliu.byproxy.utils.IOUtils;
 
 import javax.annotation.Nullable;
 import java.io.BufferedInputStream;
@@ -160,6 +159,6 @@ public class RichInputStream extends InputStream {
      */
     @Nullable
     public synchronized String readLine() throws IOException {
-        return IOUtils.readLine(this);
+        return Lines.readLine(this);
     }
 }

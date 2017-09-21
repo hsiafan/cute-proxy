@@ -73,12 +73,12 @@ public class WebSocketInputStream extends RichInputStream implements NumberReade
             return null;
         }
         int second = read();
-        boolean fin = BitUtils.getBit(first, 7) != 0;
-        boolean rsv1 = BitUtils.getBit(first, 6) != 0;
-        boolean rsv2 = BitUtils.getBit(first, 5) != 0;
-        boolean rsv3 = BitUtils.getBit(first, 4) != 0;
+        boolean fin = Bits.bitSet(first, 7);
+        boolean rsv1 = Bits.bitSet(first, 6);
+        boolean rsv2 = Bits.bitSet(first, 5);
+        boolean rsv3 = Bits.bitSet(first, 4);
         int opcode = first & 0xf;
-        boolean mask = BitUtils.getBit(second, 7) != 0;
+        boolean mask = Bits.bitSet(second, 7);
         long payloadLen = second & 0x7f;
         if (payloadLen <= 125) {
 

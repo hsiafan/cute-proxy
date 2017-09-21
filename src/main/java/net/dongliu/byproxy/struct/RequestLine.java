@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.struct;
 
-import net.dongliu.byproxy.exception.HttpParserException;
+import net.dongliu.byproxy.exception.HttpDecodeException;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -33,7 +33,7 @@ public class RequestLine implements Serializable {
     public static RequestLine parse(String str) {
         String[] items = str.split(" ");
         if (items.length != 3) {
-            throw new HttpParserException("Invalid http request line:" + str);
+            throw new HttpDecodeException("Invalid http request line:" + str);
         }
         RequestLine requestLine = new RequestLine(items[0], items[1], items[2]);
         requestLine.raw = str;

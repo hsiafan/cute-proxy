@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.struct;
 
-import net.dongliu.byproxy.exception.HttpParserException;
+import net.dongliu.byproxy.exception.HttpDecodeException;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -32,7 +32,7 @@ public class StatusLine implements Serializable {
         Objects.requireNonNull(str);
         int idx = str.indexOf(' ');
         if (idx < 0) {
-            throw new HttpParserException("Invalid http status line: " + str);
+            throw new HttpDecodeException("Invalid http status line: " + str);
         }
         String version = str.substring(0, idx);
         int code;

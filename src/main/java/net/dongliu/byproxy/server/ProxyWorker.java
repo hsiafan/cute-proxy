@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.server;
 
-import net.dongliu.byproxy.exception.HttpParserException;
+import net.dongliu.byproxy.exception.HttpDecodeException;
 import net.dongliu.byproxy.parser.HttpInputStream;
 import net.dongliu.byproxy.parser.HttpOutputStream;
 import net.dongliu.byproxy.struct.RequestLine;
@@ -64,7 +64,7 @@ public class ProxyWorker implements Runnable {
             handleHttp(b, input);
         } catch (RejectedExecutionException e) {
             logger.debug("server thread pool shutdown", e);
-        } catch (HttpParserException e) {
+        } catch (HttpDecodeException e) {
             logger.error("Illegal http data", e);
         } catch (SocketTimeoutException e) {
             logger.error("Socket Timeout", e);

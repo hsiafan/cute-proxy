@@ -6,7 +6,7 @@ import java.io.InputStream;
 /**
  * @author Liu Dong
  */
-public class WrappedInputStream extends InputStream {
+class WrappedInputStream extends InputStream {
     private final InputStream inputStream;
     private final byte[] heading;
     private int remains;

@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.parser;
 
-import net.dongliu.byproxy.exception.HttpParserException;
+import net.dongliu.byproxy.exception.HttpDecodeException;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.FilterInputStream;
@@ -30,7 +30,7 @@ class FixLenInputStream extends FilterInputStream {
         }
         int read = super.read();
         if (read == -1) {
-            throw new HttpParserException("Unexpected end of fix len stream");
+            throw new HttpDecodeException("Unexpected end of fix len stream");
         }
         count += 1;
         return read;
@@ -50,7 +50,7 @@ class FixLenInputStream extends FilterInputStream {
         int toRead = (int) Math.min(this.capacity - count, len);
         int read = super.read(b, off, toRead);
         if (read == -1) {
-            throw new HttpParserException("Unexpected end of fix len stream");
+            throw new HttpDecodeException("Unexpected end of fix len stream");
         }
         this.count += read;
         return read;

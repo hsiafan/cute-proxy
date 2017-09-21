@@ -12,7 +12,6 @@ import net.dongliu.byproxy.store.HttpBody;
 import net.dongliu.byproxy.struct.*;
 import net.dongliu.byproxy.utils.NetUtils;
 import net.dongliu.byproxy.utils.StringUtils;
-import net.dongliu.byproxy.utils.TeeInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
