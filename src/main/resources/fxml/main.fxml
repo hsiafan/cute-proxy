@@ -33,7 +33,7 @@
 
     </MenuBar>
     <ToolBar>
-        <SplitMenuButton onAction="#updateSetting" fx:id="proxyConfigureButton">
+        <SplitMenuButton onAction="#updateSetting">
             <graphic>
                 <ImageView>
                     <Image url="@/images/ic_settings_black_24dp_1x.png"/>
@@ -46,7 +46,7 @@
                 <MenuItem text="External Proxy" onAction="#setProxy"/>
             </items>
         </SplitMenuButton>
-        <SplitMenuButton onAction="#setKeyStore" fx:id="setKeyStoreButton">
+        <SplitMenuButton onAction="#setKeyStore">
             <graphic>
                 <ImageView>
                     <Image url="@/images/ic_vpn_key_black_24dp_1x.png"/>
@@ -62,11 +62,11 @@
         </SplitMenuButton>
 
         <Separator/>
-        <MyButton onAction="#open" fx:id="openFileButton">
+        <MyButton onAction="#open">
             <iconPath>/images/ic_folder_open_black_24dp_1x.png</iconPath>
             <tooltipText>Open Saved File</tooltipText>
         </MyButton>
-        <MyButton onAction="#save" fx:id="saveFileButton">
+        <MyButton onAction="#save">
             <iconPath>/images/ic_save_black_24dp_1x.png</iconPath>
             <tooltipText>Save Messages to File</tooltipText>
         </MyButton>
@@ -89,7 +89,7 @@
         <Label fx:id="listenedAddressLabel"/>
     </ToolBar>
 
-    <SplitPane prefHeight="${root.height}" fx:id="splitPane" dividerPositions="0.2">
+    <SplitPane prefHeight="${root.height}" dividerPositions="0.2">
         <CatalogPane fx:id="catalogPane"/>
         <StackPane>
             <HttpRoundTripMessagePane fx:id="httpRoundTripMessagePane" visible="false"/>

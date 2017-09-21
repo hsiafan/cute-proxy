@@ -162,7 +162,7 @@ public class ConnectProxyHandler implements Handler {
             return true;
         }
 
-        @Nullable RequestHeaders requestHeaders = fromIn.readRequestHeaders();
+        @Nullable HttpRequestHeader requestHeaders = fromIn.readRequestHeaders();
         // client close connection
         if (requestHeaders == null) {
             logger.debug("Client close connection");
@@ -197,7 +197,7 @@ public class ConnectProxyHandler implements Handler {
             }
         }
 
-        ResponseHeaders responseHeaders = toIn.readResponseHeaders();
+        HttpResponseHeader responseHeaders = toIn.readResponseHeaders();
         if (responseHeaders == null) {
             logger.debug("Target server  close connection");
             return true;
@@ -252,7 +252,7 @@ public class ConnectProxyHandler implements Handler {
         return sb.toString();
     }
 
-    private HttpBody readRequestBody(HttpInputStream input, RequestHeaders requestHeaders)
+    private HttpBody readRequestBody(HttpInputStream input, HttpRequestHeader requestHeaders)
             throws IOException {
         InputStream requestBody;
         long len = requestHeaders.contentLen();
@@ -276,7 +276,7 @@ public class ConnectProxyHandler implements Handler {
         return httpBody;
     }
 
-    private HttpBody readResponseBody(ResponseHeaders headers, HttpInputStream dstIn, String method)
+    private HttpBody readResponseBody(HttpResponseHeader headers, HttpInputStream dstIn, String method)
             throws IOException {
         long len = headers.contentLen();
         InputStream responseBody;
@@ -300,7 +300,7 @@ public class ConnectProxyHandler implements Handler {
     }
 
 
-    private ResponseHeaders filterChunkedHeader(ResponseHeaders responseHeaders, long contentLen) {
+    private HttpResponseHeader filterChunkedHeader(HttpResponseHeader responseHeaders, long contentLen) {
         List<Header> headers = responseHeaders.getHeaders();
         List<Header> newHeaders = new ArrayList<>(headers.size());
         for (Header header : headers) {
@@ -310,10 +310,10 @@ public class ConnectProxyHandler implements Handler {
                 newHeaders.add(header);
             }
         }
-        return new ResponseHeaders(responseHeaders.getStatusLine(), newHeaders);
+        return new HttpResponseHeader(responseHeaders.getStatusLine(), newHeaders);
     }
 
-    private RequestHeaders filterChunkedHeader(RequestHeaders requestHeaders, long contentLen) {
+    private HttpRequestHeader filterChunkedHeader(HttpRequestHeader requestHeaders, long contentLen) {
         List<Header> headers = requestHeaders.getHeaders();
         List<Header> newHeaders = new ArrayList<>(headers.size());
         for (Header header : headers) {
@@ -323,6 +323,6 @@ public class ConnectProxyHandler implements Handler {
                 newHeaders.add(header);
             }
         }
-        return new RequestHeaders(requestHeaders.getRequestLine(), newHeaders);
+        return new HttpRequestHeader(requestHeaders.getRequestLine(), newHeaders);
     }
 }

@@ -24,7 +24,7 @@ public class HttpOutputStream extends OutputStream {
     /**
      * Output http response headers
      */
-    public synchronized void writeResponseHeaders(ResponseHeaders headers) throws IOException {
+    public synchronized void writeResponseHeaders(HttpResponseHeader headers) throws IOException {
         writeLine(headers.getStatusLine().raw());
         writeHeaders(headers.getHeaders());
     }
@@ -32,7 +32,7 @@ public class HttpOutputStream extends OutputStream {
     /**
      * Output http request headers
      */
-    public synchronized void writeRequestHeaders(RequestHeaders headers) throws IOException {
+    public synchronized void writeRequestHeaders(HttpRequestHeader headers) throws IOException {
         writeLine(headers.getRequestLine().raw());
         writeHeaders(headers.getHeaders());
     }

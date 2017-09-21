@@ -28,17 +28,17 @@ public class HttpInputStreamTest {
 
 
     private void mock() throws IOException {
-        RequestHeaders requestHeaders = mockRequest();
-        ResponseHeaders responseHeaders = mockResponse();
+        HttpRequestHeader requestHeaders = mockRequest();
+        HttpResponseHeader responseHeaders = mockResponse();
     }
 
-    private RequestHeaders mockRequest() throws IOException {
+    private HttpRequestHeader mockRequest() throws IOException {
         InputStream input = getClass().getResourceAsStream("/req.txt");
         HttpInputStream httpInputStream = new HttpInputStream(input);
         return httpInputStream.readRequestHeaders();
     }
 
-    private ResponseHeaders mockResponse() throws IOException {
+    private HttpResponseHeader mockResponse() throws IOException {
         InputStream input = getClass().getResourceAsStream("/resp.txt");
         HttpInputStream httpInputStream = new HttpInputStream(input);
         return httpInputStream.readResponseHeaders();

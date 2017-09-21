@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.byproxy.ui.component.BodyPane?>
-<?import net.dongliu.byproxy.ui.component.MyButton?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
-<fx:root type="net.dongliu.byproxy.ui.component.BodyPane" xmlns:fx="http://javafx.com/fxml">
+<?import net.dongliu.byproxy.ui.component.HttpBodyPane?>
+<?import net.dongliu.byproxy.ui.component.MyButton?>
+<fx:root type="HttpBodyPane" xmlns:fx="http://javafx.com/fxml">
     <top>
         <HBox spacing="4" alignment="CENTER_LEFT">
             <padding>
@@ -18,12 +16,6 @@
 
             <ComboBox onAction="#setMimeType" fx:id="bodyTypeBox"/>
             <ComboBox onAction="#setCharset" fx:id="charsetBox"/>
-
-            <ToggleButton onAction="#beautify" fx:id="beautifyButton" text="Beautify">
-                <tooltip>
-                    <Tooltip text="Beautify Text"/>
-                </tooltip>
-            </ToggleButton>
 
             <MyButton onAction="#exportBody">
                 <tooltipText>Save Content To File</tooltipText>

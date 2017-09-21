@@ -3,7 +3,9 @@ package net.dongliu.byproxy.ui.component;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CharStreams;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,7 +14,6 @@ import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -34,19 +35,18 @@ import java.util.Map;
  *
  * @author Liu Dong
  */
-public class BodyPane extends BorderPane {
+public class HttpBodyPane extends BorderPane {
     @FXML
     private Label sizeLabel;
     @FXML
     private ComboBox<HttpBodyType> bodyTypeBox;
     @FXML
     private ComboBox<Charset> charsetBox;
-    @FXML
-    private ToggleButton beautifyButton;
 
     private ObjectProperty<HttpBody> body = new SimpleObjectProperty<>();
+    private BooleanProperty beautify = new SimpleBooleanProperty();
 
-    public BodyPane() throws IOException {
+    public HttpBodyPane() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_body.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -54,7 +54,7 @@ public class BodyPane extends BorderPane {
     }
 
     @FXML
-    void initialize() {
+    private void initialize() {
         body.addListener((o, old, newValue) -> {
             try {
                 refreshBody(newValue);
@@ -68,6 +68,13 @@ public class BodyPane extends BorderPane {
                 Charset.forName("GB18030"), Charset.forName("GBK"), Charset.forName("GB2312"),
                 Charset.forName("BIG5"));
         bodyTypeBox.getItems().addAll(HttpBodyType.values());
+        beautify.addListener((ob, old, value) -> {
+            try {
+                refreshBody(body.get());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
     }
 
     private static final Map<HttpBodyType, Beautifier> beautifiers = ImmutableMap.of(
@@ -89,11 +96,6 @@ public class BodyPane extends BorderPane {
         charsetBox.setManaged(storeType.isText());
         charsetBox.setVisible(storeType.isText());
         sizeLabel.setText(FileUtils.byteCountToDisplaySize(httpBody.size()));
-
-        boolean showBeautify = beautifiers.containsKey(storeType);
-        beautifyButton.setSelected(httpBody.isBeautify());
-        beautifyButton.setManaged(showBeautify);
-        beautifyButton.setVisible(showBeautify);
 
         bodyTypeBox.setValue(storeType);
 
@@ -123,9 +125,11 @@ public class BodyPane extends BorderPane {
             }
 
             // beautify
-            if (httpBody.isBeautify()) {
+            if (beautify.get()) {
                 Beautifier beautifier = beautifiers.get(storeType);
-                text = beautifier.beautify(text, httpBody.getCharset());
+                if (beautifier != null) {
+                    text = beautifier.beautify(text, httpBody.getCharset());
+                }
             }
 
             TextArea textArea = new TextArea();
@@ -145,7 +149,7 @@ public class BodyPane extends BorderPane {
     }
 
     @FXML
-    void exportBody(ActionEvent e) throws IOException {
+    private void exportBody(ActionEvent e) throws IOException {
         HttpBody httpBody = body.get();
         if (httpBody == null || httpBody.size() == 0) {
             UIUtils.showMessageDialog("This http message has nobody");
@@ -210,7 +214,7 @@ public class BodyPane extends BorderPane {
     }
 
     @FXML
-    void setMimeType(ActionEvent e) throws IOException {
+    private void setMimeType(ActionEvent e) throws IOException {
         HttpBody httpBody = body.get();
         if (httpBody == null) {
             return;
@@ -222,7 +226,7 @@ public class BodyPane extends BorderPane {
     }
 
     @FXML
-    void setCharset(ActionEvent e) throws IOException {
+    private void setCharset(ActionEvent e) throws IOException {
         HttpBody httpBody = body.get();
         if (httpBody == null) {
             return;
@@ -233,27 +237,15 @@ public class BodyPane extends BorderPane {
         }
     }
 
-    @FXML
-    void beautify(ActionEvent e) throws IOException {
-        HttpBody httpBody = body.get();
-        if (httpBody == null) {
-            return;
-        }
-        httpBody.setBeautify(beautifyButton.isSelected());
-        if (httpBody.isFinished() && httpBody.size() != 0 && httpBody.getType().isText()) {
-            refreshBody(httpBody);
-        }
-    }
-
     public HttpBody getBody() {
         return body.get();
     }
 
-    public ObjectProperty<HttpBody> bodyProperty() {
-        return body;
-    }
-
     public void setBody(HttpBody body) {
         this.body.set(body);
+    }
+
+    public BooleanProperty beautifyProperty() {
+        return beautify;
     }
 }

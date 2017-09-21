@@ -30,7 +30,7 @@ public class HttpRequestHandler implements Handler {
     public void handle() throws IOException {
         input.enableBuffered();
         HttpOutputStream out = new HttpOutputStream(serverSocket.getOutputStream());
-        RequestHeaders headers = input.readRequestHeaders();
+        HttpRequestHeader headers = input.readRequestHeaders();
         if (headers == null) {
             return;
         }

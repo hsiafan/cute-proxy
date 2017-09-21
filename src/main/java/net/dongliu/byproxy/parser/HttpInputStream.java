@@ -26,13 +26,13 @@ public class HttpInputStream extends RichInputStream {
      * @return null if reach end of input stream
      */
     @Nullable
-    public synchronized RequestHeaders readRequestHeaders() throws IOException {
+    public synchronized HttpRequestHeader readRequestHeaders() throws IOException {
         String line = readLine();
         if (line == null) {
             return null;
         }
         List<String> rawHeaders = readHeaders();
-        return RequestHeaders.parse(line, rawHeaders);
+        return HttpRequestHeader.parse(line, rawHeaders);
     }
 
     /**
@@ -41,13 +41,13 @@ public class HttpInputStream extends RichInputStream {
      * @return null if reach end of input stream
      */
     @Nullable
-    public synchronized ResponseHeaders readResponseHeaders() throws IOException {
+    public synchronized HttpResponseHeader readResponseHeaders() throws IOException {
         String line = readLine();
         if (line == null) {
             return null;
         }
         List<String> rawHeaders = readHeaders();
-        return ResponseHeaders.parse(line, rawHeaders);
+        return HttpResponseHeader.parse(line, rawHeaders);
     }
 
     /**

@@ -52,7 +52,7 @@ public class CommonProxyHandler implements Handler {
 
     //TODO: HttpUrlConnection always resolve dns before send request when using a proxy.
     private boolean handleOneRequest(HttpOutputStream fromOut) throws IOException {
-        @Nullable RequestHeaders requestHeaders;
+        @Nullable HttpRequestHeader requestHeaders;
         try {
             requestHeaders = input.readRequestHeaders();
         } catch (SocketTimeoutException e) {
@@ -147,7 +147,7 @@ public class CommonProxyHandler implements Handler {
 
         Objects.requireNonNull(statusLine);
         fromOut.writeLine(statusLine);
-        ResponseHeaders responseHeaders = toResponseHeaders(statusLine, headerList);
+        HttpResponseHeader responseHeaders = toResponseHeaders(statusLine, headerList);
         HttpBody responseHttpBody = readResponseBody(responseHeaders, responseInput);
         messageListener.onHttpResponse(messageId, new HttpMessage(responseHeaders, responseHttpBody));
         List<Header> newResponseHeaders = filterResponseHeaders(shouldClose, responseHeaders, responseHttpBody.size());
@@ -161,7 +161,7 @@ public class CommonProxyHandler implements Handler {
         return shouldClose;
     }
 
-    private HttpBody readRequestBody(HttpInputStream input, RequestHeaders requestHeaders) throws IOException {
+    private HttpBody readRequestBody(HttpInputStream input, HttpRequestHeader requestHeaders) throws IOException {
         HttpBody httpBody = HttpBody.create(requestHeaders.contentType(), requestHeaders.contentEncoding());
         InputStream requestBody;
         long len = requestHeaders.contentLen();
@@ -184,7 +184,7 @@ public class CommonProxyHandler implements Handler {
         return httpBody;
     }
 
-    private HttpBody readResponseBody(ResponseHeaders headers, @Nullable InputStream responseIn)
+    private HttpBody readResponseBody(HttpResponseHeader headers, @Nullable InputStream responseIn)
             throws IOException {
         HttpBody httpBody = HttpBody.create(headers.contentType(), headers.contentEncoding());
         if (responseIn != null) {
@@ -197,7 +197,7 @@ public class CommonProxyHandler implements Handler {
     }
 
 
-    private List<Header> filterResponseHeaders(boolean shouldClose, ResponseHeaders responseHeaders, long contentLen) {
+    private List<Header> filterResponseHeaders(boolean shouldClose, HttpResponseHeader responseHeaders, long contentLen) {
         List<Header> newResponseHeaders = new ArrayList<>(responseHeaders.getHeaders());
         Set<String> removeHeaders = ImmutableSet.of("Transfer-Encoding", "Connection", "Content-Length");
         newResponseHeaders.removeIf(h -> removeHeaders.contains(h.getName()));
@@ -214,8 +214,8 @@ public class CommonProxyHandler implements Handler {
             "Transfer-Encoding");
 
 
-    private ResponseHeaders toResponseHeaders(String statusLine, List<Header> headers) {
-        return new ResponseHeaders(StatusLine.parse(statusLine), headers);
+    private HttpResponseHeader toResponseHeaders(String statusLine, List<Header> headers) {
+        return new HttpResponseHeader(StatusLine.parse(statusLine), headers);
     }
 
 

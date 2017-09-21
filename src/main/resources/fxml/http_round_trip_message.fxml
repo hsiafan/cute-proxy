@@ -1,8 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.byproxy.ui.component.HttpMessagePane?>
+<?import net.dongliu.byproxy.ui.component.HttpHeaderPane?>
 <?import net.dongliu.byproxy.ui.component.HttpRoundTripMessagePane?>
+<?import net.dongliu.byproxy.ui.component.HttpBodyPane?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ToggleButton?>
 <fx:root type="HttpRoundTripMessagePane" xmlns:fx="http://javafx.com/fxml">
-    <HttpMessagePane fx:id="requestPane"/>
-    <HttpMessagePane fx:id="responsePane"/>
+    <SplitPane orientation="VERTICAL">
+        <HttpHeaderPane fx:id="requestHeaderPane"/>
+        <HttpHeaderPane fx:id="responseHeaderPane"/>
+    </SplitPane>
+    <BorderPane>
+        <top>
+            <fx:define>
+                <ToggleGroup fx:id="bodyToggleGroup"/>
+            </fx:define>
+            <HBox spacing="4" alignment="CENTER_LEFT">
+                <padding>
+                    <Insets top="4" bottom="2" left="4" right="4"/>
+                </padding>
+                <RadioButton text="RequestBody" toggleGroup="$bodyToggleGroup" selected="true" userData="request"/>
+                <RadioButton text="ResponseBody" toggleGroup="$bodyToggleGroup" userData="response"/>
+                <ToggleButton fx:id="beautifyButton" text="Beautify"/>
+            </HBox>
+        </top>
+        <center>
+            <HttpBodyPane fx:id="bodyPane"/>
+        </center>
+    </BorderPane>
 </fx:root>

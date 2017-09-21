@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import net.dongliu.byproxy.ui.component.BodyPane?>
-<?import net.dongliu.byproxy.ui.component.HttpMessagePane?>
-<fx:root type="HttpMessagePane" orientation="VERTICAL" xmlns:fx="http://javafx.com/fxml">
+<?import net.dongliu.byproxy.ui.component.HttpHeaderPane?>
+<fx:root type="HttpHeaderPane" orientation="VERTICAL" xmlns:fx="http://javafx.com/fxml">
     <TabPane>
-        <Tab text="Raw">
-            <TextArea fx:id="rawHeadersText" editable="false"/>
+        <Tab text="Headers">
+            <TextArea fx:id="headerText" editable="false"/>
         </Tab>
         <Tab text="Cookie">
             <TextArea fx:id="cookieText" editable="false"/>
         </Tab>
     </TabPane>
-    <BodyPane fx:id="bodyPane"/>
 </fx:root>

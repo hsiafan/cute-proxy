@@ -44,9 +44,7 @@ public class HttpBody implements Serializable {
     private volatile Charset charset;
     private String contentEncoding;
 
-    private transient boolean beautify;
-
-    private final List<Chunk> chunkList;
+    private List<Chunk> chunkList;
 
     public HttpBody(@Nullable HttpBodyType type, @Nullable Charset charset,
                     @Nullable String contentEncoding) {
@@ -180,7 +178,7 @@ public class HttpBody implements Serializable {
         out.writeUTF(contentEncoding);
 
         if (finished) {
-            out.writeLong(size());
+            out.writeLong(size);
             try (InputStream in = getInputStream()) {
                 ByteStreams.copy(in, out);
             }
@@ -194,7 +192,8 @@ public class HttpBody implements Serializable {
         contentEncoding = in.readUTF();
 
         if (finished) {
-            long size = in.readLong();
+            size = in.readLong();
+            chunkList = new ArrayList<>();
             loadFromInput(in, size);
             //TODO: check size
         }
@@ -202,12 +201,16 @@ public class HttpBody implements Serializable {
 
     public void loadFromInput(InputStream in, long size) throws IOException {
         if (size < 0) {
-            size = Long.MAX_VALUE;
+            size = Integer.MAX_VALUE;
         }
-        byte[] buffer = new byte[(int) Math.min(8 * 1024, size)];
-        int count;
-        while ((count = in.read(buffer)) != -1) {
-            append(ByteBuffer.wrap(buffer, 0, count));
+        int chunkSize = (int) Math.min(4 * 1024, size);
+
+        long offset = 0;
+        byte[] buffer = new byte[chunkSize];
+        int read;
+        while (offset < size && (read = in.read(buffer, 0, (int) Math.min(size - offset, chunkSize))) != -1) {
+            append(ByteBuffer.wrap(buffer, 0, read));
+            offset += read;
         }
     }
 
@@ -229,10 +232,6 @@ public class HttpBody implements Serializable {
         return contentEncoding;
     }
 
-    public boolean isBeautify() {
-        return beautify;
-    }
-
     public void setCharset(Charset charset) {
         this.charset = charset;
     }
@@ -241,7 +240,4 @@ public class HttpBody implements Serializable {
         this.type = type;
     }
 
-    public void setBeautify(boolean beautify) {
-        this.beautify = beautify;
-    }
 }

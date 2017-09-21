@@ -6,16 +6,16 @@ import java.io.Serializable;
 
 public class HttpMessage implements Serializable {
     private static final long serialVersionUID = 5094098542868403395L;
-    private Headers headers;
+    private HttpHeader header;
     private HttpBody body;
 
-    public HttpMessage(Headers headers, HttpBody body) {
-        this.headers = headers;
+    public HttpMessage(HttpHeader header, HttpBody body) {
+        this.header = header;
         this.body = body;
     }
 
-    public Headers getHeaders() {
-        return headers;
+    public HttpHeader getHeader() {
+        return header;
     }
 
     public HttpBody getBody() {

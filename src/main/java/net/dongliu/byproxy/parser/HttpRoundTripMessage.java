@@ -1,5 +1,7 @@
 package net.dongliu.byproxy.parser;
 
+import net.dongliu.byproxy.store.HttpBody;
+
 import javax.annotation.Nullable;
 import java.io.Serializable;
 
@@ -35,5 +37,31 @@ public class HttpRoundTripMessage extends Message implements Serializable {
 
     public void setResponse(HttpMessage response) {
         this.response = response;
+    }
+
+    public HttpHeader getRequestHeader() {
+        return request.getHeader();
+    }
+
+    @Nullable
+    public HttpHeader getResponseHeader() {
+        HttpMessage response = this.response;
+        if (response == null) {
+            return null;
+        }
+        return response.getHeader();
+    }
+
+    public HttpBody getRequestBody() {
+        return request.getBody();
+    }
+
+    @Nullable
+    public HttpBody getResponseBody() {
+        HttpMessage response = this.response;
+        if (response == null) {
+            return null;
+        }
+        return response.getBody();
     }
 }

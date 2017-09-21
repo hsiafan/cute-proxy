@@ -114,7 +114,6 @@ public class MainController {
         });
 
         Property<Message> selectedMessage = catalogPane.selectedMessageProperty();
-
         selectedMessage.addListener((ov, old, message) -> {
             if (message == null) {
                 hideContent();
@@ -130,6 +129,7 @@ public class MainController {
         Property<TreeItem<ItemValue>> selectedTreeItem = catalogPane.selectedTreeItemProperty();
         deleteMenu.disableProperty().bind(UIUtils.observeNull(selectedTreeItem));
         loadConfigAndKeyStore();
+
     }
 
     /**
@@ -195,8 +195,9 @@ public class MainController {
     private void showMessage(Message message) {
         if (message instanceof HttpRoundTripMessage) {
             httpRoundTripMessagePane.setRoundTripMessage((HttpRoundTripMessage) message);
-            httpRoundTripMessagePane.setVisible(true);
             webSocketMessagePane.setVisible(false);
+            httpRoundTripMessagePane.setVisible(true);
+//            httpRoundTripMessagePane.setStyle("-fx-background-color:white;");
         } else if (message instanceof WebSocketMessage) {
             webSocketMessagePane.setMessage((WebSocketMessage) message);
             httpRoundTripMessagePane.setVisible(false);
