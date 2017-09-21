@@ -1,7 +1,7 @@
 package net.dongliu.byproxy;
 
-import net.dongliu.byproxy.proxy.SSLContextManager;
-import net.dongliu.byproxy.proxy.SSLUtils;
+import net.dongliu.byproxy.server.SSLContextManager;
+import net.dongliu.byproxy.server.SSLUtils;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
 import net.dongliu.byproxy.setting.MainSetting;
 import net.dongliu.byproxy.setting.ProxySetting;

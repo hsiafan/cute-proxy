@@ -8,7 +8,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import net.dongliu.byproxy.parser.HttpRoundTripMessage;
+import net.dongliu.byproxy.struct.HttpRoundTripMessage;
 
 import java.io.IOException;
 

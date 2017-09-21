@@ -2,9 +2,8 @@ package net.dongliu.byproxy.store;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import com.google.common.io.ByteStreams;
-import net.dongliu.byproxy.parser.ContentType;
+import net.dongliu.byproxy.struct.ContentType;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.z.ZCompressorInputStream;
 import org.brotli.dec.BrotliInputStream;
@@ -19,7 +18,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;

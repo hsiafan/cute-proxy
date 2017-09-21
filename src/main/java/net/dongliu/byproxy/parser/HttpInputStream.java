@@ -1,5 +1,8 @@
 package net.dongliu.byproxy.parser;
 
+import net.dongliu.byproxy.struct.HttpRequestHeader;
+import net.dongliu.byproxy.struct.HttpResponseHeader;
+
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.EOFException;

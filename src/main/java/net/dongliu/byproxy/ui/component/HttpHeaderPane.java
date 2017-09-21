@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
-import net.dongliu.byproxy.parser.HttpHeader;
+import net.dongliu.byproxy.struct.HttpHeader;
 
 import java.io.IOException;
 

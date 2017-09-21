@@ -1,5 +1,9 @@
 package net.dongliu.byproxy.parser;
 
+import net.dongliu.byproxy.struct.Header;
+import net.dongliu.byproxy.struct.HttpRequestHeader;
+import net.dongliu.byproxy.struct.HttpResponseHeader;
+
 import javax.annotation.concurrent.ThreadSafe;
 import java.io.IOException;
 import java.io.OutputStream;

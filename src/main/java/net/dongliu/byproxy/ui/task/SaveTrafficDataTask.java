@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.ui.task;
 
-import net.dongliu.byproxy.parser.Message;
+import net.dongliu.byproxy.struct.Message;
 import javafx.concurrent.Task;
 
 import java.io.BufferedOutputStream;

@@ -1,5 +1,6 @@
 package net.dongliu.byproxy.parser;
 
+import net.dongliu.byproxy.struct.StatusLine;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

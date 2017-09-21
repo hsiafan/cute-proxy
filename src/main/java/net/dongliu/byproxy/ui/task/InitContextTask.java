@@ -1,7 +1,7 @@
 package net.dongliu.byproxy.ui.task;
 
 import net.dongliu.byproxy.Context;
-import net.dongliu.byproxy.proxy.CAKeyStoreGenerator;
+import net.dongliu.byproxy.server.CAKeyStoreGenerator;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
 import net.dongliu.byproxy.setting.MainSetting;
 import net.dongliu.byproxy.setting.ProxySetting;

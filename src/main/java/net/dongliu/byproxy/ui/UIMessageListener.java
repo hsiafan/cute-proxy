@@ -1,11 +1,11 @@
 package net.dongliu.byproxy.ui;
 
 import javafx.application.Platform;
-import net.dongliu.byproxy.parser.HttpMessage;
-import net.dongliu.byproxy.parser.HttpRoundTripMessage;
-import net.dongliu.byproxy.parser.Message;
-import net.dongliu.byproxy.parser.WebSocketMessage;
-import net.dongliu.byproxy.proxy.MessageListener;
+import net.dongliu.byproxy.struct.HttpMessage;
+import net.dongliu.byproxy.struct.HttpRoundTripMessage;
+import net.dongliu.byproxy.struct.Message;
+import net.dongliu.byproxy.struct.WebSocketMessage;
+import net.dongliu.byproxy.server.MessageListener;
 import net.dongliu.byproxy.store.HttpBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
