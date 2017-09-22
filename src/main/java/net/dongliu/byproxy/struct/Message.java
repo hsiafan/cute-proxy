@@ -11,12 +11,10 @@ import java.io.Serializable;
  */
 public abstract class Message implements ItemValue, Serializable {
     private static final long serialVersionUID = 434844783179505084L;
-    private String id;
     private String host;
     private String url;
 
-    protected Message(String id, String host, String url) {
-        this.id = id;
+    protected Message(String host, String url) {
         this.host = host;
         this.url = url;
     }
@@ -25,10 +23,6 @@ public abstract class Message implements ItemValue, Serializable {
      * For show in abstract
      */
     public abstract String displayText();
-
-    public String getId() {
-        return id;
-    }
 
     public String getHost() {
         return host;

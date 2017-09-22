@@ -4,6 +4,7 @@ import net.dongliu.byproxy.store.HttpBody;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Http request and response
@@ -12,13 +13,17 @@ import java.io.Serializable;
  */
 public class HttpRoundTripMessage extends Message implements Serializable {
     private static final long serialVersionUID = -8007788167253549079L;
-    private HttpMessage request;
+    private HttpRequestHeader requestHeader;
+    private HttpBody requestBody;
     @Nullable
-    private volatile HttpMessage response;
+    private volatile HttpResponseHeader responseHeader;
+    @Nullable
+    private volatile HttpBody responseBody;
 
-    public HttpRoundTripMessage(String id, String host, String url, HttpMessage request) {
-        super(id, host, url);
-        this.request = request;
+    public HttpRoundTripMessage(String host, String url, HttpRequestHeader requestHeader, HttpBody requestBody) {
+        super(host, url);
+        this.requestHeader = Objects.requireNonNull(requestHeader);
+        this.requestBody = Objects.requireNonNull(requestBody);
     }
 
     @Override
@@ -26,42 +31,29 @@ public class HttpRoundTripMessage extends Message implements Serializable {
         return getUrl();
     }
 
-    public HttpMessage getRequest() {
-        return request;
-    }
-
-    @Nullable
-    public HttpMessage getResponse() {
-        return response;
-    }
-
-    public void setResponse(HttpMessage response) {
-        this.response = response;
-    }
-
-    public HttpHeader getRequestHeader() {
-        return request.getHeader();
-    }
-
-    @Nullable
-    public HttpHeader getResponseHeader() {
-        HttpMessage response = this.response;
-        if (response == null) {
-            return null;
-        }
-        return response.getHeader();
+    public HttpRequestHeader getRequestHeader() {
+        return requestHeader;
     }
 
     public HttpBody getRequestBody() {
-        return request.getBody();
+        return requestBody;
+    }
+
+    @Nullable
+    public HttpResponseHeader getResponseHeader() {
+        return responseHeader;
+    }
+
+    public void setResponseHeader(HttpResponseHeader responseHeader) {
+        this.responseHeader = Objects.requireNonNull(responseHeader);
     }
 
     @Nullable
     public HttpBody getResponseBody() {
-        HttpMessage response = this.response;
-        if (response == null) {
-            return null;
-        }
-        return response.getBody();
+        return responseBody;
+    }
+
+    public void setResponseBody(@Nullable HttpBody responseBody) {
+        this.responseBody = Objects.requireNonNull(responseBody);
     }
 }

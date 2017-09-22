@@ -7,12 +7,14 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
+import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.HttpProxyConnectHandler;
 import net.dongliu.byproxy.netty.HttpProxyHandler;
 import net.dongliu.byproxy.netty.HttpRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -31,6 +33,13 @@ public class HttpProtocolMatcher implements ProtocolMatcher {
     private static final int HTTP_PROXY = 3;
 
     private int type;
+
+    @Nullable
+    private MessageListener messageListener;
+
+    public HttpProtocolMatcher(@Nullable MessageListener messageListener) {
+        this.messageListener = messageListener;
+    }
 
     @Override
     public int match(ByteBuf buf) {
@@ -87,7 +96,7 @@ public class HttpProtocolMatcher implements ProtocolMatcher {
             case HTTP_PROXY:
                 pipeline.addLast(new HttpServerCodec());
                 pipeline.addLast(new HttpServerExpectContinueHandler());
-                pipeline.addLast(new HttpProxyHandler());
+                pipeline.addLast(new HttpProxyHandler(messageListener));
                 break;
             default:
                 throw new RuntimeException("should not happen");

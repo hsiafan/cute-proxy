@@ -1,9 +1,9 @@
 package net.dongliu.byproxy.ui.task;
 
 import net.dongliu.byproxy.Context;
-import net.dongliu.byproxy.server.CAKeyStoreGenerator;
+import net.dongliu.byproxy.ssl.CAKeyStoreGenerator;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
-import net.dongliu.byproxy.setting.MainSetting;
+import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.setting.Settings;
 import net.dongliu.byproxy.ui.UIUtils;
@@ -33,23 +33,23 @@ public class InitContextTask extends Task<Void> {
 
     @Override
     public Void call() throws Exception {
-        // load mainSetting
-        updateMessage("Loading mainSetting file...");
-        Path configPath = MainSetting.configPath();
+        // load serverSetting
+        updateMessage("Loading serverSetting file...");
+        Path configPath = ServerSetting.configPath();
         updateProgress(1, 10);
-        MainSetting mainSetting;
+        ServerSetting serverSetting;
         KeyStoreSetting keyStoreSetting;
         ProxySetting proxySetting;
         if (Files.exists(configPath)) {
             try (InputStream in = Files.newInputStream(configPath);
                  BufferedInputStream bin = new BufferedInputStream(in);
                  ObjectInputStream oin = new ObjectInputStream(bin)) {
-                mainSetting = (MainSetting) oin.readObject();
+                serverSetting = (ServerSetting) oin.readObject();
                 keyStoreSetting = (KeyStoreSetting) oin.readObject();
                 proxySetting = (ProxySetting) oin.readObject();
             }
         } else {
-            mainSetting = MainSetting.getDefault();
+            serverSetting = ServerSetting.getDefault();
             keyStoreSetting = KeyStoreSetting.getDefault();
             proxySetting = ProxySetting.getDefault();
         }
@@ -73,7 +73,7 @@ public class InitContextTask extends Task<Void> {
             }
 
         }
-        context.setMainSetting(mainSetting);
+        context.setServerSetting(serverSetting);
         context.setKeyStoreSetting(keyStoreSetting);
         updateProgress(8, 10);
         context.setProxySetting(proxySetting);

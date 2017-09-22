@@ -18,6 +18,7 @@ public class NettyUtils {
                 @Override
                 public Thread newThread(Runnable r) {
                     Thread thread = new Thread(r);
+                    thread.setDaemon(true);
                     thread.setName("BlockingWorker-" + seq.getAndIncrement());
                     return thread;
                 }
@@ -27,8 +28,15 @@ public class NettyUtils {
     /**
      * for run block operations in blockOperationExecutor
      */
-    public static <T> CompletableFuture<T> runAsync(Supplier<T> supplier) {
+    public static <T> CompletableFuture<T> callAsync(Supplier<T> supplier) {
         return CompletableFuture.supplyAsync(supplier, blockOperationExecutor);
+    }
+
+    /**
+     * for run block operations in blockOperationExecutor
+     */
+    public static CompletableFuture<Void> runAsync(Runnable runable) {
+        return CompletableFuture.runAsync(runable, blockOperationExecutor);
     }
 
     /**

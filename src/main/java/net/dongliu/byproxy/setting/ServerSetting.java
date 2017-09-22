@@ -9,14 +9,14 @@ import java.nio.file.Paths;
  *
  * @author Liu Dong
  */
-public class MainSetting implements Serializable {
+public class ServerSetting implements Serializable {
     private static final long serialVersionUID = -1828819182428842928L;
     private final String host;
     private final int port;
     // timeout in seconds
     private final int timeout;
 
-    public MainSetting(String host, int port, int timeout) {
+    public ServerSetting(String host, int port, int timeout) {
         this.host = host;
         this.port = port;
         this.timeout = timeout;
@@ -30,8 +30,8 @@ public class MainSetting implements Serializable {
     }
 
 
-    public static MainSetting getDefault() {
-        return new MainSetting("", 2080, 1800);
+    public static ServerSetting getDefault() {
+        return new ServerSetting("", 2080, 1800);
     }
 
     public String getHost() {

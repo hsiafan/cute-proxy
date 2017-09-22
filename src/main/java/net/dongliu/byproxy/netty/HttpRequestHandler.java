@@ -36,7 +36,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
         String uri = request.uri();
 
         if (uri.equals("/") || uri.equals("/index.html")) { // index page
-            CompletableFuture<Response> future = NettyUtils.runAsync(() -> {
+            CompletableFuture<Response> future = NettyUtils.callAsync(() -> {
                 try (InputStream in = HttpRequestHandler.class.getResourceAsStream("/www/html/index.html")) {
                     return ByteStreams.toByteArray(in);
                 } catch (IOException e) {

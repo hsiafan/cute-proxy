@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.server;
+package net.dongliu.byproxy;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;

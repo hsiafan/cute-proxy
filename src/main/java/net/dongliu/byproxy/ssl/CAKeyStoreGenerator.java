@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.server;
+package net.dongliu.byproxy.ssl;
 
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;

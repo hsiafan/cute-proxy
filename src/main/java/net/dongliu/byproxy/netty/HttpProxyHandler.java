@@ -10,10 +10,13 @@ import io.netty.handler.codec.http.*;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
+import net.dongliu.byproxy.MessageListener;
+import net.dongliu.byproxy.netty.interceptor.HttpMessageInterceptor;
 import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -30,11 +33,17 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LoggerFactory.getLogger(HttpProxyHandler.class);
 
     private final Bootstrap bootstrap = new Bootstrap();
-
     private Channel clientOutChannel;
     private NetAddress address;
 
     private final Queue<HttpContent> queue = new ArrayDeque<>();
+
+    @Nullable
+    private MessageListener messageListener;
+
+    public HttpProxyHandler(@Nullable MessageListener messageListener) {
+        this.messageListener = messageListener;
+    }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -72,7 +81,6 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
                     NettyUtils.closeOnFlush(clientOutChannel);
                 }
                 clientOutChannel = null;
-                this.address = null;
             }
 
             logger.debug("begin creating new connection to {}", address);
@@ -139,6 +147,9 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
             }
             Channel channel = f.getNow();
             channel.pipeline().addLast(new HttpClientCodec());
+            if (messageListener != null) {
+                channel.pipeline().addLast(new HttpMessageInterceptor("http", address, messageListener));
+            }
             channel.pipeline().addLast(new TunnelProxyHandler(ctx.channel()));
         });
         return promise;

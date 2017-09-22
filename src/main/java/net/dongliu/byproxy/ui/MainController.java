@@ -12,14 +12,14 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import net.dongliu.byproxy.Context;
 import net.dongliu.byproxy.ShutdownHooks;
+import net.dongliu.byproxy.netty.Server;
+import net.dongliu.byproxy.setting.KeyStoreSetting;
+import net.dongliu.byproxy.setting.ServerSetting;
+import net.dongliu.byproxy.setting.ProxySetting;
+import net.dongliu.byproxy.ssl.AppKeyStoreGenerator;
 import net.dongliu.byproxy.struct.HttpRoundTripMessage;
 import net.dongliu.byproxy.struct.Message;
 import net.dongliu.byproxy.struct.WebSocketMessage;
-import net.dongliu.byproxy.server.AppKeyStoreGenerator;
-import net.dongliu.byproxy.server.ProxyServer;
-import net.dongliu.byproxy.setting.KeyStoreSetting;
-import net.dongliu.byproxy.setting.MainSetting;
-import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.ui.component.*;
 import net.dongliu.byproxy.ui.task.InitContextTask;
 import net.dongliu.byproxy.ui.task.LoadTask;
@@ -66,9 +66,8 @@ public class MainController {
     private HttpRoundTripMessagePane httpRoundTripMessagePane;
     @FXML
     private WebSocketMessagePane webSocketMessagePane;
-//    public MenuItem replayMenu;
 
-    private volatile ProxyServer proxyServer;
+    private volatile Server server;
     private Context context = Context.getInstance();
 
     @FXML
@@ -76,9 +75,10 @@ public class MainController {
         startProxyButton.setDisable(true);
         startProxyMenu.setDisable(true);
         try {
-            proxyServer = new ProxyServer(context.getMainSetting(), context.getSslContextManager());
-            proxyServer.setMessageListener(new UIMessageListener(catalogPane::addTreeItemMessage));
-            proxyServer.start();
+            server = new Server(context.getServerSetting());
+            server.setSslContextManager(context.getSslContextManager());
+            server.setMessageListener(new UIMessageListener(catalogPane::addTreeItemMessage));
+            server.start();
         } catch (Throwable t) {
             logger.error("Start proxy failed", t);
             UIUtils.showMessageDialog("Start proxy failed!");
@@ -96,7 +96,7 @@ public class MainController {
         stopProxyButton.setDisable(true);
         stopProxyMenu.setDisable(true);
         new Thread(() -> {
-            proxyServer.stop();
+            server.stop();
             Platform.runLater(() -> {
                 startProxyButton.setDisable(false);
                 startProxyMenu.setDisable(false);
@@ -108,8 +108,8 @@ public class MainController {
     @FXML
     private void initialize() {
         ShutdownHooks.registerTask(() -> {
-            if (proxyServer != null) {
-                proxyServer.stop();
+            if (server != null) {
+                server.stop();
             }
         });
 
@@ -146,8 +146,8 @@ public class MainController {
     @FXML
     private void updateSetting(ActionEvent e) throws IOException {
         MainSettingDialog dialog = new MainSettingDialog();
-        dialog.mainSettingProperty().setValue(context.getMainSetting());
-        Optional<MainSetting> newConfig = dialog.showAndWait();
+        dialog.mainSettingProperty().setValue(context.getServerSetting());
+        Optional<ServerSetting> newConfig = dialog.showAndWait();
         if (newConfig.isPresent()) {
             SaveSettingTask task = new SaveSettingTask(context, newConfig.get(), context.getKeyStoreSetting(),
                     context.getProxySetting());
@@ -161,7 +161,7 @@ public class MainController {
         dialog.keyStoreSettingProperty().setValue(context.getKeyStoreSetting());
         Optional<KeyStoreSetting> newConfig = dialog.showAndWait();
         if (newConfig.isPresent()) {
-            SaveSettingTask task = new SaveSettingTask(context, context.getMainSetting(), newConfig.get(),
+            SaveSettingTask task = new SaveSettingTask(context, context.getServerSetting(), newConfig.get(),
                     context.getProxySetting());
             UIUtils.runBackground(task, "save key store failed");
         }
@@ -173,7 +173,7 @@ public class MainController {
         dialog.proxySettingProperty().setValue(context.getProxySetting());
         Optional<ProxySetting> newConfig = dialog.showAndWait();
         if (newConfig.isPresent()) {
-            SaveSettingTask task = new SaveSettingTask(context, context.getMainSetting(), context.getKeyStoreSetting(),
+            SaveSettingTask task = new SaveSettingTask(context, context.getServerSetting(), context.getKeyStoreSetting(),
                     newConfig.get());
             UIUtils.runBackground(task, "save secondary proxy setting failed");
         }
@@ -183,7 +183,7 @@ public class MainController {
      * Get listened addresses, show in toolbar
      */
     private void updateListenedAddress() {
-        MainSetting config = context.getMainSetting();
+        ServerSetting config = context.getServerSetting();
         String host = config.getHost().trim();
         int port = config.getPort();
         Platform.runLater(() -> listenedAddressLabel.setText("Listened " + host + ":" + port));

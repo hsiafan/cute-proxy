@@ -25,6 +25,8 @@ public class Main extends Application {
         stage.setOnCloseRequest(e -> {
             ShutdownHooks.shutdownAll();
             Platform.exit();
+            //TODO: find a way to make netty close faster...
+            System.exit(0);
         });
     }
 

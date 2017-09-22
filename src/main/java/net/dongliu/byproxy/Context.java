@@ -1,9 +1,9 @@
 package net.dongliu.byproxy;
 
-import net.dongliu.byproxy.server.SSLContextManager;
-import net.dongliu.byproxy.server.SSLUtils;
+import net.dongliu.byproxy.ssl.SSLContextManager;
+import net.dongliu.byproxy.ssl.SSLUtils;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
-import net.dongliu.byproxy.setting.MainSetting;
+import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.setting.ProxySetting;
 
 import javax.net.ssl.SSLContext;
@@ -22,7 +22,7 @@ import java.util.Objects;
  * @author Liu Dong
  */
 public class Context {
-    private volatile MainSetting mainSetting;
+    private volatile ServerSetting serverSetting;
     private volatile KeyStoreSetting keyStoreSetting;
     private volatile ProxySetting proxySetting;
     private volatile SSLContextManager sslContextManager;
@@ -51,8 +51,8 @@ public class Context {
         this.keyStoreSetting = setting;
     }
 
-    public void setMainSetting(MainSetting mainSetting) {
-        this.mainSetting = Objects.requireNonNull(mainSetting);
+    public void setServerSetting(ServerSetting serverSetting) {
+        this.serverSetting = Objects.requireNonNull(serverSetting);
     }
 
     public void setProxySetting(ProxySetting proxySetting) {
@@ -115,8 +115,8 @@ public class Context {
         return (SSLSocket) factory.createSocket(createSocket(host, port), host, port, true);
     }
 
-    public MainSetting getMainSetting() {
-        return mainSetting;
+    public ServerSetting getServerSetting() {
+        return serverSetting;
     }
 
     public KeyStoreSetting getKeyStoreSetting() {

@@ -17,8 +17,8 @@ public class WebSocketMessage extends Message implements Serializable {
     private boolean request;
     private volatile HttpBody httpBody;
 
-    public WebSocketMessage(String id, String host, String url, int type, boolean request) {
-        super(id, host, url);
+    public WebSocketMessage(String host, String url, int type, boolean request) {
+        super(host, url);
         this.type = type;
         this.request = request;
     }

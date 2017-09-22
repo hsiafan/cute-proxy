@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.parser;
+package net.dongliu.byproxy.struct;
 
 import net.dongliu.byproxy.struct.RequestLine;
 import org.junit.Test;

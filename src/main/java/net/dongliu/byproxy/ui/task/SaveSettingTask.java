@@ -2,7 +2,7 @@ package net.dongliu.byproxy.ui.task;
 
 import net.dongliu.byproxy.Context;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
-import net.dongliu.byproxy.setting.MainSetting;
+import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.setting.ProxySetting;
 import javafx.concurrent.Task;
 
@@ -20,15 +20,15 @@ import static java.util.Objects.requireNonNull;
 public class SaveSettingTask extends Task<Void> {
 
     private Context context;
-    private MainSetting mainSetting;
+    private ServerSetting serverSetting;
     private KeyStoreSetting keyStoreSetting;
     private ProxySetting proxySetting;
 
-    public SaveSettingTask(Context context, MainSetting mainSetting,
+    public SaveSettingTask(Context context, ServerSetting serverSetting,
                            KeyStoreSetting keyStoreSetting,
                            ProxySetting proxySetting) {
         this.context = context;
-        this.mainSetting = requireNonNull(mainSetting);
+        this.serverSetting = requireNonNull(serverSetting);
         this.keyStoreSetting = requireNonNull(keyStoreSetting);
         this.proxySetting = requireNonNull(proxySetting);
     }
@@ -37,18 +37,18 @@ public class SaveSettingTask extends Task<Void> {
     protected Void call() throws Exception {
         updateProgress(0, 10);
         // if need to load new key store
-        context.setMainSetting(mainSetting);
+        context.setServerSetting(serverSetting);
         updateProgress(1, 10);
         context.setKeyStoreSetting(keyStoreSetting);
         updateProgress(5, 10);
         context.setProxySetting(proxySetting);
         updateProgress(7, 10);
-        updateMessage("Save mainSetting to file");
-        Path configPath = MainSetting.configPath();
+        updateMessage("Save serverSetting to file");
+        Path configPath = ServerSetting.configPath();
         try (OutputStream os = Files.newOutputStream(configPath);
              BufferedOutputStream bos = new BufferedOutputStream(os);
              ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-            oos.writeObject(mainSetting);
+            oos.writeObject(serverSetting);
             oos.writeObject(keyStoreSetting);
             oos.writeObject(proxySetting);
         }

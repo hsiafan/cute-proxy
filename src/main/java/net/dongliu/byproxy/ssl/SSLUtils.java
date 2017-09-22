@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.server;
+package net.dongliu.byproxy.ssl;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;

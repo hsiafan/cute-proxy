@@ -1,6 +1,6 @@
 package net.dongliu.byproxy;
 
-import net.dongliu.byproxy.server.SSLUtils;
+import net.dongliu.byproxy.ssl.SSLUtils;
 import org.junit.Ignore;
 import org.junit.Test;
 
