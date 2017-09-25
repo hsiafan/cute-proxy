@@ -23,6 +23,21 @@ public class HttpInterceptorContext {
         this.messageListener = Objects.requireNonNull(messageListener);
     }
 
+    public String joinUrl(String path) {
+        StringBuilder sb = new StringBuilder();
+        if (ssl) {
+            sb.append("https");
+        } else {
+            sb.append("http");
+        }
+        sb.append("://").append(address.getHost());
+        if (!(ssl && address.getPort() == 443 || !ssl && address.getPort() == 80)) {
+            sb.append(":").append(address.getPort());
+        }
+        sb.append(path);
+        return sb.toString();
+    }
+
     public HttpRoundTripMessage getHttpMessage() {
         return httpMessage;
     }

@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty.switcher;
+package net.dongliu.byproxy.netty.detector;
 
 import com.google.common.collect.ImmutableSet;
 import io.netty.buffer.ByteBuf;
@@ -24,7 +24,7 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
 /**
  * Matcher for plain http protocol
  */
-public class HttpProtocolMatcher implements ProtocolMatcher {
+public class HttpProtocolMatcher extends ProtocolMatcher {
     private static final Logger logger = LoggerFactory.getLogger(HttpProtocolMatcher.class);
 
     private static Set<String> methods = ImmutableSet.of("GET", "POST", "PUT", "HEAD", "OPTIONS", "PATCH", "DELETE",
@@ -98,7 +98,7 @@ public class HttpProtocolMatcher implements ProtocolMatcher {
                 break;
             case CONNECT:
                 pipeline.addLast(new HttpServerCodec());
-                pipeline.addLast(new HttpProxyConnectHandler(messageListener));
+                pipeline.addLast(new HttpProxyConnectHandler(messageListener, sslContextManager));
                 break;
             case HTTP_PROXY:
                 pipeline.addLast(new HttpServerCodec());

@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty.switcher;
+package net.dongliu.byproxy.netty.detector;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelPipeline;
@@ -9,21 +9,26 @@ import io.netty.handler.codec.socksx.v5.Socks5ServerEncoder;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.tcp.Socks4ProxyAuthHandler;
 import net.dongliu.byproxy.netty.tcp.Socks5ProxyAuthHandler;
+import net.dongliu.byproxy.ssl.SSLContextManager;
 
 import javax.annotation.Nullable;
 
 /**
  * Matcher for socks4/socks5 proxy protocol
  */
-public class SocksProxyProtocolMatcher implements ProtocolMatcher {
+public class SocksProxyProtocolMatcher extends ProtocolMatcher {
 
     private int socksVersion;
 
     @Nullable
     private final MessageListener messageListener;
+    @Nullable
+    private final SSLContextManager sslContextManager;
 
-    public SocksProxyProtocolMatcher(@Nullable MessageListener messageListener) {
+    public SocksProxyProtocolMatcher(@Nullable MessageListener messageListener,
+                                     @Nullable SSLContextManager sslContextManager) {
         this.messageListener = messageListener;
+        this.sslContextManager = sslContextManager;
     }
 
     @Override
@@ -45,13 +50,13 @@ public class SocksProxyProtocolMatcher implements ProtocolMatcher {
         if (socksVersion == 4) {
             pipeline.addLast(Socks4ServerEncoder.INSTANCE);
             pipeline.addLast(new Socks4ServerDecoder());
-            pipeline.addLast(new Socks4ProxyAuthHandler(messageListener));
+            pipeline.addLast(new Socks4ProxyAuthHandler(messageListener, sslContextManager));
             return;
         }
         if (socksVersion == 5) {
             pipeline.addLast(Socks5ServerEncoder.DEFAULT);
             pipeline.addLast(new Socks5InitialRequestDecoder());
-            pipeline.addLast(new Socks5ProxyAuthHandler(messageListener));
+            pipeline.addLast(new Socks5ProxyAuthHandler(messageListener, sslContextManager));
             return;
         }
         throw new RuntimeException("should not happen");

@@ -7,6 +7,7 @@ import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
+import net.dongliu.byproxy.ssl.SSLContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +18,13 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
 
     @Nullable
     private final MessageListener messageListener;
+    @Nullable
+    private final SSLContextManager sslContextManager;
 
-    public Socks5ProxyAuthHandler(@Nullable MessageListener messageListener) {
+    public Socks5ProxyAuthHandler(@Nullable MessageListener messageListener,
+                                  @Nullable SSLContextManager sslContextManager) {
         this.messageListener = messageListener;
+        this.sslContextManager = sslContextManager;
     }
 
     @Override
@@ -40,7 +45,7 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
         } else if (socksRequest instanceof Socks5CommandRequest) {
             Socks5CommandRequest socks5CmdRequest = (Socks5CommandRequest) socksRequest;
             if (socks5CmdRequest.type() == Socks5CommandType.CONNECT) {
-                ctx.pipeline().addLast(new Socks5ProxyConnectHandler(messageListener));
+                ctx.pipeline().addLast(new Socks5ProxyConnectHandler(messageListener, sslContextManager));
                 ctx.pipeline().remove(this);
                 ctx.fireChannelRead(socksRequest);
             } else {

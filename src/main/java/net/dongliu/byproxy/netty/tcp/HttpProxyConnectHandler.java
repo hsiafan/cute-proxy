@@ -9,6 +9,7 @@ import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
+import net.dongliu.byproxy.ssl.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
 import net.dongliu.byproxy.utils.NetUtils;
 import org.slf4j.Logger;
@@ -27,8 +28,13 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
     @Nullable
     private final MessageListener messageListener;
 
-    public HttpProxyConnectHandler(@Nullable MessageListener messageListener) {
+    @Nullable
+    private final SSLContextManager sslContextManager;
+
+    public HttpProxyConnectHandler(@Nullable MessageListener messageListener,
+                                   @Nullable SSLContextManager sslContextManager) {
         this.messageListener = messageListener;
+        this.sslContextManager = sslContextManager;
     }
 
     @Override
@@ -56,7 +62,7 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
             responseFuture.addListener((ChannelFutureListener) channelFuture -> {
                 ctx.pipeline().remove(HttpProxyConnectHandler.this);
                 ctx.pipeline().remove(HttpServerCodec.class);
-                initTcpProxyHandlers(ctx, address, outboundChannel, messageListener);
+                initTcpProxyHandlers(ctx, address, outboundChannel);
             });
         });
     }
@@ -65,5 +71,17 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) throws Exception {
         logger.error("", e);
         NettyUtils.closeOnFlush(ctx.channel());
+    }
+
+    @Nullable
+    @Override
+    public MessageListener messageListener() {
+        return messageListener;
+    }
+
+    @Nullable
+    @Override
+    public SSLContextManager sslContextManager() {
+        return sslContextManager;
     }
 }

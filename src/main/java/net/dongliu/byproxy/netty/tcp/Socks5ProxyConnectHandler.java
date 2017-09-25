@@ -9,6 +9,7 @@ import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
+import net.dongliu.byproxy.ssl.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,8 +25,13 @@ public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
     @Nullable
     private final MessageListener messageListener;
 
-    public Socks5ProxyConnectHandler(@Nullable MessageListener messageListener) {
+    @Nullable
+    private final SSLContextManager sslContextManager;
+
+    public Socks5ProxyConnectHandler(@Nullable MessageListener messageListener,
+                                     @Nullable SSLContextManager sslContextManager) {
         this.messageListener = messageListener;
+        this.sslContextManager = sslContextManager;
     }
 
     @Override
@@ -56,7 +62,7 @@ public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
             responseFuture.addListener((ChannelFutureListener) f -> {
                 ctx.pipeline().remove(Socks5ProxyConnectHandler.this);
                 NetAddress address = new NetAddress(request.dstAddr(), request.dstPort());
-                initTcpProxyHandlers(ctx, address, outboundChannel, messageListener);
+                initTcpProxyHandlers(ctx, address, outboundChannel);
             });
         });
     }
@@ -65,5 +71,17 @@ public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) throws Exception {
         logger.error("", e);
         NettyUtils.closeOnFlush(ctx.channel());
+    }
+
+    @Nullable
+    @Override
+    public MessageListener messageListener() {
+        return messageListener;
+    }
+
+    @Nullable
+    @Override
+    public SSLContextManager sslContextManager() {
+        return sslContextManager;
     }
 }

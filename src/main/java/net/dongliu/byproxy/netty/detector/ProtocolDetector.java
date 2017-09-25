@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty.switcher;
+package net.dongliu.byproxy.netty.detector;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -17,7 +17,7 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
 
     private final Cumulator cumulator = MERGE_CUMULATOR;
     private final ProtocolMatcher[] matcherList;
-    private final boolean[] results;
+    private int index;
 
     private ByteBuf buf;
 
@@ -26,7 +26,6 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
             throw new IllegalArgumentException("No matcher for ProtocolDetector");
         }
         this.matcherList = matcherList;
-        this.results = new boolean[matcherList.length];
     }
 
     @Override
@@ -43,12 +42,7 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
             buf = cumulator.cumulate(ctx.alloc(), buf, in);
         }
 
-        boolean allMiss = true;
-        for (int i = 0; i < matcherList.length; i++) {
-            if (results[i]) {
-                continue;
-            }
-
+        for (int i = index; i < matcherList.length; i++) {
             ProtocolMatcher matcher = matcherList[i];
             int match = matcher.match(buf.duplicate());
             if (match == ProtocolMatcher.MATCH) {
@@ -60,21 +54,17 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
                 return;
             }
 
-            if (match == ProtocolMatcher.DISMATCH) {
-                results[i] = true;
-            }
-
             if (match == ProtocolMatcher.PENDING) {
-                allMiss = false;
+                index = i;
+                return;
             }
         }
 
-        if (allMiss) {
-            logger.error("unsupported protocol");
-            buf.release();
-            buf = null;
-            ctx.close();
-        }
+        // all miss
+        logger.error("unsupported protocol");
+        buf.release();
+        buf = null;
+        ctx.close();
     }
 
     @Override
