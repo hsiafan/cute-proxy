@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty;
+package net.dongliu.byproxy.netty.tcp;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -8,19 +8,32 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
+import net.dongliu.byproxy.MessageListener;
+import net.dongliu.byproxy.netty.ChannelActiveAwareHandler;
+import net.dongliu.byproxy.netty.NettyUtils;
 import net.dongliu.byproxy.utils.NetAddress;
 import net.dongliu.byproxy.utils.NetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpRequest> {
+public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpRequest>
+        implements TcpProxyHandlerTraits {
     private static final Logger logger = LoggerFactory.getLogger(HttpProxyConnectHandler.class);
 
     private final Bootstrap bootstrap = new Bootstrap();
+
+    @Nullable
+    private final MessageListener messageListener;
+
+    public HttpProxyConnectHandler(@Nullable MessageListener messageListener) {
+        this.messageListener = messageListener;
+    }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
@@ -53,8 +66,7 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
             responseFuture.addListener((ChannelFutureListener) channelFuture -> {
                 ctx.pipeline().remove(HttpProxyConnectHandler.this);
                 ctx.pipeline().remove(HttpServerCodec.class);
-                outboundChannel.pipeline().addLast(new TunnelProxyHandler(ctx.channel()));
-                ctx.pipeline().addLast(new TunnelProxyHandler(outboundChannel));
+                initTcpProxyHandlers(ctx, address, outboundChannel, messageListener);
             });
         });
     }

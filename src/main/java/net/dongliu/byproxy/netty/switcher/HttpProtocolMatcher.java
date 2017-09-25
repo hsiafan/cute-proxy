@@ -9,8 +9,8 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.HttpProxyConnectHandler;
-import net.dongliu.byproxy.netty.HttpProxyHandler;
+import net.dongliu.byproxy.netty.tcp.HttpProxyConnectHandler;
+import net.dongliu.byproxy.netty.http.HttpProxyHandler;
 import net.dongliu.byproxy.netty.web.HttpRequestHandler;
 import net.dongliu.byproxy.ssl.SSLContextManager;
 import org.slf4j.Logger;
@@ -98,7 +98,7 @@ public class HttpProtocolMatcher implements ProtocolMatcher {
                 break;
             case CONNECT:
                 pipeline.addLast(new HttpServerCodec());
-                pipeline.addLast(new HttpProxyConnectHandler());
+                pipeline.addLast(new HttpProxyConnectHandler(messageListener));
                 break;
             case HTTP_PROXY:
                 pipeline.addLast(new HttpServerCodec());

@@ -47,7 +47,7 @@ public class Server {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ProtocolSwitcher protocolSwitcher = new ProtocolSwitcher(
-                                new SocksProxyProtocolMatcher(),
+                                new SocksProxyProtocolMatcher(messageListener),
                                 new HttpProtocolMatcher(messageListener, sslContextManager)
                         );
                         ch.pipeline().addLast(protocolSwitcher);

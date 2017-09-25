@@ -1,16 +1,26 @@
-package net.dongliu.byproxy.netty.socks;
+package net.dongliu.byproxy.netty.tcp;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.socksx.SocksMessage;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
+import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+
 public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMessage> {
     private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyAuthHandler.class);
+
+    @Nullable
+    private final MessageListener messageListener;
+
+    public Socks5ProxyAuthHandler(@Nullable MessageListener messageListener) {
+        this.messageListener = messageListener;
+    }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, SocksMessage socksRequest) throws Exception {
@@ -30,7 +40,7 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
         } else if (socksRequest instanceof Socks5CommandRequest) {
             Socks5CommandRequest socks5CmdRequest = (Socks5CommandRequest) socksRequest;
             if (socks5CmdRequest.type() == Socks5CommandType.CONNECT) {
-                ctx.pipeline().addLast(new Socks5ProxyConnectHandler());
+                ctx.pipeline().addLast(new Socks5ProxyConnectHandler(messageListener));
                 ctx.pipeline().remove(this);
                 ctx.fireChannelRead(socksRequest);
             } else {

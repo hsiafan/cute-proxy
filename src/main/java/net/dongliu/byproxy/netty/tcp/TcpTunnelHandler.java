@@ -1,23 +1,27 @@
-package net.dongliu.byproxy.netty;
+package net.dongliu.byproxy.netty.tcp;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import net.dongliu.byproxy.netty.NettyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Handler tunnel proxy traffic, for socks proxy or http connect proxy.
  */
-public class TunnelProxyHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(TunnelProxyHandler.class);
+public class TcpTunnelHandler extends ChannelInboundHandlerAdapter {
+    private static final Logger logger = LoggerFactory.getLogger(TcpTunnelHandler.class);
 
     private final Channel targetChannel;
+    private final boolean pass;
 
-    public TunnelProxyHandler(Channel targetChannel) {
+    public TcpTunnelHandler(Channel targetChannel, boolean pass) {
         this.targetChannel = targetChannel;
+        this.pass = pass;
     }
 
     @Override
@@ -27,11 +31,23 @@ public class TunnelProxyHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+        if (!(msg instanceof ByteBuf)) {
+            logger.error("not ByteBuf message: {}", msg);
+            if (pass) {
+                ctx.fireChannelRead(ReferenceCountUtil.retain(msg));
+            }
+            return;
+        }
+
+        ByteBuf buf = (ByteBuf) msg;
+        if (pass) {
+            ctx.fireChannelRead(buf.retainedDuplicate());
+        }
         if (targetChannel.isActive()) {
             targetChannel.writeAndFlush(msg);
         } else {
             logger.error("proxy channel inactive");
-            ReferenceCountUtil.release(msg);
+            buf.release();
         }
     }
 

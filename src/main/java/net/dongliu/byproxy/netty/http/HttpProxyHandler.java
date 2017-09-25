@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty;
+package net.dongliu.byproxy.netty.http;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -11,7 +11,11 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.interceptor.HttpMessageInterceptor;
+import net.dongliu.byproxy.netty.ChannelActiveAwareHandler;
+import net.dongliu.byproxy.netty.NettyUtils;
+import net.dongliu.byproxy.netty.interceptor.HttpInterceptorContext;
+import net.dongliu.byproxy.netty.interceptor.HttpRequestOutBoundInterceptor;
+import net.dongliu.byproxy.netty.interceptor.HttpResponseInboundInterceptor;
 import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -148,9 +152,11 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
             Channel channel = f.getNow();
             channel.pipeline().addLast(new HttpClientCodec());
             if (messageListener != null) {
-                channel.pipeline().addLast(new HttpMessageInterceptor("http", address, messageListener));
+                HttpInterceptorContext interceptorContext = new HttpInterceptorContext(false, address, messageListener);
+                channel.pipeline().addLast(new HttpRequestOutBoundInterceptor(interceptorContext));
+                channel.pipeline().addLast(new HttpResponseInboundInterceptor(interceptorContext, true));
             }
-            channel.pipeline().addLast(new TunnelProxyHandler(ctx.channel()));
+            channel.pipeline().addLast(new HttpTunnelHandler(ctx.channel()));
         });
         return promise;
     }

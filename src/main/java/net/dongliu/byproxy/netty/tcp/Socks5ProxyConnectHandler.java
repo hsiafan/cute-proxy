@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty.socks;
+package net.dongliu.byproxy.netty.tcp;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -8,18 +8,29 @@ import io.netty.handler.codec.socksx.v5.Socks5CommandRequest;
 import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
+import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.ChannelActiveAwareHandler;
 import net.dongliu.byproxy.netty.NettyUtils;
-import net.dongliu.byproxy.netty.TunnelProxyHandler;
+import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+
 import static io.netty.handler.codec.socksx.v5.Socks5CommandStatus.FAILURE;
 
-public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks5CommandRequest> {
+public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks5CommandRequest>
+        implements TcpProxyHandlerTraits {
     private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyConnectHandler.class);
 
     private final Bootstrap bootstrap = new Bootstrap();
+
+    @Nullable
+    private final MessageListener messageListener;
+
+    public Socks5ProxyConnectHandler(@Nullable MessageListener messageListener) {
+        this.messageListener = messageListener;
+    }
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Socks5CommandRequest request) throws Exception {
@@ -52,10 +63,10 @@ public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
                     request.dstAddr(),
                     request.dstPort()));
 
-            responseFuture.addListener((ChannelFutureListener) channelFuture -> {
+            responseFuture.addListener((ChannelFutureListener) f -> {
                 ctx.pipeline().remove(Socks5ProxyConnectHandler.this);
-                outboundChannel.pipeline().addLast(new TunnelProxyHandler(ctx.channel()));
-                ctx.pipeline().addLast(new TunnelProxyHandler(outboundChannel));
+                NetAddress address = new NetAddress(request.dstAddr(), request.dstPort());
+                initTcpProxyHandlers(ctx, address, outboundChannel, messageListener);
             });
         });
     }

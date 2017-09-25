@@ -6,8 +6,11 @@ import io.netty.handler.codec.socksx.v4.Socks4ServerDecoder;
 import io.netty.handler.codec.socksx.v4.Socks4ServerEncoder;
 import io.netty.handler.codec.socksx.v5.Socks5InitialRequestDecoder;
 import io.netty.handler.codec.socksx.v5.Socks5ServerEncoder;
-import net.dongliu.byproxy.netty.socks.Socks4ProxyAuthHandler;
-import net.dongliu.byproxy.netty.socks.Socks5ProxyAuthHandler;
+import net.dongliu.byproxy.MessageListener;
+import net.dongliu.byproxy.netty.tcp.Socks4ProxyAuthHandler;
+import net.dongliu.byproxy.netty.tcp.Socks5ProxyAuthHandler;
+
+import javax.annotation.Nullable;
 
 /**
  * Matcher for socks4/socks5 proxy protocol
@@ -15,6 +18,13 @@ import net.dongliu.byproxy.netty.socks.Socks5ProxyAuthHandler;
 public class SocksProxyProtocolMatcher implements ProtocolMatcher {
 
     private int socksVersion;
+
+    @Nullable
+    private final MessageListener messageListener;
+
+    public SocksProxyProtocolMatcher(@Nullable MessageListener messageListener) {
+        this.messageListener = messageListener;
+    }
 
     @Override
     public int match(ByteBuf buf) {
@@ -35,13 +45,13 @@ public class SocksProxyProtocolMatcher implements ProtocolMatcher {
         if (socksVersion == 4) {
             pipeline.addLast(Socks4ServerEncoder.INSTANCE);
             pipeline.addLast(new Socks4ServerDecoder());
-            pipeline.addLast(new Socks4ProxyAuthHandler());
+            pipeline.addLast(new Socks4ProxyAuthHandler(messageListener));
             return;
         }
         if (socksVersion == 5) {
             pipeline.addLast(Socks5ServerEncoder.DEFAULT);
             pipeline.addLast(new Socks5InitialRequestDecoder());
-            pipeline.addLast(new Socks5ProxyAuthHandler());
+            pipeline.addLast(new Socks5ProxyAuthHandler(messageListener));
             return;
         }
         throw new RuntimeException("should not happen");
