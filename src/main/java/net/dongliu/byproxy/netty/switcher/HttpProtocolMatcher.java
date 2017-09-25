@@ -3,6 +3,7 @@ package net.dongliu.byproxy.netty.switcher;
 import com.google.common.collect.ImmutableSet;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelPipeline;
+import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
@@ -10,7 +11,8 @@ import io.netty.handler.stream.ChunkedWriteHandler;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.HttpProxyConnectHandler;
 import net.dongliu.byproxy.netty.HttpProxyHandler;
-import net.dongliu.byproxy.netty.HttpRequestHandler;
+import net.dongliu.byproxy.netty.web.HttpRequestHandler;
+import net.dongliu.byproxy.ssl.SSLContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,10 +37,14 @@ public class HttpProtocolMatcher implements ProtocolMatcher {
     private int type;
 
     @Nullable
-    private MessageListener messageListener;
+    private final MessageListener messageListener;
+    @Nullable
+    private final SSLContextManager sslContextManager;
 
-    public HttpProtocolMatcher(@Nullable MessageListener messageListener) {
+    public HttpProtocolMatcher(@Nullable MessageListener messageListener,
+                               @Nullable SSLContextManager sslContextManager) {
         this.messageListener = messageListener;
+        this.sslContextManager = sslContextManager;
     }
 
     @Override
@@ -87,7 +93,8 @@ public class HttpProtocolMatcher implements ProtocolMatcher {
                 pipeline.addLast(new HttpServerCodec());
                 pipeline.addLast(new HttpObjectAggregator(65536));
                 pipeline.addLast(new ChunkedWriteHandler());
-                pipeline.addLast(new HttpRequestHandler());
+                pipeline.addLast(new HttpContentCompressor());
+                pipeline.addLast(new HttpRequestHandler(sslContextManager));
                 break;
             case CONNECT:
                 pipeline.addLast(new HttpServerCodec());

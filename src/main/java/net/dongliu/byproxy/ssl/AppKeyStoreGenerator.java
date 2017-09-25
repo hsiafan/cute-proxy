@@ -78,6 +78,11 @@ public class AppKeyStoreGenerator {
         return caCertificate.getSerialNumber();
     }
 
+    /**
+     * return pub certificate byte data
+     *
+     * @param pem if false, return crt data; if true, return pem encoded data
+     */
     public byte[] exportCACertificate(boolean pem) throws CertificateEncodingException {
         byte[] data = caCertificate.getEncoded();
         if (!pem) {

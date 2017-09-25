@@ -4,40 +4,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
 
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Supplier;
-
 public class NettyUtils {
-
-
-    private static ExecutorService blockOperationExecutor = Executors.newCachedThreadPool(
-            new ThreadFactory() {
-                private AtomicLong seq = new AtomicLong();
-
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r);
-                    thread.setDaemon(true);
-                    thread.setName("BlockingWorker-" + seq.getAndIncrement());
-                    return thread;
-                }
-            }
-    );
-
-    /**
-     * for run block operations in blockOperationExecutor
-     */
-    public static <T> CompletableFuture<T> callAsync(Supplier<T> supplier) {
-        return CompletableFuture.supplyAsync(supplier, blockOperationExecutor);
-    }
-
-    /**
-     * for run block operations in blockOperationExecutor
-     */
-    public static CompletableFuture<Void> runAsync(Runnable runable) {
-        return CompletableFuture.runAsync(runable, blockOperationExecutor);
-    }
 
     /**
      * Closes the specified channel after all queued write requests are flushed.
