@@ -29,7 +29,7 @@ public class SaveTrafficDataTask extends Task<Void> {
         int total = messages.size();
         updateProgress(1, total + 1);
 
-        updateMessage("save data...");
+        updateMessage("append data...");
         int written = 0;
         try (OutputStream out = new BufferedOutputStream(new FileOutputStream(path));
              ObjectOutputStream oos = new ObjectOutputStream(out)) {

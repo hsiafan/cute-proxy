@@ -46,7 +46,7 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
             ProtocolMatcher matcher = matcherList[i];
             int match = matcher.match(buf.duplicate());
             if (match == ProtocolMatcher.MATCH) {
-                logger.debug("matched by {}", matcher.getClass().getSimpleName());
+                logger.debug("matched by {}", matcher.getClass().getName());
                 matcher.handlePipeline(ctx.pipeline());
                 ctx.pipeline().remove(this);
                 ctx.fireChannelRead(buf);

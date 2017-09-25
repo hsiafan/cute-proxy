@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty.tcp;
+package net.dongliu.byproxy.netty.proxy;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;

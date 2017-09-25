@@ -14,7 +14,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
-import net.dongliu.byproxy.store.HttpBodyType;
+import net.dongliu.byproxy.store.BodyType;
 import net.dongliu.byproxy.ui.component.ProgressDialog;
 import net.sf.image4j.codec.ico.ICODecoder;
 import org.slf4j.Logger;
@@ -38,11 +38,11 @@ public class UIUtils {
     /**
      * Get a Pane show otherImage, in center
      */
-    public static Node getImagePane(InputStream in, HttpBodyType type) {
-        if (type == HttpBodyType.jpeg || type == HttpBodyType.png || type == HttpBodyType.gif
-                || type == HttpBodyType.bmp || type == HttpBodyType.icon) {
+    public static Node getImagePane(InputStream in, BodyType type) {
+        if (type == BodyType.jpeg || type == BodyType.png || type == BodyType.gif
+                || type == BodyType.bmp || type == BodyType.icon) {
             Image image;
-            if (type == HttpBodyType.icon) {
+            if (type == BodyType.icon) {
                 try {
                     image = getIconImage(in);
                 } catch (IOException e) {

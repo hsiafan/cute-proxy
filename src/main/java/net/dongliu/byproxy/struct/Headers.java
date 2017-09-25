@@ -17,18 +17,18 @@ import static java.util.stream.Collectors.*;
  * @author Liu Dong
  */
 @Immutable
-public abstract class HttpHeader implements Serializable {
+public abstract class Headers implements Serializable {
     private static final long serialVersionUID = 8364988912653478880L;
     private List<Header> headers;
 
-    public HttpHeader(List<Header> headers) {
+    public Headers(List<Header> headers) {
         this.headers = headers;
     }
 
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("HttpHeader(");
+        StringBuilder sb = new StringBuilder("Headers(");
         Joiner.on(",").appendTo(sb, Lists.transform(headers, Header::raw));
         sb.append(")");
         return sb.toString();

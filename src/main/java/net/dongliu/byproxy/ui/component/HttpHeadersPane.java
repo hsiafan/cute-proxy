@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
-import net.dongliu.byproxy.struct.HttpHeader;
+import net.dongliu.byproxy.struct.Headers;
 
 import java.io.IOException;
 
@@ -17,15 +17,15 @@ import static java.util.stream.Collectors.joining;
  *
  * @author Liu Dong
  */
-public class HttpHeaderPane extends SplitPane {
+public class HttpHeadersPane extends SplitPane {
     @FXML
     private TextArea cookieText;
     @FXML
     private TextArea headerText;
 
-    private ObjectProperty<HttpHeader> httpHeader = new SimpleObjectProperty<>();
+    private ObjectProperty<Headers> httpHeader = new SimpleObjectProperty<>();
 
-    public HttpHeaderPane() throws IOException {
+    public HttpHeadersPane() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_header.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
@@ -48,7 +48,7 @@ public class HttpHeaderPane extends SplitPane {
         });
     }
 
-    public void setHttpHeader(HttpHeader httpHttpHeader) {
-        this.httpHeader.set(httpHttpHeader);
+    public void setHttpHeader(Headers headers) {
+        this.httpHeader.set(headers);
     }
 }

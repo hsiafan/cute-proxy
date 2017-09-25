@@ -151,7 +151,7 @@ public class MainController {
         if (newConfig.isPresent()) {
             SaveSettingTask task = new SaveSettingTask(context, newConfig.get(), context.getKeyStoreSetting(),
                     context.getProxySetting());
-            UIUtils.runBackground(task, "save settings failed");
+            UIUtils.runBackground(task, "append settings failed");
         }
     }
 
@@ -163,7 +163,7 @@ public class MainController {
         if (newConfig.isPresent()) {
             SaveSettingTask task = new SaveSettingTask(context, context.getServerSetting(), newConfig.get(),
                     context.getProxySetting());
-            UIUtils.runBackground(task, "save key store failed");
+            UIUtils.runBackground(task, "append key store failed");
         }
     }
 
@@ -175,7 +175,7 @@ public class MainController {
         if (newConfig.isPresent()) {
             SaveSettingTask task = new SaveSettingTask(context, context.getServerSetting(), context.getKeyStoreSetting(),
                     newConfig.get());
-            UIUtils.runBackground(task, "save secondary proxy setting failed");
+            UIUtils.runBackground(task, "append secondary proxy setting failed");
         }
     }
 

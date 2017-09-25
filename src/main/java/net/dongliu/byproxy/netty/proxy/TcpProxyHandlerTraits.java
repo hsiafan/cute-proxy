@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty.tcp;
+package net.dongliu.byproxy.netty.proxy;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -6,18 +6,19 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseDecoder;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.websocketx.WebSocket13FrameDecoder;
+import io.netty.handler.codec.http.websocketx.WebSocket13FrameEncoder;
+import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
+import io.netty.handler.codec.http.websocketx.WebSocketFrameEncoder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.ChannelActiveAwareHandler;
 import net.dongliu.byproxy.netty.detector.AnyMatcher;
 import net.dongliu.byproxy.netty.detector.ProtocolDetector;
 import net.dongliu.byproxy.netty.detector.SSLMatcher;
-import net.dongliu.byproxy.netty.interceptor.HttpInterceptorContext;
-import net.dongliu.byproxy.netty.interceptor.HttpRequestInboundInterceptor;
-import net.dongliu.byproxy.netty.interceptor.HttpResponseInboundInterceptor;
+import net.dongliu.byproxy.netty.interceptor.HttpInterceptor;
 import net.dongliu.byproxy.ssl.SSLContextManager;
 import net.dongliu.byproxy.ssl.SSLUtils;
 import net.dongliu.byproxy.utils.NetAddress;
@@ -25,7 +26,6 @@ import net.dongliu.byproxy.utils.NetAddress;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
-import java.util.function.Supplier;
 
 public interface TcpProxyHandlerTraits {
 
@@ -41,8 +41,8 @@ public interface TcpProxyHandlerTraits {
     default void initTcpProxyHandlers(ChannelHandlerContext ctx, NetAddress address, Channel outboundChannel) {
         boolean intercept = messageListener() != null;
         if (!intercept) {
-            ctx.pipeline().addLast(new TcpTunnelHandler(outboundChannel, false));
-            outboundChannel.pipeline().addLast(new TcpTunnelHandler(ctx.channel(), false));
+            ctx.pipeline().addLast(new ReplayHandler(outboundChannel));
+            outboundChannel.pipeline().addLast(new ReplayHandler(ctx.channel()));
             return;
         }
 
@@ -51,16 +51,13 @@ public interface TcpProxyHandlerTraits {
             throw new RuntimeException("SSLContextManager must be set when use mitm");
         }
 
-        Supplier<SSLEngine> serverSSLEngineSupplier = () -> {
-            SSLContext sslContext = sslContextManager.createSSlContext(address.getHost());
-            SSLEngine sslEngine = sslContext.createSSLEngine();
-            sslEngine.setUseClientMode(false);
-            return sslEngine;
-        };
         ProtocolDetector protocolDetector = new ProtocolDetector(
                 new SSLMatcher().onMatched(p -> {
                     //TODO: create ssl context is slow, should execute in another executor?
-                    p.addLast("ssl", new SslHandler(serverSSLEngineSupplier.get()));
+                    SSLContext sslContext = sslContextManager.createSSlContext(address.getHost());
+                    SSLEngine serverSSLEngine = sslContext.createSSLEngine();
+                    serverSSLEngine.setUseClientMode(false);
+                    p.addLast("ssl", new SslHandler(serverSSLEngine));
 
                     SSLEngine sslEngine = SSLUtils.createClientSSlContext().createSSLEngine();
                     sslEngine.setUseClientMode(true);
@@ -73,14 +70,21 @@ public interface TcpProxyHandlerTraits {
     }
 
     default void initPlainHandler(ChannelHandlerContext ctx, NetAddress address, Channel outboundChannel, boolean ssl) {
-        ctx.pipeline().addLast(new TcpTunnelHandler(outboundChannel, true));
-        outboundChannel.pipeline().addLast(new TcpTunnelHandler(ctx.channel(), true));
 
-        HttpInterceptorContext interceptorContext = new HttpInterceptorContext(ssl, address, messageListener());
-        ctx.pipeline().addLast(new HttpRequestDecoder());
-        ctx.pipeline().addLast(new HttpRequestInboundInterceptor(interceptorContext, false));
-        outboundChannel.pipeline().addLast(new HttpResponseDecoder());
-        outboundChannel.pipeline().addLast(new HttpResponseInboundInterceptor(interceptorContext, false));
+        ctx.pipeline().addLast(new HttpServerCodec());
+        ctx.pipeline().addLast("tcp-tunnel-handler", new ReplayHandler(outboundChannel));
+
+        outboundChannel.pipeline().addLast(new HttpClientCodec());
+        HttpInterceptor interceptor = new HttpInterceptor(ssl, address, messageListener()).onUpgrade(() -> {
+            ctx.pipeline().remove(HttpServerCodec.class);
+            WebSocketFrameDecoder frameDecoder = new WebSocket13FrameDecoder(true, true, 65536, false);
+            WebSocketFrameEncoder frameEncoder = new WebSocket13FrameEncoder(false);
+            ctx.pipeline().addBefore("tcp-tunnel-handler", "ws-decoder", frameDecoder);
+            ctx.pipeline().addBefore("tcp-tunnel-handler", "ws-encoder", frameEncoder);
+        });
+        outboundChannel.pipeline().addLast("http-interceptor", interceptor);
+        outboundChannel.pipeline().addLast("tcp-tunnel-handler", new ReplayHandler(ctx.channel()));
+
     }
 
     @Nullable

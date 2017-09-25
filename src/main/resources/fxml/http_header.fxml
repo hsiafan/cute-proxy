@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import net.dongliu.byproxy.ui.component.HttpHeaderPane?>
-<fx:root type="HttpHeaderPane" orientation="VERTICAL" xmlns:fx="http://javafx.com/fxml">
+<?import net.dongliu.byproxy.ui.component.HttpHeadersPane?>
+<fx:root type="HttpHeadersPane" orientation="VERTICAL" xmlns:fx="http://javafx.com/fxml">
     <TabPane>
         <Tab text="Headers">
             <TextArea fx:id="headerText" editable="false"/>

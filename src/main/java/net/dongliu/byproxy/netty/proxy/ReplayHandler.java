@@ -1,6 +1,5 @@
-package net.dongliu.byproxy.netty.tcp;
+package net.dongliu.byproxy.netty.proxy;
 
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,15 +12,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Handler tunnel proxy traffic, for socks proxy or http connect proxy.
  */
-public class TcpTunnelHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(TcpTunnelHandler.class);
+public class ReplayHandler extends ChannelInboundHandlerAdapter {
+    private static final Logger logger = LoggerFactory.getLogger(ReplayHandler.class);
 
     private final Channel targetChannel;
-    private final boolean pass;
 
-    public TcpTunnelHandler(Channel targetChannel, boolean pass) {
+    public ReplayHandler(Channel targetChannel) {
         this.targetChannel = targetChannel;
-        this.pass = pass;
     }
 
     @Override
@@ -31,23 +28,12 @@ public class TcpTunnelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if (!(msg instanceof ByteBuf)) {
-            logger.error("not ByteBuf message: {}", msg);
-            if (pass) {
-                ctx.fireChannelRead(ReferenceCountUtil.retain(msg));
-            }
-            return;
-        }
-
-        ByteBuf buf = (ByteBuf) msg;
-        if (pass) {
-            ctx.fireChannelRead(buf.retainedDuplicate());
-        }
+        ctx.fireChannelRead(ReferenceCountUtil.retain(msg));
         if (targetChannel.isActive()) {
             targetChannel.writeAndFlush(msg);
         } else {
-            logger.error("proxy channel inactive");
-            buf.release();
+            logger.warn("proxy target channel {} inactive", targetChannel.remoteAddress());
+            ReferenceCountUtil.release(msg);
         }
     }
 
@@ -60,7 +46,7 @@ public class TcpTunnelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
-        logger.error("", e);
+        logger.error("{} to {} error occurred", ctx.channel().remoteAddress(), targetChannel.remoteAddress(), e);
         ctx.close();
     }
 }

@@ -30,75 +30,75 @@ import static java.util.stream.Collectors.toList;
  * @author Liu Dong
  */
 @ThreadSafe
-public class HttpBody implements Serializable {
+public class Body implements Serializable {
     private static final long serialVersionUID = -5119917294712380816L;
-    private static Logger logger = LoggerFactory.getLogger(HttpBody.class);
+    private static Logger logger = LoggerFactory.getLogger(Body.class);
 
     private long size;
     // http body has been finished
     private boolean finished;
 
-    private volatile HttpBodyType type;
+    private volatile BodyType type;
     private volatile Charset charset;
     private String contentEncoding;
 
     private List<Chunk> chunkList;
 
-    public HttpBody(@Nullable HttpBodyType type, @Nullable Charset charset,
-                    @Nullable String contentEncoding) {
-        this.type = MoreObjects.firstNonNull(type, HttpBodyType.unknown);
+    public Body(@Nullable BodyType type, @Nullable Charset charset,
+                @Nullable String contentEncoding) {
+        this.type = MoreObjects.firstNonNull(type, BodyType.unknown);
         this.charset = MoreObjects.firstNonNull(charset, StandardCharsets.UTF_8);
         this.contentEncoding = Strings.nullToEmpty(contentEncoding);
         this.chunkList = new ArrayList<>();
     }
 
 
-    public static HttpBody create(@Nullable ContentType contentType, @Nullable String contentEncoding) {
+    public static Body create(@Nullable ContentType contentType, @Nullable String contentEncoding) {
         if (contentType == null) {
-            return new HttpBody(null, null, contentEncoding);
+            return new Body(null, null, contentEncoding);
         }
-        HttpBodyType httpBodyType;
-        httpBodyType = getHttpBodyType(contentType);
-        return new HttpBody(httpBodyType, contentType.getCharset(), contentEncoding);
+        BodyType bodyType;
+        bodyType = getHttpBodyType(contentType);
+        return new Body(bodyType, contentType.getCharset(), contentEncoding);
     }
 
-    private static HttpBodyType getHttpBodyType(ContentType contentType) {
-        HttpBodyType httpBodyType;
+    private static BodyType getHttpBodyType(ContentType contentType) {
+        BodyType bodyType;
         String subType = contentType.getMimeType().getSubType();
         if (contentType.isImage()) {
             if ("png".equals(subType)) {
-                httpBodyType = HttpBodyType.png;
+                bodyType = BodyType.png;
             } else if ("jpeg".equals(subType)) {
-                httpBodyType = HttpBodyType.jpeg;
+                bodyType = BodyType.jpeg;
             } else if ("gif".equals(subType)) {
-                httpBodyType = HttpBodyType.gif;
+                bodyType = BodyType.gif;
             } else if ("bmp".equals(subType)) {
-                httpBodyType = HttpBodyType.bmp;
+                bodyType = BodyType.bmp;
             } else if ("x-icon".equals(subType)) {
-                httpBodyType = HttpBodyType.icon;
+                bodyType = BodyType.icon;
             } else {
-                httpBodyType = HttpBodyType.otherImage;
+                bodyType = BodyType.otherImage;
             }
         } else if (contentType.isText()) {
             if ("json".equals(subType)) {
-                httpBodyType = HttpBodyType.json;
+                bodyType = BodyType.json;
             } else if ("html".equals(subType)) {
-                httpBodyType = HttpBodyType.html;
+                bodyType = BodyType.html;
             } else if ("xml".equals(subType)) {
-                httpBodyType = HttpBodyType.xml;
+                bodyType = BodyType.xml;
             } else if ("x-www-form-urlencoded".equals(subType)) {
-                httpBodyType = HttpBodyType.www_form;
+                bodyType = BodyType.www_form;
             } else if ("css".equals(subType)) {
-                httpBodyType = HttpBodyType.css;
+                bodyType = BodyType.css;
             } else if ("javascript".equals(subType) || "x-javascript".equals(subType)) {
-                httpBodyType = HttpBodyType.javascript;
+                bodyType = BodyType.javascript;
             } else {
-                httpBodyType = HttpBodyType.text;
+                bodyType = BodyType.text;
             }
         } else {
-            httpBodyType = HttpBodyType.binary;
+            bodyType = BodyType.binary;
         }
-        return httpBodyType;
+        return bodyType;
     }
 
     /**
@@ -185,7 +185,7 @@ public class HttpBody implements Serializable {
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         finished = in.readBoolean();
-        type = (HttpBodyType) in.readObject();
+        type = (BodyType) in.readObject();
         charset = Charset.forName(in.readUTF());
         contentEncoding = in.readUTF();
 
@@ -214,10 +214,10 @@ public class HttpBody implements Serializable {
 
     @Override
     public String toString() {
-        return "HttpBody{size=" + size() + "}";
+        return "Body{size=" + size() + "}";
     }
 
-    public HttpBodyType getType() {
+    public BodyType getType() {
         return type;
     }
 
@@ -234,7 +234,7 @@ public class HttpBody implements Serializable {
         this.charset = charset;
     }
 
-    public void setType(HttpBodyType type) {
+    public void setType(BodyType type) {
         this.type = type;
     }
 

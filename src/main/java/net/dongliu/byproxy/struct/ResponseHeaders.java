@@ -13,23 +13,23 @@ import static java.util.stream.Collectors.*;
  * @author Liu Dong
  */
 @Immutable
-public class HttpResponseHeader extends HttpHeader implements Serializable {
+public class ResponseHeaders extends Headers implements Serializable {
     private static final long serialVersionUID = 299585070993883703L;
     private StatusLine statusLine;
 
-    public HttpResponseHeader(StatusLine statusLine, List<Header> headers) {
+    public ResponseHeaders(StatusLine statusLine, List<Header> headers) {
         super(headers);
         this.statusLine = statusLine;
     }
 
-    public static HttpResponseHeader parse(String rawStatueLine, List<String> rawHeaders) {
-        return new HttpResponseHeader(StatusLine.parse(rawStatueLine),
+    public static ResponseHeaders parse(String rawStatueLine, List<String> rawHeaders) {
+        return new ResponseHeaders(StatusLine.parse(rawStatueLine),
                 rawHeaders.stream().map(Header::parse).collect(toList()));
     }
 
     @Override
     public String toString() {
-        return "HttpResponseHeader(statusLine=" + statusLine.raw() + ", headers=" + super.toString() + ")";
+        return "ResponseHeaders(statusLine=" + statusLine.raw() + ", headers=" + super.toString() + ")";
     }
 
     @Override

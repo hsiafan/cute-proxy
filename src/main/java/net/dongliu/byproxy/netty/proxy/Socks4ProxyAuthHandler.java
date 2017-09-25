@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty.tcp;
+package net.dongliu.byproxy.netty.proxy;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -37,7 +37,7 @@ public class Socks4ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
         }
         Socks4CommandRequest socksV4CmdRequest = (Socks4CommandRequest) socksRequest;
         if (socksV4CmdRequest.type() == Socks4CommandType.CONNECT) {
-            ctx.pipeline().addLast(new Socks4ProxyConnectHandler(messageListener, sslContextManager));
+            ctx.pipeline().addLast("socks4-proxy-connector", new Socks4ProxyConnectHandler(messageListener, sslContextManager));
             ctx.pipeline().remove(this);
             ctx.fireChannelRead(socksRequest);
         } else {

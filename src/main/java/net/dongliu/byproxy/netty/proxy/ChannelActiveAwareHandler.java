@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty;
+package net.dongliu.byproxy.netty.proxy;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;

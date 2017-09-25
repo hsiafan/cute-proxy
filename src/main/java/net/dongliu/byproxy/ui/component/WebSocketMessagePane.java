@@ -45,7 +45,7 @@ public class WebSocketMessagePane extends BorderPane {
                 return;
             }
 
-            httpBodyPane.setBody(n.getHttpBody());
+            httpBodyPane.setBody(n.getBody());
         });
     }
 

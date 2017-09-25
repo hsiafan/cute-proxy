@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.byproxy.ui.component.HttpHeaderPane?>
+<?import net.dongliu.byproxy.ui.component.HttpHeadersPane?>
 <?import net.dongliu.byproxy.ui.component.HttpRoundTripMessagePane?>
 <?import net.dongliu.byproxy.ui.component.HttpBodyPane?>
 <?import javafx.scene.control.SplitPane?>
@@ -13,8 +13,8 @@
 <?import javafx.scene.layout.Region?>
 <fx:root type="HttpRoundTripMessagePane" xmlns:fx="http://javafx.com/fxml" dividerPositions="0.45">
     <SplitPane orientation="VERTICAL">
-        <HttpHeaderPane fx:id="requestHeaderPane"/>
-        <HttpHeaderPane fx:id="responseHeaderPane"/>
+        <HttpHeadersPane fx:id="requestHeaderPane"/>
+        <HttpHeadersPane fx:id="responseHeaderPane"/>
     </SplitPane>
     <BorderPane>
         <top>

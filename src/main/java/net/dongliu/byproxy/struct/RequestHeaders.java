@@ -15,23 +15,23 @@ import static java.util.stream.Collectors.*;
  *
  * @author Liu Dong
  */
-public class HttpRequestHeader extends HttpHeader implements Serializable {
+public class RequestHeaders extends Headers implements Serializable {
     private static final long serialVersionUID = 6625148408370480848L;
     private RequestLine requestLine;
 
-    public HttpRequestHeader(RequestLine requestLine, List<Header> headers) {
+    public RequestHeaders(RequestLine requestLine, List<Header> headers) {
         super(headers);
         this.requestLine = requestLine;
     }
 
-    public static HttpRequestHeader parse(String rawRequestLine, List<String> rawHeaders) {
-        return new HttpRequestHeader(RequestLine.parse(rawRequestLine),
+    public static RequestHeaders parse(String rawRequestLine, List<String> rawHeaders) {
+        return new RequestHeaders(RequestLine.parse(rawRequestLine),
                 rawHeaders.stream().map(Header::parse).collect(toList()));
     }
 
     @Override
     public String toString() {
-        return "HttpRequestHeader(requestLine=" + requestLine + ", headers=" + super.toString() + ")";
+        return "RequestHeaders(requestLine=" + requestLine + ", headers=" + super.toString() + ")";
     }
 
     @Override

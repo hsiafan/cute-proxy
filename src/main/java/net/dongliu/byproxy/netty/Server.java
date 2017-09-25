@@ -8,9 +8,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.detector.HttpProtocolMatcher;
+import net.dongliu.byproxy.netty.detector.HttpMatcher;
 import net.dongliu.byproxy.netty.detector.ProtocolDetector;
-import net.dongliu.byproxy.netty.detector.SocksProxyProtocolMatcher;
+import net.dongliu.byproxy.netty.detector.SocksProxyMatcher;
 import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.ssl.SSLContextManager;
 import org.slf4j.Logger;
@@ -47,10 +47,10 @@ public class Server {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ProtocolDetector protocolDetector = new ProtocolDetector(
-                                new SocksProxyProtocolMatcher(messageListener, sslContextManager),
-                                new HttpProtocolMatcher(messageListener, sslContextManager)
+                                new SocksProxyMatcher(messageListener, sslContextManager),
+                                new HttpMatcher(messageListener, sslContextManager)
                         );
-                        ch.pipeline().addLast(protocolDetector);
+                        ch.pipeline().addLast("protocol-detector", protocolDetector);
                     }
                 });
 

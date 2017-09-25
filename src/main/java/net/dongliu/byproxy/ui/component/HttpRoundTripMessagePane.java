@@ -19,9 +19,9 @@ import java.io.IOException;
  */
 public class HttpRoundTripMessagePane extends SplitPane {
     @FXML
-    private HttpHeaderPane requestHeaderPane;
+    private HttpHeadersPane requestHeaderPane;
     @FXML
-    private HttpHeaderPane responseHeaderPane;
+    private HttpHeadersPane responseHeaderPane;
     @FXML
     private ToggleGroup bodyToggleGroup;
     @FXML

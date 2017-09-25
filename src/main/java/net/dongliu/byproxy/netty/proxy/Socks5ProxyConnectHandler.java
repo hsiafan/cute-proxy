@@ -1,10 +1,10 @@
-package net.dongliu.byproxy.netty.tcp;
+package net.dongliu.byproxy.netty.proxy;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.handler.codec.socksx.v4.DefaultSocks4CommandResponse;
-import io.netty.handler.codec.socksx.v4.Socks4CommandRequest;
-import io.netty.handler.codec.socksx.v4.Socks4CommandStatus;
+import io.netty.handler.codec.socksx.v5.DefaultSocks5CommandResponse;
+import io.netty.handler.codec.socksx.v5.Socks5CommandRequest;
+import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
@@ -16,11 +16,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 
-import static io.netty.handler.codec.socksx.v4.Socks4CommandStatus.REJECTED_OR_FAILED;
+import static io.netty.handler.codec.socksx.v5.Socks5CommandStatus.FAILURE;
 
-public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks4CommandRequest>
+public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks5CommandRequest>
         implements TcpProxyHandlerTraits {
-    private static final Logger logger = LoggerFactory.getLogger(Socks4ProxyConnectHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyConnectHandler.class);
 
     @Nullable
     private final MessageListener messageListener;
@@ -28,36 +28,39 @@ public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
     @Nullable
     private final SSLContextManager sslContextManager;
 
-    public Socks4ProxyConnectHandler(@Nullable MessageListener messageListener,
+    public Socks5ProxyConnectHandler(@Nullable MessageListener messageListener,
                                      @Nullable SSLContextManager sslContextManager) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, Socks4CommandRequest request) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Socks5CommandRequest request) throws Exception {
         Promise<Channel> promise = ctx.executor().newPromise();
         Bootstrap bootstrap = initBootStrap(promise, ctx.channel().eventLoop());
 
         bootstrap.connect(request.dstAddr(), request.dstPort()).addListener((ChannelFutureListener) future -> {
-            if (future.isSuccess()) {
-                ctx.channel().writeAndFlush(new DefaultSocks4CommandResponse(REJECTED_OR_FAILED));
+            if (!future.isSuccess()) {
+                ctx.channel().writeAndFlush(new DefaultSocks5CommandResponse(FAILURE, request.dstAddrType()));
                 NettyUtils.closeOnFlush(ctx.channel());
             }
         });
 
         promise.addListener((FutureListener<Channel>) future -> {
-            Channel outboundChannel = future.getNow();
             if (!future.isSuccess()) {
-                ctx.channel().writeAndFlush(new DefaultSocks4CommandResponse(REJECTED_OR_FAILED));
+                ctx.channel().writeAndFlush(new DefaultSocks5CommandResponse(FAILURE, request.dstAddrType()));
                 NettyUtils.closeOnFlush(ctx.channel());
                 return;
             }
-            ChannelFuture responseFuture = ctx.channel().writeAndFlush(
-                    new DefaultSocks4CommandResponse(Socks4CommandStatus.SUCCESS));
+            Channel outboundChannel = future.getNow();
+            ChannelFuture responseFuture = ctx.channel().writeAndFlush(new DefaultSocks5CommandResponse(
+                    Socks5CommandStatus.SUCCESS,
+                    request.dstAddrType(),
+                    request.dstAddr(),
+                    request.dstPort()));
 
-            responseFuture.addListener((ChannelFutureListener) channelFuture -> {
-                ctx.pipeline().remove(Socks4ProxyConnectHandler.this);
+            responseFuture.addListener((ChannelFutureListener) f -> {
+                ctx.pipeline().remove(Socks5ProxyConnectHandler.this);
                 NetAddress address = new NetAddress(request.dstAddr(), request.dstPort());
                 initTcpProxyHandlers(ctx, address, outboundChannel);
             });

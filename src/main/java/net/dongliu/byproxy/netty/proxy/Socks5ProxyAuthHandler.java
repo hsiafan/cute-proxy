@@ -1,4 +1,4 @@
-package net.dongliu.byproxy.netty.tcp;
+package net.dongliu.byproxy.netty.proxy;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -45,14 +45,14 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
         } else if (socksRequest instanceof Socks5CommandRequest) {
             Socks5CommandRequest socks5CmdRequest = (Socks5CommandRequest) socksRequest;
             if (socks5CmdRequest.type() == Socks5CommandType.CONNECT) {
-                ctx.pipeline().addLast(new Socks5ProxyConnectHandler(messageListener, sslContextManager));
+                ctx.pipeline().addLast("socks5-proxy-connector", new Socks5ProxyConnectHandler(messageListener, sslContextManager));
                 ctx.pipeline().remove(this);
                 ctx.fireChannelRead(socksRequest);
             } else {
                 ctx.close();
             }
         } else {
-            logger.error("unknown socks5 command: {}", socksRequest.getClass().getSimpleName());
+            logger.error("unknown socks5 command: {}", socksRequest.getClass().getName());
             ctx.close();
         }
     }

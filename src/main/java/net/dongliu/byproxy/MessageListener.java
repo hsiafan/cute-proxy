@@ -1,7 +1,6 @@
 package net.dongliu.byproxy;
 
 import net.dongliu.byproxy.struct.*;
-import net.dongliu.byproxy.store.HttpBody;
 
 /**
  * Listener to receive request data

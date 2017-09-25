@@ -17,8 +17,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
-import net.dongliu.byproxy.store.HttpBody;
-import net.dongliu.byproxy.store.HttpBodyType;
+import net.dongliu.byproxy.store.Body;
+import net.dongliu.byproxy.store.BodyType;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.ui.beautifier.*;
 import net.dongliu.byproxy.utils.StringUtils;
@@ -39,11 +39,11 @@ public class HttpBodyPane extends BorderPane {
     @FXML
     private Label sizeLabel;
     @FXML
-    private ComboBox<HttpBodyType> bodyTypeBox;
+    private ComboBox<BodyType> bodyTypeBox;
     @FXML
     private ComboBox<Charset> charsetBox;
 
-    private ObjectProperty<HttpBody> body = new SimpleObjectProperty<>();
+    private ObjectProperty<Body> body = new SimpleObjectProperty<>();
     private BooleanProperty beautify = new SimpleBooleanProperty();
 
     public HttpBodyPane() throws IOException {
@@ -67,7 +67,7 @@ public class HttpBodyPane extends BorderPane {
                 StandardCharsets.ISO_8859_1,
                 Charset.forName("GB18030"), Charset.forName("GBK"), Charset.forName("GB2312"),
                 Charset.forName("BIG5"));
-        bodyTypeBox.getItems().addAll(HttpBodyType.values());
+        bodyTypeBox.getItems().addAll(BodyType.values());
         beautify.addListener((ob, old, value) -> {
             try {
                 refreshBody(body.get());
@@ -77,41 +77,41 @@ public class HttpBodyPane extends BorderPane {
         });
     }
 
-    private static final Map<HttpBodyType, Beautifier> beautifiers = ImmutableMap.of(
-            HttpBodyType.json, new JsonBeautifier(),
-            HttpBodyType.www_form, new FormEncodedBeautifier(),
-            HttpBodyType.xml, new XMLBeautifier(),
-            HttpBodyType.html, new HtmlBeautifier()
+    private static final Map<BodyType, Beautifier> beautifiers = ImmutableMap.of(
+            BodyType.json, new JsonBeautifier(),
+            BodyType.www_form, new FormEncodedBeautifier(),
+            BodyType.xml, new XMLBeautifier(),
+            BodyType.html, new HtmlBeautifier()
     );
 
-    private void refreshBody(@Nullable HttpBody httpBody) throws IOException {
-        if (httpBody == null) {
+    private void refreshBody(@Nullable Body body) throws IOException {
+        if (body == null) {
             this.setCenter(new Text());
             return;
         }
 
-        HttpBodyType storeType = httpBody.getType();
+        BodyType storeType = body.getType();
 
-        charsetBox.setValue(httpBody.getCharset());
+        charsetBox.setValue(body.getCharset());
         charsetBox.setManaged(storeType.isText());
         charsetBox.setVisible(storeType.isText());
-        sizeLabel.setText(FileUtils.byteCountToDisplaySize(httpBody.size()));
+        sizeLabel.setText(FileUtils.byteCountToDisplaySize(body.size()));
 
         bodyTypeBox.setValue(storeType);
 
-        if (!httpBody.isFinished()) {
+        if (!body.isFinished()) {
             this.setCenter(new Text("Still reading..."));
             return;
         }
 
-        if (httpBody.size() == 0) {
+        if (body.size() == 0) {
             this.setCenter(new Text());
             return;
         }
 
         // handle images
         if (storeType.isImage()) {
-            Node imagePane = UIUtils.getImagePane(httpBody.getDecodedInputStream(), storeType);
+            Node imagePane = UIUtils.getImagePane(body.getDecodedInputStream(), storeType);
             this.setCenter(imagePane);
             return;
         }
@@ -119,8 +119,8 @@ public class HttpBodyPane extends BorderPane {
         // textual body
         if (storeType.isText()) {
             String text;
-            try (InputStream input = httpBody.getDecodedInputStream();
-                 Reader reader = new InputStreamReader(input, httpBody.getCharset())) {
+            try (InputStream input = body.getDecodedInputStream();
+                 Reader reader = new InputStreamReader(input, body.getCharset())) {
                 text = CharStreams.toString(reader);
             }
 
@@ -128,7 +128,7 @@ public class HttpBodyPane extends BorderPane {
             if (beautify.get()) {
                 Beautifier beautifier = beautifiers.get(storeType);
                 if (beautifier != null) {
-                    text = beautifier.beautify(text, httpBody.getCharset());
+                    text = beautifier.beautify(text, body.getCharset());
                 }
             }
 
@@ -141,7 +141,7 @@ public class HttpBodyPane extends BorderPane {
 
         // do not know how to handle
         Text t = new Text();
-        long size = httpBody.size();
+        long size = body.size();
         if (size > 0) {
             t.setText("Binary Body");
         }
@@ -150,15 +150,15 @@ public class HttpBodyPane extends BorderPane {
 
     @FXML
     private void exportBody(ActionEvent e) throws IOException {
-        HttpBody httpBody = body.get();
-        if (httpBody == null || httpBody.size() == 0) {
+        Body body = this.body.get();
+        if (body == null || body.size() == 0) {
             UIUtils.showMessageDialog("This http message has nobody");
             return;
         }
 
-//        String fileName = suggestFileName(httpBody.getUrl(), httpBody.getType());
+//        String fileName = suggestFileName(body.getUrl(), body.getType());
         //TODO: get url here
-        String fileName = addExtension("", httpBody.getType());
+        String fileName = addExtension("", body.getType());
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialFileName(fileName);
@@ -166,7 +166,7 @@ public class HttpBodyPane extends BorderPane {
         if (file == null) {
             return;
         }
-        try (InputStream in = httpBody.getDecodedInputStream();
+        try (InputStream in = body.getDecodedInputStream();
              OutputStream out = new FileOutputStream(file)) {
             ByteStreams.copy(in, out);
         }
@@ -174,7 +174,7 @@ public class HttpBodyPane extends BorderPane {
     }
 
 
-    private static String suggestFileName(String url, HttpBodyType type) {
+    private static String suggestFileName(String url, BodyType type) {
         url = StringUtils.before(url, "?");
         String fileName = StringUtils.afterLast(url, "/");
         if (fileName.isEmpty()) {
@@ -188,7 +188,7 @@ public class HttpBodyPane extends BorderPane {
         return fileName;
     }
 
-    private static String addExtension(String fileName, HttpBodyType type) {
+    private static String addExtension(String fileName, BodyType type) {
         switch (type) {
             case html:
                 return fileName + ".html";
@@ -215,33 +215,33 @@ public class HttpBodyPane extends BorderPane {
 
     @FXML
     private void setMimeType(ActionEvent e) throws IOException {
-        HttpBody httpBody = body.get();
-        if (httpBody == null) {
+        Body body = this.body.get();
+        if (body == null) {
             return;
         }
-        httpBody.setType(bodyTypeBox.getSelectionModel().getSelectedItem());
-        if (httpBody.isFinished() && httpBody.size() != 0) {
-            refreshBody(httpBody);
+        body.setType(bodyTypeBox.getSelectionModel().getSelectedItem());
+        if (body.isFinished() && body.size() != 0) {
+            refreshBody(body);
         }
     }
 
     @FXML
     private void setCharset(ActionEvent e) throws IOException {
-        HttpBody httpBody = body.get();
-        if (httpBody == null) {
+        Body body = this.body.get();
+        if (body == null) {
             return;
         }
-        httpBody.setCharset(charsetBox.getSelectionModel().getSelectedItem());
-        if (httpBody.isFinished() && httpBody.size() != 0 && httpBody.getType().isText()) {
-            refreshBody(httpBody);
+        body.setCharset(charsetBox.getSelectionModel().getSelectedItem());
+        if (body.isFinished() && body.size() != 0 && body.getType().isText()) {
+            refreshBody(body);
         }
     }
 
-    public HttpBody getBody() {
+    public Body getBody() {
         return body.get();
     }
 
-    public void setBody(HttpBody body) {
+    public void setBody(Body body) {
         this.body.set(body);
     }
 
