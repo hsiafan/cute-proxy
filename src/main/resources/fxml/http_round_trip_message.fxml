@@ -10,7 +10,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ToggleButton?>
-<fx:root type="HttpRoundTripMessagePane" xmlns:fx="http://javafx.com/fxml">
+<?import javafx.scene.layout.Region?>
+<fx:root type="HttpRoundTripMessagePane" xmlns:fx="http://javafx.com/fxml" dividerPositions="0.45">
     <SplitPane orientation="VERTICAL">
         <HttpHeaderPane fx:id="requestHeaderPane"/>
         <HttpHeaderPane fx:id="responseHeaderPane"/>
@@ -26,6 +27,7 @@
                 </padding>
                 <RadioButton text="RequestBody" toggleGroup="$bodyToggleGroup" selected="true" userData="request"/>
                 <RadioButton text="ResponseBody" toggleGroup="$bodyToggleGroup" userData="response"/>
+                <Region HBox.hgrow="ALWAYS"/>
                 <ToggleButton fx:id="beautifyButton" text="Beautify"/>
             </HBox>
         </top>

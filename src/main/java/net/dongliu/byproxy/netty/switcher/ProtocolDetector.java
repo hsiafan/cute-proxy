@@ -12,8 +12,8 @@ import static io.netty.handler.codec.ByteToMessageDecoder.MERGE_CUMULATOR;
 /**
  * Switcher to distinguish different protocols
  */
-public class ProtocolSwitcher extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(ProtocolSwitcher.class);
+public class ProtocolDetector extends ChannelInboundHandlerAdapter {
+    private static final Logger logger = LoggerFactory.getLogger(ProtocolDetector.class);
 
     private final Cumulator cumulator = MERGE_CUMULATOR;
     private final ProtocolMatcher[] matcherList;
@@ -21,9 +21,9 @@ public class ProtocolSwitcher extends ChannelInboundHandlerAdapter {
 
     private ByteBuf buf;
 
-    public ProtocolSwitcher(ProtocolMatcher... matcherList) {
+    public ProtocolDetector(ProtocolMatcher... matcherList) {
         if (matcherList.length == 0) {
-            throw new IllegalArgumentException("No matcher for ProtocolSwitcher");
+            throw new IllegalArgumentException("No matcher for ProtocolDetector");
         }
         this.matcherList = matcherList;
         this.results = new boolean[matcherList.length];
@@ -32,7 +32,7 @@ public class ProtocolSwitcher extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (!(msg instanceof ByteBuf)) {
-            logger.error("unexpected message type for ProtocolSwitcher: {}", msg.getClass());
+            logger.error("unexpected message type for ProtocolDetector: {}", msg.getClass());
             ctx.close();
             return;
         }

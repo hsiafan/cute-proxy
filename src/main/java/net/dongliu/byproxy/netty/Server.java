@@ -9,7 +9,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.switcher.HttpProtocolMatcher;
-import net.dongliu.byproxy.netty.switcher.ProtocolSwitcher;
+import net.dongliu.byproxy.netty.switcher.ProtocolDetector;
 import net.dongliu.byproxy.netty.switcher.SocksProxyProtocolMatcher;
 import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.ssl.SSLContextManager;
@@ -46,11 +46,11 @@ public class Server {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ProtocolSwitcher protocolSwitcher = new ProtocolSwitcher(
+                        ProtocolDetector protocolDetector = new ProtocolDetector(
                                 new SocksProxyProtocolMatcher(messageListener),
                                 new HttpProtocolMatcher(messageListener, sslContextManager)
                         );
-                        ch.pipeline().addLast(protocolSwitcher);
+                        ch.pipeline().addLast(protocolDetector);
                     }
                 });
 

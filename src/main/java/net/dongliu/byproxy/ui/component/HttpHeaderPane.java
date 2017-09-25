@@ -26,7 +26,7 @@ public class HttpHeaderPane extends SplitPane {
     private ObjectProperty<HttpHeader> httpHeader = new SimpleObjectProperty<>();
 
     public HttpHeaderPane() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_message.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_header.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         fxmlLoader.load();

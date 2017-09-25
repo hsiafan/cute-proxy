@@ -2,14 +2,12 @@ package net.dongliu.byproxy.netty.tcp;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.socksx.v4.DefaultSocks4CommandResponse;
 import io.netty.handler.codec.socksx.v4.Socks4CommandRequest;
 import io.netty.handler.codec.socksx.v4.Socks4CommandStatus;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.ChannelActiveAwareHandler;
 import net.dongliu.byproxy.netty.NettyUtils;
 import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
@@ -23,8 +21,6 @@ public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
         implements TcpProxyHandlerTraits {
     private static final Logger logger = LoggerFactory.getLogger(Socks4ProxyConnectHandler.class);
 
-    private final Bootstrap bootstrap = new Bootstrap();
-
     @Nullable
     private final MessageListener messageListener;
 
@@ -35,13 +31,7 @@ public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
     @Override
     public void channelRead0(ChannelHandlerContext ctx, Socks4CommandRequest request) throws Exception {
         Promise<Channel> promise = ctx.executor().newPromise();
-
-        Channel inboundChannel = ctx.channel();
-        bootstrap.group(inboundChannel.eventLoop())
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new ChannelActiveAwareHandler(promise));
+        Bootstrap bootstrap = initBootStrap(promise, ctx.channel().eventLoop());
 
         bootstrap.connect(request.dstAddr(), request.dstPort()).addListener((ChannelFutureListener) future -> {
             if (future.isSuccess()) {
