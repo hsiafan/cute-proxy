@@ -1,29 +1,29 @@
-package net.dongliu.byproxy.netty;
+package net.dongliu.byproxy.netty.socks;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.socksx.v4.DefaultSocks4CommandResponse;
+import io.netty.handler.codec.socksx.v4.Socks4CommandRequest;
+import io.netty.handler.codec.socksx.v4.Socks4CommandStatus;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
-import net.dongliu.byproxy.utils.NetAddress;
-import net.dongliu.byproxy.utils.NetUtils;
+import net.dongliu.byproxy.netty.ChannelActiveAwareHandler;
+import net.dongliu.byproxy.netty.NettyUtils;
+import net.dongliu.byproxy.netty.TunnelProxyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
-import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+import static io.netty.handler.codec.socksx.v4.Socks4CommandStatus.REJECTED_OR_FAILED;
 
-public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpRequest> {
-    private static final Logger logger = LoggerFactory.getLogger(HttpProxyConnectHandler.class);
+@ChannelHandler.Sharable
+public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks4CommandRequest> {
+    private static final Logger logger = LoggerFactory.getLogger(Socks4ProxyConnectHandler.class);
 
     private final Bootstrap bootstrap = new Bootstrap();
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Socks4CommandRequest request) throws Exception {
         Promise<Channel> promise = ctx.executor().newPromise();
 
         Channel inboundChannel = ctx.channel();
@@ -33,26 +33,25 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(new ChannelActiveAwareHandler(promise));
 
-        NetAddress address = NetUtils.parseAddress(request.uri());
-        bootstrap.connect(address.getHost(), address.getPort()).addListener((ChannelFutureListener) future -> {
-            if (!future.isSuccess()) {
-                ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, BAD_GATEWAY));
+        bootstrap.connect(request.dstAddr(), request.dstPort()).addListener((ChannelFutureListener) future -> {
+            if (future.isSuccess()) {
+                ctx.channel().writeAndFlush(new DefaultSocks4CommandResponse(REJECTED_OR_FAILED));
                 NettyUtils.closeOnFlush(ctx.channel());
             }
         });
 
         promise.addListener((FutureListener<Channel>) future -> {
+            Channel outboundChannel = future.getNow();
             if (!future.isSuccess()) {
-                ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, BAD_GATEWAY));
+                ctx.channel().writeAndFlush(new DefaultSocks4CommandResponse(REJECTED_OR_FAILED));
                 NettyUtils.closeOnFlush(ctx.channel());
                 return;
             }
+            ChannelFuture responseFuture = ctx.channel().writeAndFlush(
+                    new DefaultSocks4CommandResponse(Socks4CommandStatus.SUCCESS));
 
-            Channel outboundChannel = future.getNow();
-            ChannelFuture responseFuture = ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, OK));
             responseFuture.addListener((ChannelFutureListener) channelFuture -> {
-                ctx.pipeline().remove(HttpProxyConnectHandler.this);
-                ctx.pipeline().remove(HttpServerCodec.class);
+                ctx.pipeline().remove(Socks4ProxyConnectHandler.this);
                 outboundChannel.pipeline().addLast(new TunnelProxyHandler(ctx.channel()));
                 ctx.pipeline().addLast(new TunnelProxyHandler(outboundChannel));
             });

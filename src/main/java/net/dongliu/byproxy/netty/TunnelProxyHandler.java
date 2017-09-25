@@ -30,6 +30,7 @@ public class TunnelProxyHandler extends ChannelInboundHandlerAdapter {
         if (targetChannel.isActive()) {
             targetChannel.writeAndFlush(msg);
         } else {
+            logger.error("proxy channel inactive");
             ReferenceCountUtil.release(msg);
         }
     }

@@ -130,7 +130,7 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
                 .channel(NioSocketChannel.class)
                 .option(CONNECT_TIMEOUT_MILLIS, 10000)
                 .option(SO_KEEPALIVE, true)
-                .handler(new DirectClientHandler(promise));
+                .handler(new ChannelActiveAwareHandler(promise));
 
         bootstrap.connect(address.getHost(), address.getPort()).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {

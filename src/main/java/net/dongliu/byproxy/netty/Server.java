@@ -13,11 +13,14 @@ import net.dongliu.byproxy.netty.switcher.ProtocolSwitcher;
 import net.dongliu.byproxy.netty.switcher.SocksProxyProtocolMatcher;
 import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.ssl.SSLContextManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 
 public class Server {
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
     private ServerSetting setting;
     @Nullable
@@ -52,6 +55,7 @@ public class Server {
                 });
 
         bindFuture = bootstrap.bind().sync();
+        logger.info("proxy server start");
     }
 
 
@@ -70,6 +74,7 @@ public class Server {
         }
         master.shutdownGracefully();
         worker.shutdownGracefully();
+        logger.info("proxy server stop");
     }
 
     public static void main(String[] args) throws Exception {

@@ -67,7 +67,7 @@ public class HttpProtocolMatcher implements ProtocolMatcher {
         }
 
         String method = buf.toString(0, index, US_ASCII);
-        char firstURI = (char) (buf.getByte(firstURIIndex) & 0xff);
+        char firstURI = (char) (buf.getByte(firstURIIndex + buf.readerIndex()) & 0xff);
         if (!methods.contains(method)) {
             return DISMATCH;
         }

@@ -5,11 +5,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.concurrent.Promise;
 
-public class DirectClientHandler extends ChannelInboundHandlerAdapter {
+/**
+ * Used to notice channel is active
+ */
+public class ChannelActiveAwareHandler extends ChannelInboundHandlerAdapter {
 
     private final Promise<Channel> promise;
 
-    public DirectClientHandler(Promise<Channel> promise) {
+    public ChannelActiveAwareHandler(Promise<Channel> promise) {
         this.promise = promise;
     }
 
