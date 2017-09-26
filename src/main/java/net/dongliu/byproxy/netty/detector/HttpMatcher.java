@@ -109,7 +109,7 @@ public class HttpMatcher extends ProtocolMatcher {
                 break;
             case HTTP_PROXY:
                 pipeline.addLast(new HttpServerCodec());
-//                pipeline.addLast("", new HttpServerExpectContinueHandler());
+                pipeline.addLast("", new HttpServerExpectContinueHandler());
                 pipeline.addLast(new HttpProxyHandler(messageListener, proxyHandlerSupplier));
                 break;
             default:

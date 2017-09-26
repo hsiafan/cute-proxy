@@ -6,6 +6,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import io.netty.handler.codec.http.websocketx.WebSocket13FrameDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocket13FrameEncoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
@@ -81,6 +82,7 @@ public interface TcpProxyHandlerTraits {
     default void initPlainHandler(ChannelHandlerContext ctx, NetAddress address, Channel outboundChannel, boolean ssl) {
 
         ctx.pipeline().addLast(new HttpServerCodec());
+        ctx.pipeline().addLast("", new HttpServerExpectContinueHandler());
         ctx.pipeline().addLast("tcp-tunnel-handler", new ReplayHandler(outboundChannel));
 
         outboundChannel.pipeline().addLast(new HttpClientCodec());

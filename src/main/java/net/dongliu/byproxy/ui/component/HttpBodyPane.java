@@ -22,7 +22,6 @@ import net.dongliu.byproxy.store.BodyType;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.ui.beautifier.*;
 import net.dongliu.byproxy.utils.StringUtils;
-import org.apache.commons.io.FileUtils;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -95,7 +94,7 @@ public class HttpBodyPane extends BorderPane {
         charsetBox.setValue(body.getCharset());
         charsetBox.setManaged(storeType.isText());
         charsetBox.setVisible(storeType.isText());
-        sizeLabel.setText(FileUtils.byteCountToDisplaySize(body.size()));
+        sizeLabel.setText(StringUtils.humanReadableSize(body.size()));
 
         bodyTypeBox.setValue(storeType);
 

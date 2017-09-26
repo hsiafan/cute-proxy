@@ -9,8 +9,8 @@ import java.util.List;
 /**
  * @author Liu Dong
  */
-public class ShutdownHooks {
-    private static final Logger logger = LoggerFactory.getLogger(ShutdownHooks.class);
+public class ExitHooks {
+    private static final Logger logger = LoggerFactory.getLogger(ExitHooks.class);
     private static final List<Runnable> tasks = new ArrayList<>();
     private static boolean shutdown = false;
 

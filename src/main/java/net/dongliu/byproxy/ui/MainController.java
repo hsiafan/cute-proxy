@@ -12,7 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import net.dongliu.byproxy.Context;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.ShutdownHooks;
+import net.dongliu.byproxy.ExitHooks;
 import net.dongliu.byproxy.netty.Server;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
 import net.dongliu.byproxy.setting.ServerSetting;
@@ -109,6 +109,7 @@ public class MainController {
         stopProxyMenu.setDisable(true);
         new Thread(() -> {
             server.stop();
+            server = null;
             Platform.runLater(() -> {
                 startProxyButton.setDisable(false);
                 startProxyMenu.setDisable(false);
@@ -119,9 +120,10 @@ public class MainController {
 
     @FXML
     private void initialize() {
-        ShutdownHooks.registerTask(() -> {
+        ExitHooks.registerTask(() -> {
             if (server != null) {
                 server.stop();
+                server = null;
             }
         });
 

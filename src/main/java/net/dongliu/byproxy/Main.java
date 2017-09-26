@@ -23,10 +23,8 @@ public class Main extends Application {
         root.requestFocus();
 
         stage.setOnCloseRequest(e -> {
-            ShutdownHooks.shutdownAll();
+            ExitHooks.shutdownAll();
             Platform.exit();
-            //TODO: find a way to make netty close faster...
-//            System.exit(0);
         });
     }
 
