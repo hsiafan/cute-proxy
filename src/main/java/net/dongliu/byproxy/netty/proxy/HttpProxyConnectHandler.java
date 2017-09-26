@@ -5,6 +5,7 @@ import io.netty.channel.*;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.proxy.ProxyHandler;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
@@ -30,11 +32,15 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
 
     @Nullable
     private final SSLContextManager sslContextManager;
+    @Nullable
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
     public HttpProxyConnectHandler(@Nullable MessageListener messageListener,
-                                   @Nullable SSLContextManager sslContextManager) {
+                                   @Nullable SSLContextManager sslContextManager,
+                                   @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
+        this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override
@@ -83,5 +89,11 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
     @Override
     public SSLContextManager sslContextManager() {
         return sslContextManager;
+    }
+
+    @Nullable
+    @Override
+    public Supplier<ProxyHandler> proxyHandlerSupplier() {
+        return proxyHandlerSupplier;
     }
 }

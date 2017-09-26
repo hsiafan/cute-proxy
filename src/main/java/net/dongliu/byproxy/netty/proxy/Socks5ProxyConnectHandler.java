@@ -5,16 +5,20 @@ import io.netty.channel.*;
 import io.netty.handler.codec.socksx.v5.DefaultSocks5CommandResponse;
 import io.netty.handler.codec.socksx.v5.Socks5CommandRequest;
 import io.netty.handler.codec.socksx.v5.Socks5CommandStatus;
+import io.netty.handler.proxy.ProxyHandler;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
+import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.ssl.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+
+import java.util.function.Supplier;
 
 import static io.netty.handler.codec.socksx.v5.Socks5CommandStatus.FAILURE;
 
@@ -27,11 +31,15 @@ public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
 
     @Nullable
     private final SSLContextManager sslContextManager;
+    @Nullable
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
     public Socks5ProxyConnectHandler(@Nullable MessageListener messageListener,
-                                     @Nullable SSLContextManager sslContextManager) {
+                                     @Nullable SSLContextManager sslContextManager,
+                                     @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
+        this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override
@@ -83,5 +91,11 @@ public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
     @Override
     public SSLContextManager sslContextManager() {
         return sslContextManager;
+    }
+
+    @Nullable
+    @Override
+    public Supplier<ProxyHandler> proxyHandlerSupplier() {
+        return proxyHandlerSupplier;
     }
 }

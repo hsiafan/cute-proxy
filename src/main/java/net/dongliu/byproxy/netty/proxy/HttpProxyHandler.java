@@ -7,12 +7,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.proxy.ProxyHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
 import net.dongliu.byproxy.netty.interceptor.HttpInterceptor;
+import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import javax.annotation.Nullable;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.function.Supplier;
 
 import static io.netty.channel.ChannelOption.CONNECT_TIMEOUT_MILLIS;
 import static io.netty.channel.ChannelOption.SO_KEEPALIVE;
@@ -40,10 +43,14 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
     private final Queue<HttpContent> queue = new ArrayDeque<>();
 
     @Nullable
-    private MessageListener messageListener;
+    private final MessageListener messageListener;
+    @Nullable
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public HttpProxyHandler(@Nullable MessageListener messageListener) {
+    public HttpProxyHandler(@Nullable MessageListener messageListener,
+                            @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
+        this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override

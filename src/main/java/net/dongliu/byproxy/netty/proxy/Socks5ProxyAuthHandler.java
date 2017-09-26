@@ -5,6 +5,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.socksx.SocksMessage;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v5.*;
+import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
 import net.dongliu.byproxy.ssl.SSLContextManager;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMessage> {
     private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyAuthHandler.class);
@@ -20,11 +22,15 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
     private final MessageListener messageListener;
     @Nullable
     private final SSLContextManager sslContextManager;
+    @Nullable
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
     public Socks5ProxyAuthHandler(@Nullable MessageListener messageListener,
-                                  @Nullable SSLContextManager sslContextManager) {
+                                  @Nullable SSLContextManager sslContextManager,
+                                  @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
+        this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override
@@ -45,7 +51,8 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
         } else if (socksRequest instanceof Socks5CommandRequest) {
             Socks5CommandRequest socks5CmdRequest = (Socks5CommandRequest) socksRequest;
             if (socks5CmdRequest.type() == Socks5CommandType.CONNECT) {
-                ctx.pipeline().addLast("socks5-proxy-connector", new Socks5ProxyConnectHandler(messageListener, sslContextManager));
+                ctx.pipeline().addLast(new Socks5ProxyConnectHandler(messageListener, sslContextManager,
+                        proxyHandlerSupplier));
                 ctx.pipeline().remove(this);
                 ctx.fireChannelRead(socksRequest);
             } else {

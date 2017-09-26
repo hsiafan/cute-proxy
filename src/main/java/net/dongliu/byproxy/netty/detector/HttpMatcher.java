@@ -6,6 +6,8 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
+import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.proxy.HttpProxyConnectHandler;
@@ -17,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
@@ -39,11 +42,15 @@ public class HttpMatcher extends ProtocolMatcher {
     private final MessageListener messageListener;
     @Nullable
     private final SSLContextManager sslContextManager;
+    @Nullable
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
     public HttpMatcher(@Nullable MessageListener messageListener,
-                       @Nullable SSLContextManager sslContextManager) {
+                       @Nullable SSLContextManager sslContextManager,
+                       @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
+        this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override
@@ -89,20 +96,21 @@ public class HttpMatcher extends ProtocolMatcher {
     public void handlePipeline(ChannelPipeline pipeline) {
         switch (type) {
             case HTTP:
-                pipeline.addLast("http-server-codec", new HttpServerCodec());
-                pipeline.addLast("http-aggregator", new HttpObjectAggregator(65536));
-                pipeline.addLast("chunk-write-handler", new ChunkedWriteHandler());
-                pipeline.addLast("http-compressor", new HttpContentCompressor());
-                pipeline.addLast("http-request-handler", new HttpRequestHandler(sslContextManager));
+                pipeline.addLast(new HttpServerCodec());
+                pipeline.addLast(new HttpServerExpectContinueHandler());
+                pipeline.addLast(new HttpObjectAggregator(65536));
+                pipeline.addLast(new ChunkedWriteHandler());
+                pipeline.addLast(new HttpContentCompressor());
+                pipeline.addLast(new HttpRequestHandler(sslContextManager));
                 break;
             case CONNECT:
-                pipeline.addLast("http-server-codec", new HttpServerCodec());
-                pipeline.addLast("http-connector-proxy-handler", new HttpProxyConnectHandler(messageListener, sslContextManager));
+                pipeline.addLast(new HttpServerCodec());
+                pipeline.addLast(new HttpProxyConnectHandler(messageListener, sslContextManager, proxyHandlerSupplier));
                 break;
             case HTTP_PROXY:
-                pipeline.addLast("http-server-codec", new HttpServerCodec());
+                pipeline.addLast(new HttpServerCodec());
 //                pipeline.addLast("", new HttpServerExpectContinueHandler());
-                pipeline.addLast("http-proxy-handler", new HttpProxyHandler(messageListener));
+                pipeline.addLast(new HttpProxyHandler(messageListener, proxyHandlerSupplier));
                 break;
             default:
                 throw new RuntimeException("should not happen");

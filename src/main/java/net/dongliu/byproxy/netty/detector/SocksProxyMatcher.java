@@ -6,12 +6,15 @@ import io.netty.handler.codec.socksx.v4.Socks4ServerDecoder;
 import io.netty.handler.codec.socksx.v4.Socks4ServerEncoder;
 import io.netty.handler.codec.socksx.v5.Socks5InitialRequestDecoder;
 import io.netty.handler.codec.socksx.v5.Socks5ServerEncoder;
+import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.proxy.Socks4ProxyAuthHandler;
 import net.dongliu.byproxy.netty.proxy.Socks5ProxyAuthHandler;
+import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.ssl.SSLContextManager;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 /**
  * Matcher for socks4/socks5 proxy protocol
@@ -24,11 +27,15 @@ public class SocksProxyMatcher extends ProtocolMatcher {
     private final MessageListener messageListener;
     @Nullable
     private final SSLContextManager sslContextManager;
+    @Nullable
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
     public SocksProxyMatcher(@Nullable MessageListener messageListener,
-                             @Nullable SSLContextManager sslContextManager) {
+                             @Nullable SSLContextManager sslContextManager,
+                             Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
+        this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override
@@ -48,15 +55,15 @@ public class SocksProxyMatcher extends ProtocolMatcher {
     @Override
     public void handlePipeline(ChannelPipeline pipeline) {
         if (socksVersion == 4) {
-            pipeline.addLast("socks4-server-encoder", Socks4ServerEncoder.INSTANCE);
-            pipeline.addLast("socks4-server-decoder", new Socks4ServerDecoder());
-            pipeline.addLast("socks4-proxy-auth-handler", new Socks4ProxyAuthHandler(messageListener, sslContextManager));
+            pipeline.addLast(Socks4ServerEncoder.INSTANCE);
+            pipeline.addLast(new Socks4ServerDecoder());
+            pipeline.addLast(new Socks4ProxyAuthHandler(messageListener, sslContextManager, proxyHandlerSupplier));
             return;
         }
         if (socksVersion == 5) {
-            pipeline.addLast("socks5-server-encoder", Socks5ServerEncoder.DEFAULT);
-            pipeline.addLast("socks5-request-decoder", new Socks5InitialRequestDecoder());
-            pipeline.addLast("socks5-proxy-auth-handler", new Socks5ProxyAuthHandler(messageListener, sslContextManager));
+            pipeline.addLast(Socks5ServerEncoder.DEFAULT);
+            pipeline.addLast(new Socks5InitialRequestDecoder());
+            pipeline.addLast(new Socks5ProxyAuthHandler(messageListener, sslContextManager, proxyHandlerSupplier));
             return;
         }
         throw new RuntimeException("should not happen");

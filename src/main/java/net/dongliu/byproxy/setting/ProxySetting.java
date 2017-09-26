@@ -14,6 +14,10 @@ public class ProxySetting implements Serializable {
     private String password;
     private boolean use;
 
+    public static final String TYPE_SOCKS5 = "socks5";
+    public static final String TYPE_SOCKS4 = "socks4";
+    public static final String TYPE_HTTP = "http";
+
     public ProxySetting(String type, String host, int port, String user, String password, boolean use) {
         this.type = type;
         this.host = host;

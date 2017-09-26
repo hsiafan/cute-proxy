@@ -3,7 +3,7 @@ package net.dongliu.byproxy;
 import net.dongliu.byproxy.struct.*;
 
 /**
- * Listener to receive request data
+ * Listener to receive request data. The operation in the call back method must not block
  *
  * @author Liu Dong
  */

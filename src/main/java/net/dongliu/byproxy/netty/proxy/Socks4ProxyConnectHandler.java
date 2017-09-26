@@ -4,7 +4,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.handler.codec.socksx.v4.DefaultSocks4CommandResponse;
 import io.netty.handler.codec.socksx.v4.Socks4CommandRequest;
-import io.netty.handler.codec.socksx.v4.Socks4CommandStatus;
+import io.netty.handler.proxy.ProxyHandler;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 import static io.netty.handler.codec.socksx.v4.Socks4CommandStatus.REJECTED_OR_FAILED;
+import static io.netty.handler.codec.socksx.v4.Socks4CommandStatus.SUCCESS;
 
 public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks4CommandRequest>
         implements TcpProxyHandlerTraits {
@@ -27,11 +29,15 @@ public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
 
     @Nullable
     private final SSLContextManager sslContextManager;
+    @Nullable
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
     public Socks4ProxyConnectHandler(@Nullable MessageListener messageListener,
-                                     @Nullable SSLContextManager sslContextManager) {
+                                     @Nullable SSLContextManager sslContextManager,
+                                     @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
+        this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override
@@ -53,8 +59,7 @@ public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
                 NettyUtils.closeOnFlush(ctx.channel());
                 return;
             }
-            ChannelFuture responseFuture = ctx.channel().writeAndFlush(
-                    new DefaultSocks4CommandResponse(Socks4CommandStatus.SUCCESS));
+            ChannelFuture responseFuture = ctx.channel().writeAndFlush(new DefaultSocks4CommandResponse(SUCCESS));
 
             responseFuture.addListener((ChannelFutureListener) channelFuture -> {
                 ctx.pipeline().remove(Socks4ProxyConnectHandler.this);
@@ -80,5 +85,11 @@ public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
     @Override
     public SSLContextManager sslContextManager() {
         return sslContextManager;
+    }
+
+    @Nullable
+    @Override
+    public Supplier<ProxyHandler> proxyHandlerSupplier() {
+        return proxyHandlerSupplier;
     }
 }

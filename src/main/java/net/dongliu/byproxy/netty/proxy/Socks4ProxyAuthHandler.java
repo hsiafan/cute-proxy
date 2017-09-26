@@ -6,13 +6,16 @@ import io.netty.handler.codec.socksx.SocksMessage;
 import io.netty.handler.codec.socksx.SocksVersion;
 import io.netty.handler.codec.socksx.v4.Socks4CommandRequest;
 import io.netty.handler.codec.socksx.v4.Socks4CommandType;
+import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
+import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.ssl.SSLContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 public class Socks4ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMessage> {
     private static final Logger logger = LoggerFactory.getLogger(Socks4ProxyAuthHandler.class);
@@ -21,11 +24,15 @@ public class Socks4ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
     private final MessageListener messageListener;
     @Nullable
     private final SSLContextManager sslContextManager;
+    @Nullable
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
     public Socks4ProxyAuthHandler(@Nullable MessageListener messageListener,
-                                  @Nullable SSLContextManager sslContextManager) {
+                                  @Nullable SSLContextManager sslContextManager,
+                                  @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
+        this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override
@@ -37,7 +44,8 @@ public class Socks4ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
         }
         Socks4CommandRequest socksV4CmdRequest = (Socks4CommandRequest) socksRequest;
         if (socksV4CmdRequest.type() == Socks4CommandType.CONNECT) {
-            ctx.pipeline().addLast("socks4-proxy-connector", new Socks4ProxyConnectHandler(messageListener, sslContextManager));
+            ctx.pipeline().addLast(new Socks4ProxyConnectHandler(messageListener, sslContextManager,
+                    proxyHandlerSupplier));
             ctx.pipeline().remove(this);
             ctx.fireChannelRead(socksRequest);
         } else {

@@ -26,6 +26,7 @@ package net.dongliu.byproxy.ui.component;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -44,6 +45,8 @@ public class ProxySettingDialog extends MyDialog<ProxySetting> {
     private CheckBox useProxy;
     @FXML
     private RadioButton socks5Radio;
+    @FXML
+    private RadioButton socks4Radio;
     @FXML
     private RadioButton httpRadio;
     @FXML
@@ -99,14 +102,12 @@ public class ProxySettingDialog extends MyDialog<ProxySetting> {
         portFiled.setText(String.valueOf(proxySetting.getPort()));
         userField.setText(proxySetting.getUser());
         passwordField.setText(proxySetting.getPassword());
-//        proxyTypeGroup.selectToggle();
         String type = proxySetting.getType();
-        if (type.equals("socks5") || type.isEmpty()) {
-            socks5Radio.setSelected(true);
-        } else if (type.equals("http")) {
-            httpRadio.setSelected(true);
-        } else {
-            throw new RuntimeException("unknown proxy type: " + type);
+        ObservableList<Toggle> toggles = proxyTypeGroup.getToggles();
+        for (Toggle toggle : toggles) {
+            if (toggle.getUserData().equals(type)) {
+                toggle.setSelected(true);
+            }
         }
     }
 

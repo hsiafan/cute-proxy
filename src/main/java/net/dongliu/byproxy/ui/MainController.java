@@ -11,6 +11,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import net.dongliu.byproxy.Context;
+import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.ShutdownHooks;
 import net.dongliu.byproxy.netty.Server;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
@@ -77,7 +78,18 @@ public class MainController {
         try {
             server = new Server(context.getServerSetting());
             server.setSslContextManager(context.getSslContextManager());
-            server.setMessageListener(new UIMessageListener(catalogPane::addTreeItemMessage));
+            server.setProxySetting(context.getProxySetting());
+            server.setMessageListener(new MessageListener() {
+                @Override
+                public void onHttpRequest(HttpRoundTripMessage message) {
+                    Platform.runLater(() -> catalogPane.addTreeItemMessage(message));
+                }
+
+                @Override
+                public void onWebSocket(WebSocketMessage message) {
+                    Platform.runLater(() -> catalogPane.addTreeItemMessage(message));
+                }
+            });
             server.start();
         } catch (Throwable t) {
             logger.error("Start proxy failed", t);

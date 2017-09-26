@@ -1,10 +1,8 @@
 package net.dongliu.byproxy.netty.proxy;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpServerCodec;
@@ -12,6 +10,7 @@ import io.netty.handler.codec.http.websocketx.WebSocket13FrameDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocket13FrameEncoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameEncoder;
+import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
@@ -26,6 +25,7 @@ import net.dongliu.byproxy.utils.NetAddress;
 import javax.annotation.Nullable;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import java.util.function.Supplier;
 
 public interface TcpProxyHandlerTraits {
 
@@ -35,7 +35,16 @@ public interface TcpProxyHandlerTraits {
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
                 .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new ChannelActiveAwareHandler(promise));
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        Supplier<ProxyHandler> proxyHandlerSupplier = proxyHandlerSupplier();
+                        if (proxyHandlerSupplier != null) {
+                            ch.pipeline().addLast(proxyHandlerSupplier.get());
+                        }
+                        ch.pipeline().addLast(new ChannelActiveAwareHandler(promise));
+                    }
+                });
     }
 
     default void initTcpProxyHandlers(ChannelHandlerContext ctx, NetAddress address, Channel outboundChannel) {
@@ -92,4 +101,7 @@ public interface TcpProxyHandlerTraits {
 
     @Nullable
     SSLContextManager sslContextManager();
+
+    @Nullable
+    Supplier<ProxyHandler> proxyHandlerSupplier();
 }
