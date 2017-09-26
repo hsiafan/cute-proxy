@@ -26,7 +26,7 @@ public class Main extends Application {
             ShutdownHooks.shutdownAll();
             Platform.exit();
             //TODO: find a way to make netty close faster...
-            System.exit(0);
+//            System.exit(0);
         });
     }
 

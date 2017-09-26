@@ -28,7 +28,7 @@ public class ProxySetting implements Serializable {
     }
 
     public static ProxySetting getDefault() {
-        return new ProxySetting("socks5", "", 0, "", "", false);
+        return new ProxySetting(TYPE_SOCKS5, "", 0, "", "", false);
     }
 
     public String getType() {

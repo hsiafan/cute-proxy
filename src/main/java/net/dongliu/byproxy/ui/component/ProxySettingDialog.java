@@ -44,12 +44,6 @@ public class ProxySettingDialog extends MyDialog<ProxySetting> {
     @FXML
     private CheckBox useProxy;
     @FXML
-    private RadioButton socks5Radio;
-    @FXML
-    private RadioButton socks4Radio;
-    @FXML
-    private RadioButton httpRadio;
-    @FXML
     private TextField passwordField;
     @FXML
     private TextField userField;

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.byproxy.ui.component.ProxySettingDialog?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import net.dongliu.byproxy.ui.component.ProxySettingDialog?>
 <fx:root type="net.dongliu.byproxy.ui.component.ProxySettingDialog" xmlns:fx="http://javafx.com/fxml">
-    <title>Proxy Setting</title>
+    <title>External Proxy Setting</title>
     <dialogPane>
         <DialogPane>
             <content>
@@ -22,11 +22,9 @@
                     </fx:define>
                     <Label text="Proxy Type" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                     <HBox GridPane.columnIndex="1" GridPane.rowIndex="2" spacing="4">
-                        <RadioButton text="socks5" toggleGroup="$proxyTypeGroup" selected="true" fx:id="socks5Radio"
-                                     userData="socks5"/>
-                        <RadioButton text="socks4" toggleGroup="$proxyTypeGroup" selected="true" fx:id="socks4Radio"
-                                     userData="socks4"/>
-                        <RadioButton text="http" toggleGroup="$proxyTypeGroup" fx:id="httpRadio" userData="http"/>
+                        <RadioButton text="socks5" toggleGroup="$proxyTypeGroup" userData="socks5"/>
+                        <RadioButton text="socks4" toggleGroup="$proxyTypeGroup" userData="socks4"/>
+                        <RadioButton text="http" toggleGroup="$proxyTypeGroup" userData="http"/>
                     </HBox>
 
                     <Label text="Host" GridPane.columnIndex="0" GridPane.rowIndex="3"/>

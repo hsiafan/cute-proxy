@@ -12,6 +12,7 @@ import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
 import io.netty.handler.proxy.Socks5ProxyHandler;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.detector.HttpMatcher;
 import net.dongliu.byproxy.netty.detector.ProtocolDetector;
@@ -24,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
@@ -50,8 +52,9 @@ public class Server {
 
     public void start() throws Exception {
         ServerBootstrap bootstrap = new ServerBootstrap();
-        master = new NioEventLoopGroup(1);
-        worker = new NioEventLoopGroup();
+        master = new NioEventLoopGroup(1, new DefaultThreadFactory("netty-master"));
+        worker = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2,
+                new DefaultThreadFactory("netty-worker"));
         bootstrap.group(master, worker)
                 .channel(NioServerSocketChannel.class)
                 .localAddress(new InetSocketAddress(setting.getPort()))
@@ -116,10 +119,19 @@ public class Server {
         try {
             bindFuture.channel().close().sync();
         } catch (InterruptedException ignored) {
+            Thread.currentThread().interrupt();
         }
-        master.shutdownGracefully();
-        worker.shutdownGracefully();
-        logger.info("proxy server stop");
+        try {
+            master.shutdownGracefully(0, 0, TimeUnit.SECONDS).sync();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        try {
+            worker.shutdownGracefully(0, 0, TimeUnit.SECONDS).sync();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
     }
 
 }
