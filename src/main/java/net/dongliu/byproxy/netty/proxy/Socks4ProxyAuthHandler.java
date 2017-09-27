@@ -39,7 +39,7 @@ public class Socks4ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
     public void channelRead0(ChannelHandlerContext ctx, SocksMessage socksRequest) throws Exception {
         if (socksRequest.version() != SocksVersion.SOCKS4a) {
             logger.error("unexpected socks version: {}", socksRequest.version());
-            ctx.close();
+            NettyUtils.closeOnFlush(ctx.channel());
             return;
         }
         Socks4CommandRequest socksV4CmdRequest = (Socks4CommandRequest) socksRequest;
@@ -49,7 +49,7 @@ public class Socks4ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
             ctx.pipeline().remove(this);
             ctx.fireChannelRead(socksRequest);
         } else {
-            ctx.close();
+            NettyUtils.closeOnFlush(ctx.channel());
         }
     }
 

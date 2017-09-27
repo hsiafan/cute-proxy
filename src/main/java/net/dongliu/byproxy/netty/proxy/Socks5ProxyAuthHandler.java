@@ -36,7 +36,7 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
     @Override
     public void channelRead0(ChannelHandlerContext ctx, SocksMessage socksRequest) throws Exception {
         if (socksRequest.version() != SocksVersion.SOCKS5) {
-            ctx.close();
+            NettyUtils.closeOnFlush(ctx.channel());
             return;
         }
         if (socksRequest instanceof Socks5InitialRequest) {
@@ -56,11 +56,11 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
                 ctx.pipeline().remove(this);
                 ctx.fireChannelRead(socksRequest);
             } else {
-                ctx.close();
+                NettyUtils.closeOnFlush(ctx.channel());
             }
         } else {
             logger.error("unknown socks5 command: {}", socksRequest.getClass().getName());
-            ctx.close();
+            NettyUtils.closeOnFlush(ctx.channel());
         }
     }
 

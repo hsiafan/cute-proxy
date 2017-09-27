@@ -47,6 +47,6 @@ public class ReplayHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
         logger.error("{} to {} error occurred", ctx.channel().remoteAddress(), targetChannel.remoteAddress(), e);
-        ctx.close();
+        NettyUtils.closeOnFlush(ctx.channel());
     }
 }

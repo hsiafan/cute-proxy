@@ -8,6 +8,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.proxy.ProxyHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.detector.HttpMatcher;
@@ -57,6 +58,11 @@ public class Server {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
+                        int timeoutSeconds = setting.getTimeout();
+                        IdleStateHandler idleStateHandler = new IdleStateHandler(timeoutSeconds, timeoutSeconds,
+                                timeoutSeconds, TimeUnit.SECONDS);
+                        ch.pipeline().addLast(idleStateHandler);
+                        ch.pipeline().addLast(new CloseTimeoutChannelHandler());
                         ProtocolDetector protocolDetector = new ProtocolDetector(
                                 new SocksProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
                                 new HttpMatcher(messageListener, sslContextManager, proxyHandlerSupplier)

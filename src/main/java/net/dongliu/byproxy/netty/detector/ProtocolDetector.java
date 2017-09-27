@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.ByteToMessageDecoder.Cumulator;
+import net.dongliu.byproxy.netty.NettyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (!(msg instanceof ByteBuf)) {
             logger.error("unexpected message type for ProtocolDetector: {}", msg.getClass());
-            ctx.close();
+            NettyUtils.closeOnFlush(ctx.channel());
             return;
         }
         ByteBuf in = (ByteBuf) msg;
@@ -64,7 +65,7 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
         logger.error("unsupported protocol");
         buf.release();
         buf = null;
-        ctx.close();
+        NettyUtils.closeOnFlush(ctx.channel());
     }
 
     @Override
@@ -74,7 +75,7 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
             buf = null;
         }
         logger.error("", cause);
-        ctx.close();
+        NettyUtils.closeOnFlush(ctx.channel());
     }
 
 }
