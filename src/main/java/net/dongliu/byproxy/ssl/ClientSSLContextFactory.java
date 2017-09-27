@@ -6,13 +6,23 @@ import javax.net.ssl.X509TrustManager;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.function.Supplier;
 
-/**
- * @author Liu Dong
- */
-public class SSLUtils {
+public class ClientSSLContextFactory implements Supplier<SSLContext> {
 
-    public static SSLContext createClientSSlContext() {
+    private SSLContext context = createClientSSlContext();
+    private static ClientSSLContextFactory instance = new ClientSSLContextFactory();
+
+    public static ClientSSLContextFactory getInstance() {
+        return instance;
+    }
+
+    @Override
+    public SSLContext get() {
+        return context;
+    }
+
+    private static SSLContext createClientSSlContext() {
         TrustManager[] trustAllManagers = new TrustManager[]{
                 new X509TrustManager() {
                     public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {

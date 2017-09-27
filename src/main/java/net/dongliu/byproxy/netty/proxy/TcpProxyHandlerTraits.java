@@ -20,12 +20,11 @@ import net.dongliu.byproxy.netty.detector.AnyMatcher;
 import net.dongliu.byproxy.netty.detector.ProtocolDetector;
 import net.dongliu.byproxy.netty.detector.SSLMatcher;
 import net.dongliu.byproxy.netty.interceptor.HttpInterceptor;
+import net.dongliu.byproxy.ssl.ClientSSLContextFactory;
 import net.dongliu.byproxy.ssl.SSLContextManager;
-import net.dongliu.byproxy.ssl.SSLUtils;
 import net.dongliu.byproxy.utils.NetAddress;
 
 import javax.annotation.Nullable;
-import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import java.util.function.Supplier;
 
@@ -66,12 +65,12 @@ public interface TcpProxyHandlerTraits {
         ProtocolDetector protocolDetector = new ProtocolDetector(
                 new SSLMatcher().onMatched(p -> {
                     //TODO: create ssl context is slow, should execute in another executor?
-                    SSLContext sslContext = sslContextManager.createSSlContext(address.getHost());
-                    SSLEngine serverSSLEngine = sslContext.createSSLEngine();
+                    SSLEngine serverSSLEngine = sslContextManager.createSSlContext(address.getHost()).createSSLEngine();
                     serverSSLEngine.setUseClientMode(false);
                     p.addLast("ssl", new SslHandler(serverSSLEngine));
 
-                    SSLEngine sslEngine = SSLUtils.createClientSSlContext().createSSLEngine();
+                    SSLEngine sslEngine = ClientSSLContextFactory.getInstance().get()
+                            .createSSLEngine(address.getHost(), address.getPort()); // using SNI
                     sslEngine.setUseClientMode(true);
                     outboundChannel.pipeline().addLast(new SslHandler(sslEngine));
                     initPlainHandler(ctx, address, outboundChannel, true);

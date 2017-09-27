@@ -13,7 +13,7 @@ public class CloseTimeoutChannelHandler extends ChannelDuplexHandler {
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent e = (IdleStateEvent) evt;
-            logger.debug("connection timeout, close");
+            logger.info("connection timeout, close");
             ctx.channel().close();
         }
     }

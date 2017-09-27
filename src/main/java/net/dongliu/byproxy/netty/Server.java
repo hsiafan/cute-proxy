@@ -85,7 +85,7 @@ public class Server {
     }
 
     public void setProxySetting(ProxySetting proxySetting) {
-        if (proxySetting == null && !proxySetting.isUse()) {
+        if (proxySetting == null || !proxySetting.isUse()) {
             proxyHandlerSupplier = null;
             return;
         }

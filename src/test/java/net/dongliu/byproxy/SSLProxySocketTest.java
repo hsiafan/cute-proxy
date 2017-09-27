@@ -1,6 +1,6 @@
 package net.dongliu.byproxy;
 
-import net.dongliu.byproxy.ssl.SSLUtils;
+import net.dongliu.byproxy.ssl.ClientSSLContextFactory;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ public class SSLProxySocketTest {
         Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(proxyHost, 1080));
         Socket socket = new Socket(proxy);
         socket.connect(InetSocketAddress.createUnresolved(host, 443));
-        SSLContext clientSSlContext = SSLUtils.createClientSSlContext();
+        SSLContext clientSSlContext = ClientSSLContextFactory.getInstance().get();
         SSLSocketFactory factory = clientSSlContext.getSocketFactory();
         socket = factory.createSocket(socket, proxyHost, 1080, true);
 
