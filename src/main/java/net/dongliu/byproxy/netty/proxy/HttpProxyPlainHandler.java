@@ -1,10 +1,8 @@
 package net.dongliu.byproxy.netty.proxy;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.*;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.proxy.ProxyHandler;
@@ -12,9 +10,9 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
+import net.dongliu.byproxy.netty.NettySettings;
 import net.dongliu.byproxy.netty.NettyUtils;
 import net.dongliu.byproxy.netty.interceptor.HttpInterceptor;
-import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +29,10 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
- * Plain http proxy
+ * Plain http proxy for non-connect-tunnel proxy requests
  */
-public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(HttpProxyHandler.class);
+public class HttpProxyPlainHandler extends ChannelInboundHandlerAdapter {
+    private static final Logger logger = LoggerFactory.getLogger(HttpProxyPlainHandler.class);
 
     private final Bootstrap bootstrap = new Bootstrap();
     private Channel clientOutChannel;
@@ -47,8 +45,8 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
     @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public HttpProxyHandler(@Nullable MessageListener messageListener,
-                            @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public HttpProxyPlainHandler(@Nullable MessageListener messageListener,
+                                 @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
@@ -136,9 +134,18 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
         Promise<Channel> promise = ctx.executor().newPromise();
         bootstrap.group(ctx.channel().eventLoop())
                 .channel(NioSocketChannel.class)
-                .option(CONNECT_TIMEOUT_MILLIS, 10000)
+                .option(CONNECT_TIMEOUT_MILLIS, NettySettings.CONNECT_TIMEOUT)
                 .option(SO_KEEPALIVE, true)
-                .handler(new ChannelActiveAwareHandler(promise));
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        if (proxyHandlerSupplier != null) {
+                            ProxyHandler proxyHandler = proxyHandlerSupplier.get();
+                            ch.pipeline().addLast(proxyHandler);
+                        }
+                        ch.pipeline().addLast(new ChannelActiveAwareHandler(promise));
+                    }
+                });
 
         bootstrap.connect(address.getHost(), address.getPort()).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {

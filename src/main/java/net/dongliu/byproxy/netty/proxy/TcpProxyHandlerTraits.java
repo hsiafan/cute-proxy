@@ -15,6 +15,7 @@ import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
+import net.dongliu.byproxy.netty.NettySettings;
 import net.dongliu.byproxy.netty.detector.AnyMatcher;
 import net.dongliu.byproxy.netty.detector.ProtocolDetector;
 import net.dongliu.byproxy.netty.detector.SSLMatcher;
@@ -34,14 +35,15 @@ public interface TcpProxyHandlerTraits {
         return new Bootstrap()
                 .group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, NettySettings.CONNECT_TIMEOUT)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         Supplier<ProxyHandler> proxyHandlerSupplier = proxyHandlerSupplier();
                         if (proxyHandlerSupplier != null) {
-                            ch.pipeline().addLast(proxyHandlerSupplier.get());
+                            ProxyHandler proxyHandler = proxyHandlerSupplier.get();
+                            ch.pipeline().addLast(proxyHandler);
                         }
                         ch.pipeline().addLast(new ChannelActiveAwareHandler(promise));
                     }

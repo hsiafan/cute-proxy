@@ -1,6 +1,5 @@
 package net.dongliu.byproxy.netty;
 
-import com.google.common.base.Strings;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -8,10 +7,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.ProxyHandler;
-import io.netty.handler.proxy.Socks4ProxyHandler;
-import io.netty.handler.proxy.Socks5ProxyHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.detector.HttpMatcher;
@@ -87,32 +83,7 @@ public class Server {
             proxyHandlerSupplier = null;
             return;
         }
-        InetSocketAddress address = new InetSocketAddress(proxySetting.getHost(), proxySetting.getPort());
-        this.proxyHandlerSupplier = () -> {
-            switch (proxySetting.getType()) {
-                case ProxySetting.TYPE_HTTP:
-                    if (Strings.isNullOrEmpty(proxySetting.getUser())) {
-                        return new HttpProxyHandler(address);
-                    } else {
-                        return new HttpProxyHandler(address, proxySetting.getUser(), proxySetting.getPassword());
-                    }
-
-                case ProxySetting.TYPE_SOCKS5:
-                    if (Strings.isNullOrEmpty(proxySetting.getUser())) {
-                        return new Socks5ProxyHandler(address);
-                    } else {
-                        return new Socks5ProxyHandler(address, proxySetting.getUser(), proxySetting.getPassword());
-                    }
-                case ProxySetting.TYPE_SOCKS4:
-                    if (Strings.isNullOrEmpty(proxySetting.getUser())) {
-                        return new Socks4ProxyHandler(address);
-                    } else {
-                        return new Socks4ProxyHandler(address, proxySetting.getUser());
-                    }
-                default:
-                    throw new RuntimeException("unknown proxy type: " + proxySetting.getType());
-            }
-        };
+        this.proxyHandlerSupplier = new ProxyHandlerSupplier(proxySetting);
     }
 
     public void stop() {
