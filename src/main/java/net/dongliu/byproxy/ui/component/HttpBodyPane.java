@@ -1,8 +1,5 @@
 package net.dongliu.byproxy.ui.component;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.io.ByteStreams;
-import com.google.common.io.CharStreams;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -76,7 +73,7 @@ public class HttpBodyPane extends BorderPane {
         });
     }
 
-    private static final Map<BodyType, Beautifier> beautifiers = ImmutableMap.of(
+    private static final Map<BodyType, Beautifier> beautifiers = Map.of(
             BodyType.json, new JsonBeautifier(),
             BodyType.www_form, new FormEncodedBeautifier(),
             BodyType.xml, new XMLBeautifier(),
@@ -120,7 +117,13 @@ public class HttpBodyPane extends BorderPane {
             String text;
             try (InputStream input = body.getDecodedInputStream();
                  Reader reader = new InputStreamReader(input, body.getCharset())) {
-                text = CharStreams.toString(reader);
+                StringBuilder sb = new StringBuilder();
+                char[] buffer = new char[4 * 1024];
+                int read;
+                while ((read = reader.read(buffer)) != -1) {
+                    sb.append(buffer, 0, read);
+                }
+                text = sb.toString();
             }
 
             // beautify
@@ -167,7 +170,7 @@ public class HttpBodyPane extends BorderPane {
         }
         try (InputStream in = body.getDecodedInputStream();
              OutputStream out = new FileOutputStream(file)) {
-            ByteStreams.copy(in, out);
+            in.transferTo(out);
         }
         UIUtils.showMessageDialog("Export Finished!");
     }

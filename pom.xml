@@ -10,8 +10,9 @@
     <version>0.7.2</version>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>9</maven.compiler.source>
+        <maven.compiler.target>9</maven.compiler.target>
+        <maven.compiler.release>9</maven.compiler.release>
         <netty.version>4.1.15.Final</netty.version>
         <slf4j.version>1.7.21</slf4j.version>
         <bouncycastle.version>1.55</bouncycastle.version>
@@ -19,11 +20,6 @@
 
     <dependencies>
         <!-- common libs -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>22.0</version>
-        </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>

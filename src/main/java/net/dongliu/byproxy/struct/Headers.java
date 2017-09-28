@@ -1,13 +1,11 @@
 package net.dongliu.byproxy.struct;
 
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
 import java.util.List;
+import java.util.StringJoiner;
 
 import static java.util.stream.Collectors.*;
 
@@ -28,10 +26,9 @@ public abstract class Headers implements Serializable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("Headers(");
-        Joiner.on(",").appendTo(sb, Lists.transform(headers, Header::raw));
-        sb.append(")");
-        return sb.toString();
+        StringJoiner joiner = new StringJoiner(",", "Headers(", ")");
+        headers.stream().map(Header::raw).forEach(joiner::add);
+        return joiner.toString();
     }
 
     /**

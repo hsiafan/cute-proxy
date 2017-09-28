@@ -1,6 +1,7 @@
 package net.dongliu.byproxy.struct;
 
-import jdk.nashorn.internal.ir.annotations.Immutable;
+
+import javax.annotation.concurrent.Immutable;
 
 /**
  * Parameter

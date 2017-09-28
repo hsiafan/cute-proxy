@@ -1,8 +1,5 @@
 package net.dongliu.byproxy.netty.web;
 
-import com.google.common.io.ByteStreams;
-import com.google.common.io.Closeables;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -38,12 +35,10 @@ public class ResourceLoader {
 
     public CompletableFuture<byte[]> loadResource(InputStream input) {
         return CompletableFuture.supplyAsync(() -> {
-            try {
-                return ByteStreams.toByteArray(input);
+            try (input) {
+                return input.readAllBytes();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
-            } finally {
-                Closeables.closeQuietly(input);
             }
         }, resourceLoaderExecutor);
     }

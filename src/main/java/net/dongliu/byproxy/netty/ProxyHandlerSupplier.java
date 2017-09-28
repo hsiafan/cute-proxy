@@ -1,6 +1,5 @@
 package net.dongliu.byproxy.netty;
 
-import com.google.common.base.Strings;
 import io.netty.handler.proxy.HttpProxyHandler;
 import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.proxy.Socks4ProxyHandler;
@@ -34,20 +33,20 @@ public class ProxyHandlerSupplier implements Supplier<ProxyHandler> {
     public ProxyHandler newProxyHandler() {
         switch (proxySetting.getType()) {
             case ProxySetting.TYPE_HTTP:
-                if (Strings.isNullOrEmpty(proxySetting.getUser())) {
+                if (proxySetting.getUser().isEmpty()) {
                     return new HttpProxyHandler(address);
                 } else {
                     return new HttpProxyHandler(address, proxySetting.getUser(), proxySetting.getPassword());
                 }
 
             case ProxySetting.TYPE_SOCKS5:
-                if (Strings.isNullOrEmpty(proxySetting.getUser())) {
+                if (proxySetting.getUser().isEmpty()) {
                     return new Socks5ProxyHandler(address);
                 } else {
                     return new Socks5ProxyHandler(address, proxySetting.getUser(), proxySetting.getPassword());
                 }
             case ProxySetting.TYPE_SOCKS4:
-                if (Strings.isNullOrEmpty(proxySetting.getUser())) {
+                if (proxySetting.getUser().isEmpty()) {
                     return new Socks4ProxyHandler(address);
                 } else {
                     return new Socks4ProxyHandler(address, proxySetting.getUser());

@@ -1,11 +1,10 @@
 package net.dongliu.byproxy.struct;
 
-import com.google.common.base.Strings;
-
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
+import java.util.Objects;
 
 public class CookieUtils {
 
@@ -54,7 +53,7 @@ public class CookieUtils {
             }
         }
 
-        return new Cookie(Strings.nullToEmpty(domain), Strings.nullToEmpty(path),
+        return new Cookie(Objects.requireNonNullElse(domain, ""), Objects.requireNonNullElse(path, ""),
                 nameValue.getKey(), nameValue.getValue(), expiry, secure);
     }
 

@@ -1,14 +1,12 @@
 package net.dongliu.byproxy.struct;
 
-import com.google.common.collect.Lists;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Http request headers
@@ -38,7 +36,7 @@ public class RequestHeaders extends Headers implements Serializable {
     public List<String> toRawLines() {
         List<String> rawLines = new ArrayList<>(getHeaders().size() + 1);
         rawLines.add(requestLine.raw());
-        rawLines.addAll(Lists.transform(getHeaders(), Header::raw));
+        getHeaders().stream().map(Header::raw).forEach(rawLines::add);
         return rawLines;
     }
 

@@ -1,8 +1,6 @@
 package net.dongliu.byproxy.struct;
 
-import com.google.common.collect.Lists;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-
+import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +34,7 @@ public class ResponseHeaders extends Headers implements Serializable {
     public List<String> toRawLines() {
         List<String> rawLines = new ArrayList<>(getHeaders().size() + 1);
         rawLines.add(statusLine.raw());
-        rawLines.addAll(Lists.transform(getHeaders(), Header::raw));
+        getHeaders().stream().map(Header::raw).forEach(rawLines::add);
         return rawLines;
     }
 

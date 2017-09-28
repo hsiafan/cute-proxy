@@ -1,6 +1,5 @@
 package net.dongliu.byproxy.store;
 
-import com.google.common.io.ByteStreams;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -26,7 +25,7 @@ public class BodyTest {
         }
         body.finish();
         InputStream inputStream = body.getDecodedInputStream();
-        byte[] bytes = ByteStreams.toByteArray(inputStream);
+        byte[] bytes = inputStream.readAllBytes();
         assertEquals(520 * 1024, bytes.length);
     }
 

@@ -1,6 +1,5 @@
 package net.dongliu.byproxy.netty.web;
 
-import com.google.common.base.Throwables;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.*;
@@ -36,7 +35,7 @@ class WebResponse {
 
     public static WebResponse fromThrowable(Throwable e) {
         return new WebResponse(INTERNAL_SERVER_ERROR, "text/plain; charset=utf-8",
-                Throwables.getStackTraceAsString(e).getBytes(UTF_8));
+                e.getMessage().getBytes(UTF_8));
     }
 
     public HttpResponseStatus getStatus() {

@@ -1,8 +1,5 @@
 package net.dongliu.byproxy.store;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Strings;
-import com.google.common.io.ByteStreams;
 import net.dongliu.byproxy.struct.ContentType;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.z.ZCompressorInputStream;
@@ -18,6 +15,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
@@ -46,9 +44,9 @@ public class Body implements Serializable {
 
     public Body(@Nullable BodyType type, @Nullable Charset charset,
                 @Nullable String contentEncoding) {
-        this.type = MoreObjects.firstNonNull(type, BodyType.unknown);
-        this.charset = MoreObjects.firstNonNull(charset, StandardCharsets.UTF_8);
-        this.contentEncoding = Strings.nullToEmpty(contentEncoding);
+        this.type = Objects.requireNonNullElse(type, BodyType.unknown);
+        this.charset = Objects.requireNonNullElse(charset, StandardCharsets.UTF_8);
+        this.contentEncoding = Objects.requireNonNullElse(contentEncoding, "");
         this.chunkList = new ArrayList<>();
     }
 
@@ -178,7 +176,7 @@ public class Body implements Serializable {
         if (finished) {
             out.writeLong(size);
             try (InputStream in = getInputStream()) {
-                ByteStreams.copy(in, out);
+                in.transferTo(out);
             }
         }
     }
