@@ -15,9 +15,9 @@ import java.util.List;
  *
  * @author Liu Dong
  */
-public class NetUtils {
+public class Networks {
 
-    private static Logger logger = LoggerFactory.getLogger(NetUtils.class);
+    private static Logger logger = LoggerFactory.getLogger(Networks.class);
 
     public static final int HOST_TYPE_IPV6 = 0;
     public static final int HOST_TYPE_IPV4 = 1;

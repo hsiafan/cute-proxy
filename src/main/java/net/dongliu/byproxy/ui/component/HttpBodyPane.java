@@ -18,7 +18,8 @@ import net.dongliu.byproxy.store.Body;
 import net.dongliu.byproxy.store.BodyType;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.ui.beautifier.*;
-import net.dongliu.byproxy.utils.StringUtils;
+import net.dongliu.byproxy.utils.Readers;
+import net.dongliu.byproxy.utils.Strings;
 
 import javax.annotation.Nullable;
 import java.io.*;
@@ -91,7 +92,7 @@ public class HttpBodyPane extends BorderPane {
         charsetBox.setValue(body.getCharset());
         charsetBox.setManaged(storeType.isText());
         charsetBox.setVisible(storeType.isText());
-        sizeLabel.setText(StringUtils.humanReadableSize(body.size()));
+        sizeLabel.setText(Strings.humanReadableSize(body.size()));
 
         bodyTypeBox.setValue(storeType);
 
@@ -117,13 +118,7 @@ public class HttpBodyPane extends BorderPane {
             String text;
             try (InputStream input = body.getDecodedInputStream();
                  Reader reader = new InputStreamReader(input, body.getCharset())) {
-                StringBuilder sb = new StringBuilder();
-                char[] buffer = new char[4 * 1024];
-                int read;
-                while ((read = reader.read(buffer)) != -1) {
-                    sb.append(buffer, 0, read);
-                }
-                text = sb.toString();
+                text = Readers.readAll(reader);
             }
 
             // beautify
@@ -177,11 +172,11 @@ public class HttpBodyPane extends BorderPane {
 
 
     private static String suggestFileName(String url, BodyType type) {
-        url = StringUtils.before(url, "?");
-        String fileName = StringUtils.afterLast(url, "/");
+        url = Strings.before(url, "?");
+        String fileName = Strings.afterLast(url, "/");
         if (fileName.isEmpty()) {
-            fileName = StringUtils.beforeLast(url, "/");
-            fileName = StringUtils.afterLast(fileName, "/");
+            fileName = Strings.beforeLast(url, "/");
+            fileName = Strings.afterLast(fileName, "/");
             fileName = fileName.replace(".", "_");
         }
         if (!fileName.contains(".")) {

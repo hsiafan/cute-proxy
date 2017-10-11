@@ -1,7 +1,7 @@
 package net.dongliu.byproxy.ssl;
 
 
-import net.dongliu.byproxy.utils.NetUtils;
+import net.dongliu.byproxy.utils.Networks;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -136,8 +136,8 @@ public class AppKeyStoreGenerator {
         ExtensionsGenerator extensionsGenerator = new ExtensionsGenerator();
         extensionsGenerator.addExtension(Extension.subjectAlternativeName, false, () -> {
             ASN1EncodableVector nameVector = new ASN1EncodableVector();
-            int hostType = NetUtils.getHostType(host);
-            if (hostType == NetUtils.HOST_TYPE_IPV4 || hostType == NetUtils.HOST_TYPE_IPV6) {
+            int hostType = Networks.getHostType(host);
+            if (hostType == Networks.HOST_TYPE_IPV4 || hostType == Networks.HOST_TYPE_IPV6) {
                 nameVector.add(new GeneralName(GeneralName.iPAddress, host));
             } else {
                 nameVector.add(new GeneralName(GeneralName.dNSName, host));

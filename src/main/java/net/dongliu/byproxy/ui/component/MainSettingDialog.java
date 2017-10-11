@@ -9,9 +9,9 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
 import net.dongliu.byproxy.setting.ServerSetting;
-import net.dongliu.byproxy.utils.NetUtils;
+import net.dongliu.byproxy.utils.Networks;
 import net.dongliu.byproxy.utils.NetworkInfo;
-import net.dongliu.byproxy.utils.StringUtils;
+import net.dongliu.byproxy.utils.Strings;
 
 import java.io.IOException;
 import java.util.List;
@@ -51,7 +51,7 @@ public class MainSettingDialog extends MyDialog<ServerSetting> {
 
     @FXML
     private void initialize() {
-        List<NetworkInfo> networkInfos = NetUtils.getNetworkInfoList();
+        List<NetworkInfo> networkInfos = Networks.getNetworkInfoList();
         hostBox.getItems().add(new NetworkInfo("all network interface", ""));
         hostBox.getItems().addAll(networkInfos);
         hostBox.setConverter(new StringConverter<NetworkInfo>() {
@@ -89,8 +89,8 @@ public class MainSettingDialog extends MyDialog<ServerSetting> {
     public ServerSetting getModel() {
         NetworkInfo networkInfo = hostBox.getSelectionModel().getSelectedItem();
         return new ServerSetting(networkInfo.getIp(),
-                StringUtils.toInt(portFiled.getText()),
-                StringUtils.toInt(timeoutField.getText()));
+                Strings.toInt(portFiled.getText()),
+                Strings.toInt(timeoutField.getText()));
     }
 
 }

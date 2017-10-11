@@ -32,7 +32,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.*;
 import net.dongliu.byproxy.setting.ProxySetting;
-import net.dongliu.byproxy.utils.StringUtils;
+import net.dongliu.byproxy.utils.Strings;
 
 import java.io.IOException;
 
@@ -108,7 +108,7 @@ public class ProxySettingDialog extends MyDialog<ProxySetting> {
     public ProxySetting getModel() {
         boolean use = useProxy.isSelected();
         String host = hostField.getText();
-        int port = StringUtils.toInt(portFiled.getText());
+        int port = Strings.toInt(portFiled.getText());
         String user = userField.getText();
         String password = passwordField.getText();
         RadioButton radioButton = (RadioButton) proxyTypeGroup.getSelectedToggle();

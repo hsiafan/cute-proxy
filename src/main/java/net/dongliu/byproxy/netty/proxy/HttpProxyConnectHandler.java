@@ -12,7 +12,7 @@ import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
 import net.dongliu.byproxy.ssl.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
-import net.dongliu.byproxy.utils.NetUtils;
+import net.dongliu.byproxy.utils.Networks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
         Promise<Channel> promise = ctx.executor().newPromise();
         Bootstrap bootstrap = initBootStrap(promise, ctx.channel().eventLoop());
 
-        NetAddress address = NetUtils.parseAddress(request.uri());
+        NetAddress address = Networks.parseAddress(request.uri());
         bootstrap.connect(address.getHost(), address.getPort()).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {
                 ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, BAD_GATEWAY));

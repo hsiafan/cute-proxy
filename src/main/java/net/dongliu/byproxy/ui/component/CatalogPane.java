@@ -19,7 +19,7 @@ import net.dongliu.byproxy.struct.Message;
 import net.dongliu.byproxy.ui.ItemValue;
 import net.dongliu.byproxy.ui.TreeNodeValue;
 import net.dongliu.byproxy.ui.UIUtils;
-import net.dongliu.byproxy.utils.NetUtils;
+import net.dongliu.byproxy.utils.Networks;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -112,7 +112,7 @@ public class CatalogPane extends BorderPane {
     public void addTreeItemMessage(Message message) {
         messageList.getItems().add(message);
         TreeItem<ItemValue> root = messageTree.getRoot();
-        String host = NetUtils.genericMultiCDNS(message.getHost());
+        String host = Networks.genericMultiCDNS(message.getHost());
 
 
         for (TreeItem<ItemValue> item : root.getChildren()) {
