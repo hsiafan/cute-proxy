@@ -1,7 +1,7 @@
 package net.dongliu.byproxy.ui.task;
 
 import net.dongliu.byproxy.Context;
-import net.dongliu.byproxy.ssl.CAKeyStoreGenerator;
+import net.dongliu.byproxy.ssl.RootKeyStoreGenerator;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
 import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.setting.ProxySetting;
@@ -63,8 +63,8 @@ public class InitContextTask extends Task<Void> {
                 logger.info("Generate new key store file");
                 updateMessage("Generating new key store...");
                 // generate one new key store
-                CAKeyStoreGenerator generator = new CAKeyStoreGenerator();
-                generator.generate(keyStorePassword, Settings.rootCertificateValidates);
+                RootKeyStoreGenerator generator = new RootKeyStoreGenerator();
+                generator.generate(keyStorePassword, Settings.rootCertValidityDays);
                 byte[] keyStoreData = generator.getKeyStoreData();
                 Files.write(keyStorePath, keyStoreData);
             } else {

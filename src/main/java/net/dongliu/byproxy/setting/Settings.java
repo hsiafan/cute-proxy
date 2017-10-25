@@ -11,7 +11,11 @@ import java.nio.file.Paths;
  */
 public class Settings {
 
-    public static final int rootCertificateValidates = 3650;
+    public static final int rootCertValidityDays = 3650;
+
+    public static final int certValidityDays = 10;
+    public static final char[] rootKeyStorePassword = "123456".toCharArray();
+    public static final char[] keyStorePassword = "123456".toCharArray();
 
     private static final Path parentPath = Paths.get(System.getProperty("user.home"), ".ByProxy");
 
@@ -24,5 +28,6 @@ public class Settings {
             }
         }
         return parentPath;
+
     }
 }

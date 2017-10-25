@@ -2,6 +2,9 @@ package net.dongliu.byproxy.utils;
 
 import java.util.Objects;
 
+/**
+ * Simple address
+ */
 public class NetAddress {
     private String host;
     private int port;

@@ -31,9 +31,9 @@ import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_localKe
  * JDK do not have an open api for this, although Open JDK/SUN JDK does have a internal api can work.
  * So we use  Bouncy Castle here.
  */
-public class AppKeyStoreGenerator {
-    private static Logger logger = LoggerFactory.getLogger(AppKeyStoreGenerator.class);
-    private final X509Certificate caCertificate;
+public class KeyStoreGenerator {
+    private static Logger logger = LoggerFactory.getLogger(KeyStoreGenerator.class);
+    private final X509Certificate rootCert;
     private final RSAPrivateCrtKeyParameters privateKeyParameters;
 
     private final SecureRandom secureRandom;
@@ -45,28 +45,28 @@ public class AppKeyStoreGenerator {
     }
 
 
-    public AppKeyStoreGenerator(String caKeyStorePath, char[] caKeyStorePassword) throws Exception {
+    public KeyStoreGenerator(String caKeyStorePath, char[] caKeyStorePassword) throws Exception {
 
         logger.debug("Loading CA certificate/private key from file {}", caKeyStorePath);
-        KeyStore caKeyStore = KeyStore.getInstance("PKCS12");
+        KeyStore rootKeyStore = KeyStore.getInstance("PKCS12");
         try (InputStream input = new FileInputStream(caKeyStorePath)) {
-            caKeyStore.load(input, caKeyStorePassword);
+            rootKeyStore.load(input, caKeyStorePassword);
         }
 
-        Enumeration<String> aliases = caKeyStore.aliases();
+        Enumeration<String> aliases = rootKeyStore.aliases();
         String alias = aliases.nextElement();
         logger.debug("Loading CA certificate/private by alias {}", alias);
 
-        Key key = caKeyStore.getKey(alias, caKeyStorePassword);
+        Key key = rootKeyStore.getKey(alias, caKeyStorePassword);
         Objects.requireNonNull(key, "Specified key of the KeyStore not found!");
         RSAPrivateCrtKey privateCrtKey = (RSAPrivateCrtKey) key;
         privateKeyParameters = getPrivateKeyParameters(privateCrtKey);
         // and get the certificate
 
-        caCertificate = (X509Certificate) caKeyStore.getCertificate(alias);
-        Objects.requireNonNull(caCertificate, "Specified certificate of the KeyStore not found!");
-        logger.debug("Successfully loaded CA key and certificate. CA DN is {}", caCertificate.getSubjectDN().getName());
-        caCertificate.verify(caCertificate.getPublicKey());
+        rootCert = (X509Certificate) rootKeyStore.getCertificate(alias);
+        Objects.requireNonNull(rootCert, "Specified certificate of the KeyStore not found!");
+        logger.debug("Successfully loaded CA key and certificate. CA DN is {}", rootCert.getSubjectDN().getName());
+        rootCert.verify(rootCert.getPublicKey());
         logger.debug("Successfully verified CA certificate with its own public key.");
 
         secureRandom = new SecureRandom();
@@ -74,8 +74,8 @@ public class AppKeyStoreGenerator {
         jcaX509ExtensionUtils = new JcaX509ExtensionUtils();
     }
 
-    public BigInteger getCACertSerialNumber() {
-        return caCertificate.getSerialNumber();
+    public BigInteger getRootCertSN() {
+        return rootCert.getSerialNumber();
     }
 
     /**
@@ -83,8 +83,8 @@ public class AppKeyStoreGenerator {
      *
      * @param pem if false, return crt data; if true, return pem encoded data
      */
-    public byte[] exportCACertificate(boolean pem) throws CertificateEncodingException {
-        byte[] data = caCertificate.getEncoded();
+    public byte[] exportRootCert(boolean pem) throws CertificateEncodingException {
+        byte[] data = rootCert.getEncoded();
         if (!pem) {
             return data;
         }
@@ -102,7 +102,13 @@ public class AppKeyStoreGenerator {
                 privateCrtKey.getCrtCoefficient());
     }
 
-    public KeyStore generateKeyStore(String host, int validityDays, char[] password) throws Exception {
+    /**
+     * Generate a new KeyStore contains the certificate for the domain signed by root certificate
+     * look at RFC 2818
+     *
+     * @throws Exception
+     */
+    public KeyStore generateKeyStore(String host, int validityDays, char[] keyStorePassword) throws Exception {
         logger.debug("Generating certificate for host {}", host);
         // generate the key pair for the new certificate
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -113,9 +119,10 @@ public class AppKeyStoreGenerator {
 
         Calendar calendar = Calendar.getInstance();
         // in case client time behind server time
-        calendar.add(Calendar.DAY_OF_YEAR, -100);
+        calendar.add(Calendar.DAY_OF_YEAR, -1);
         Date startDate = calendar.getTime();
-        calendar.add(Calendar.DAY_OF_YEAR, validityDays + 100);
+        calendar.setTime(new Date());
+        calendar.add(Calendar.DAY_OF_YEAR, validityDays);
         Date expireDate = calendar.getTime();
 
         String appDName = "CN=ClearTheSky, OU=TianCao, O=TianCao, L=Beijing, ST=Beijing, C=CN";
@@ -123,14 +130,14 @@ public class AppKeyStoreGenerator {
         ASN1ObjectIdentifier sigOID = PKCSObjectIdentifiers.sha256WithRSAEncryption;
         AlgorithmIdentifier sigAlgId = new AlgorithmIdentifier(sigOID, DERNull.INSTANCE);
 
-        V3TBSCertificateGenerator certificateGenerator = new V3TBSCertificateGenerator();
-        certificateGenerator.setSerialNumber(new ASN1Integer(random.nextLong() + System.currentTimeMillis()));
-        certificateGenerator.setIssuer(getSubject(caCertificate));
-        certificateGenerator.setSubject(subject);
-        certificateGenerator.setSignature(sigAlgId);
-        certificateGenerator.setSubjectPublicKeyInfo(getPublicKeyInfo(publicKey));
-        certificateGenerator.setStartDate(new Time(startDate));
-        certificateGenerator.setEndDate(new Time(expireDate));
+        V3TBSCertificateGenerator generator = new V3TBSCertificateGenerator();
+        generator.setSerialNumber(new ASN1Integer(random.nextLong() + System.currentTimeMillis()));
+        generator.setIssuer(getSubject(rootCert));
+        generator.setSubject(subject);
+        generator.setSignature(sigAlgId);
+        generator.setSubjectPublicKeyInfo(getPublicKeyInfo(publicKey));
+        generator.setStartDate(new Time(startDate));
+        generator.setEndDate(new Time(expireDate));
 
         // Set SubjectAlternativeName
         ExtensionsGenerator extensionsGenerator = new ExtensionsGenerator();
@@ -145,9 +152,9 @@ public class AppKeyStoreGenerator {
             return GeneralNames.getInstance(new DERSequence(nameVector)).toASN1Primitive();
         });
         Extensions x509Extensions = extensionsGenerator.generate();
-        certificateGenerator.setExtensions(x509Extensions);
+        generator.setExtensions(x509Extensions);
 
-        TBSCertificate tbsCertificateStructure = certificateGenerator.generateTBSCertificate();
+        TBSCertificate tbsCertificateStructure = generator.generateTBSCertificate();
         byte[] data = toBinaryData(tbsCertificateStructure);
         byte[] signatureData = signData(sigOID, data, privateKeyParameters, secureRandom);
 
@@ -160,15 +167,15 @@ public class AppKeyStoreGenerator {
         Certificate certificate = Certificate.getInstance(derSequence);
         X509CertificateObject clientCertificate = new X509CertificateObject(certificate);
         logger.debug("Verifying certificate for correct signature with CA public key");
-        clientCertificate.verify(caCertificate.getPublicKey());
+        clientCertificate.verify(rootCert.getPublicKey());
         clientCertificate.setBagAttribute(pkcs_9_at_friendlyName, new DERBMPString("Certificate for ByProxy App"));
         clientCertificate.setBagAttribute(pkcs_9_at_localKeyId,
                 jcaX509ExtensionUtils.createSubjectKeyIdentifier(publicKey));
         KeyStore store = KeyStore.getInstance("PKCS12");
         store.load(null, null);
 
-        X509Certificate[] chain = new X509Certificate[]{clientCertificate, caCertificate};
-        store.setKeyEntry("ByProxy app", privateKey, password, chain);
+        X509Certificate[] chain = new X509Certificate[]{clientCertificate, rootCert};
+        store.setKeyEntry("ByProxy app", privateKey, keyStorePassword, chain);
         return store;
     }
 

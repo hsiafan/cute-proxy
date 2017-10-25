@@ -1,5 +1,6 @@
 package net.dongliu.byproxy.ssl;
 
+import net.dongliu.byproxy.setting.Settings;
 import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1Sequence;
@@ -29,12 +30,13 @@ import java.util.Date;
  *
  * @author Liu Dong
  */
-public class CAKeyStoreGenerator {
+public class RootKeyStoreGenerator {
 
     // key store data of p#12 format
     private byte[] keyStoreData;
     // X.509 Certificate in der format
 
+    // Generate a root ca key store
     public void generate(char[] password, int validityDays) throws Exception {
         SecureRandom secureRandom = new SecureRandom();
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -48,7 +50,7 @@ public class CAKeyStoreGenerator {
 
         Security.addProvider(new BouncyCastleProvider());
 
-        String appDName = "CN=Love ISummer, OU=TianCao, O=TianCao, L=Beijing, ST=Beijing, C=CN";
+        String appDName = "CN=ByProxy, OU=ByProxy, O=ByProxy, L=Beijing, ST=Beijing, C=CN";
         X500Name issuerName = new X500Name(appDName);
         X500Name subjectName = new X500Name(appDName);
         Calendar calendar = Calendar.getInstance();
@@ -87,7 +89,7 @@ public class CAKeyStoreGenerator {
         X509Certificate[] chain = new X509Certificate[]{cert};
 
         keyStore.setEntry("ByProxy", new KeyStore.PrivateKeyEntry(privateKey, chain),
-                new KeyStore.PasswordProtection("123456".toCharArray()));
+                new KeyStore.PasswordProtection(Settings.rootKeyStorePassword));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             keyStore.store(bos, password);
             this.keyStoreData = bos.toByteArray();

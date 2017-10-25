@@ -10,7 +10,10 @@ import static org.junit.Assert.assertEquals;
  */
 public class NetworksTest {
     @Test
-    public void getAddresses() throws Exception {
+    public void wildcardHost() throws Exception {
+        assertEquals("www.baidu.com", Networks.wildcardHost("www.baidu.com"));
+        assertEquals("127.0.0.1", Networks.wildcardHost("127.0.0.1"));
+        assertEquals("*.p.baidu.com", Networks.wildcardHost("t.p.baidu.com"));
 
     }
 

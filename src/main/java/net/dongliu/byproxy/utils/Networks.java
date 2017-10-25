@@ -46,6 +46,23 @@ public class Networks {
         return type == HOST_TYPE_DOMAIN;
     }
 
+    /**
+     * Generate wildcard host for long domains
+     */
+    public static String wildcardHost(String host) {
+        if (!isDomain(host)) {
+            return host;
+        }
+        String[] items = host.split("\\.");
+        if (items.length <= 3) {
+            return host;
+        }
+        return "*." + items[items.length - 3] + "." + items[items.length - 2] + "." + items[items.length - 1];
+    }
+
+    /**
+     * Split address to host and port
+     */
     public static NetAddress parseAddress(String address) {
         int idx = address.indexOf(":");
         if (idx > 0) {

@@ -1,5 +1,7 @@
 package net.dongliu.byproxy.ssl;
 
+import net.dongliu.byproxy.setting.Settings;
+import net.dongliu.byproxy.utils.Networks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +16,8 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
+ * Hold current root cert and cert generator
+ *
  * @author Liu Dong
  */
 public class SSLContextManager {
@@ -21,44 +25,49 @@ public class SSLContextManager {
     private static Logger logger = LoggerFactory.getLogger(SSLContextManager.class);
 
     private String keyStorePath;
-    private AppKeyStoreGenerator appKeyStoreGenerator;
-    private BigInteger lastCaCertSerialNumber;
+    private KeyStoreGenerator keyStoreGenerator;
+    private BigInteger lastRootCertSN;
     // ssl context cache
     private final ConcurrentHashMap<String, SSLContext> sslContextCache = new ConcurrentHashMap<>();
+    // guard for set new root cert
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public SSLContextManager(String keyStorePath, char[] keyStorePassword) {
         this.keyStorePath = keyStorePath;
         long start = System.currentTimeMillis();
-        AppKeyStoreGenerator appKeyStoreGenerator;
+        KeyStoreGenerator keyStoreGenerator;
         try {
-            appKeyStoreGenerator = new AppKeyStoreGenerator(keyStorePath, keyStorePassword);
+            keyStoreGenerator = new KeyStoreGenerator(keyStorePath, keyStorePassword);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        logger.info("Initialize AppKeyStoreGenerator cost {} ms", System.currentTimeMillis() - start);
-        BigInteger caCertSerialNumber = appKeyStoreGenerator.getCACertSerialNumber();
+        logger.info("Initialize KeyStoreGenerator cost {} ms", System.currentTimeMillis() - start);
+        BigInteger rootCertSN = keyStoreGenerator.getRootCertSN();
 
         lock.writeLock().lock();
         try {
-            if (caCertSerialNumber.equals(lastCaCertSerialNumber)) {
+            if (rootCertSN.equals(lastRootCertSN)) {
                 // do nothing
                 return;
             }
-            this.appKeyStoreGenerator = appKeyStoreGenerator;
-            this.lastCaCertSerialNumber = caCertSerialNumber;
+            this.keyStoreGenerator = keyStoreGenerator;
+            this.lastRootCertSN = rootCertSN;
             this.sslContextCache.clear();
         } finally {
             lock.writeLock().unlock();
         }
     }
 
+    /**
+     * Create ssl context for the host
+     */
     public SSLContext createSSlContext(String host) {
+        host = Networks.wildcardHost(host);
         lock.readLock().lock();
         try {
-            return sslContextCache.computeIfAbsent(host, host1 -> {
+            return sslContextCache.computeIfAbsent(host, h -> {
                 try {
-                    return getSslContextInner(host1);
+                    return getSslContextInner(h);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -69,11 +78,11 @@ public class SSLContextManager {
     }
 
     private SSLContext getSslContextInner(String host) throws Exception {
-        char[] appKeyStorePassword = "123456".toCharArray();
+        char[] keyStorePassword = Settings.keyStorePassword;
         long start = System.currentTimeMillis();
-        KeyStore keyStore = appKeyStoreGenerator.generateKeyStore(host, 365, appKeyStorePassword);
+        KeyStore keyStore = keyStoreGenerator.generateKeyStore(host, Settings.certValidityDays, keyStorePassword);
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        keyManagerFactory.init(keyStore, appKeyStorePassword);
+        keyManagerFactory.init(keyStore, keyStorePassword);
         KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
         SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
         sslContext.init(keyManagers, null, new SecureRandom());
@@ -85,7 +94,7 @@ public class SSLContextManager {
         return keyStorePath;
     }
 
-    public AppKeyStoreGenerator getAppKeyStoreGenerator() {
-        return appKeyStoreGenerator;
+    public KeyStoreGenerator getKeyStoreGenerator() {
+        return keyStoreGenerator;
     }
 }

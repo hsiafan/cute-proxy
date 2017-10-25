@@ -17,7 +17,7 @@ import net.dongliu.byproxy.netty.Server;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
 import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.setting.ProxySetting;
-import net.dongliu.byproxy.ssl.AppKeyStoreGenerator;
+import net.dongliu.byproxy.ssl.KeyStoreGenerator;
 import net.dongliu.byproxy.struct.HttpRoundTripMessage;
 import net.dongliu.byproxy.struct.Message;
 import net.dongliu.byproxy.struct.WebSocketMessage;
@@ -264,8 +264,8 @@ public class MainController {
 
     @FXML
     private void exportPem(ActionEvent e) throws CertificateEncodingException, IOException {
-        AppKeyStoreGenerator generator = Context.getInstance().getSslContextManager().getAppKeyStoreGenerator();
-        byte[] data = generator.exportCACertificate(true);
+        KeyStoreGenerator generator = Context.getInstance().getSslContextManager().getKeyStoreGenerator();
+        byte[] data = generator.exportRootCert(true);
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Pem file", "*.pem"));
         fileChooser.setInitialFileName("ByProxy.pem");
@@ -278,8 +278,8 @@ public class MainController {
 
     @FXML
     private void exportCrt(ActionEvent e) throws CertificateEncodingException, IOException {
-        AppKeyStoreGenerator generator = Context.getInstance().getSslContextManager().getAppKeyStoreGenerator();
-        byte[] data = generator.exportCACertificate(false);
+        KeyStoreGenerator generator = Context.getInstance().getSslContextManager().getKeyStoreGenerator();
+        byte[] data = generator.exportRootCert(false);
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Crt file", "*.crt"));
         fileChooser.setInitialFileName("ByProxy.crt");

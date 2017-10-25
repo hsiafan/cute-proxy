@@ -48,7 +48,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
             if (sslContextManager != null) {
                 byte[] bytes;
                 try {
-                    bytes = sslContextManager.getAppKeyStoreGenerator().exportCACertificate(false);
+                    bytes = sslContextManager.getKeyStoreGenerator().exportRootCert(false);
                     response = new WebResponse(OK, "application/x-x509-ca-cert", bytes);
                 } catch (Exception e) {
                     response = WebResponse.fromThrowable(e);
@@ -65,7 +65,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
             if (sslContextManager != null) {
                 byte[] bytes;
                 try {
-                    bytes = sslContextManager.getAppKeyStoreGenerator().exportCACertificate(true);
+                    bytes = sslContextManager.getKeyStoreGenerator().exportRootCert(true);
                     response = new WebResponse(OK, "application/x-pem-file", bytes);
                 } catch (Exception e) {
                     response = WebResponse.fromThrowable(e);
