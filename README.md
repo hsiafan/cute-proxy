@@ -7,31 +7,15 @@ Capture Http/Https/WebSocket traffics via Http Proxy.
 [Pre Build Native Releases for macOS](https://github.com/clearthesky/byproxy/releases).
 
 ## Build By Yourself
-Java8+ required To build this project.
-
-ByProxy use [javafx maven plugin](https://github.com/javafx-maven-plugin/javafx-maven-plugin) to distribute.
-
-Create executable java jar:
-
-```sh
-mvn jfx:jar
-```
-
-The jar file can be found at target/app/byproxy.jar. Use
-
-```sh
-java -jar target/app/byproxy.jar
-```
-to run the program.
-
+Java9+ required To build this project.
 
 Create platform native application: 
 
 ```sh
-mvn jfx:native
+mvn clean package
 ```
 
-you will find native applications under path target/native.
+you will find native application image under path target/.
 
 
 ## Usage

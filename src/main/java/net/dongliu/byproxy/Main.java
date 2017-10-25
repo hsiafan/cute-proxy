@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -17,6 +18,7 @@ public class Main extends Application {
         VBox root = FXMLLoader.load(getClass().getResource("/fxml/main.fxml"));
         Scene scene = new Scene(root);
         stage.setTitle("ByProxy");
+        stage.getIcons().add(new Image(this.getClass().getResourceAsStream("/icon.png")));
         stage.setScene(scene);
         stage.setMaximized(true);
         stage.show();

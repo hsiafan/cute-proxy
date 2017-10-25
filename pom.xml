@@ -115,22 +115,44 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>com.zenjava</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>8.7.0</version>
+                <!-- copy all dependencies of your app to target folder-->
+                <!--  javafx ant use extended fileset, cannot cast from ant fileset. just copy to a directory-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>false</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
-                    <mainClass>net.dongliu.byproxy.Main</mainClass>
-                    <jfxAppOutputDir>${project.build.directory}/app</jfxAppOutputDir>
-                    <nativeOutputDir>${project.build.directory}/native</nativeOutputDir>
-                    <jfxMainAppJarName>${project.artifactId}.jar</jfxMainAppJarName>
-                    <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
-                    <appName>ByProxy</appName>
-                    <vendor>net.dongliu</vendor>
-                    <bundler>${bundler.name}</bundler>
-                    <bundleArguments>
-                        <runtime/>
-                        <launcher-cfg-format>prop</launcher-cfg-format>
-                    </bundleArguments>
+                    <target>
+                        <property name="icon.path" value="${icon.path}"/>
+                        <property name="app.version" value="${project.version}"/>
+                        <ant antfile="build.xml" target="deploy"/>
+                    </target>
                 </configuration>
             </plugin>
         </plugins>
@@ -145,7 +167,7 @@
                 </os>
             </activation>
             <properties>
-                <bundler.name>windows.app</bundler.name>
+                <icon.path>src/main/deploy/package/windows/ByProxy.ico</icon.path>
             </properties>
         </profile>
         <profile>
@@ -156,7 +178,7 @@
                 </os>
             </activation>
             <properties>
-                <bundler.name>dmg</bundler.name>
+                <icon.path>src/main/deploy/package/macosx/ByProxy.icns</icon.path>
             </properties>
         </profile>
         <profile>
@@ -167,7 +189,7 @@
                 </os>
             </activation>
             <properties>
-                <bundler.name>linux.app</bundler.name>
+                <icon.path>src/main/deploy/package/linux/ByProxy.png</icon.path>
             </properties>
         </profile>
     </profiles>
