@@ -36,21 +36,11 @@ public class Networks {
         return HOST_TYPE_DOMAIN;
     }
 
-    public static boolean isIp(String host) {
-        int type = getHostType(host);
-        return type == HOST_TYPE_IPV4 || type == HOST_TYPE_IPV6;
-    }
-
-    public static boolean isDomain(String host) {
-        int type = getHostType(host);
-        return type == HOST_TYPE_DOMAIN;
-    }
-
     /**
      * Generate wildcard host for long domains
      */
     public static String wildcardHost(String host) {
-        if (!isDomain(host)) {
+        if (getHostType(host) != HOST_TYPE_DOMAIN) {
             return host;
         }
         String[] items = host.split("\\.");

@@ -13,9 +13,14 @@ import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.*;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -45,19 +50,19 @@ public class KeyStoreGenerator {
     }
 
 
-    public KeyStoreGenerator(String caKeyStorePath, char[] caKeyStorePassword) throws Exception {
+    public KeyStoreGenerator(Path rootKeyStorePath, char[] rootKeyStorePassword) throws Exception {
 
-        logger.debug("Loading CA certificate/private key from file {}", caKeyStorePath);
+        logger.debug("Loading CA certificate/private key from file {}", rootKeyStorePath);
         KeyStore rootKeyStore = KeyStore.getInstance("PKCS12");
-        try (InputStream input = new FileInputStream(caKeyStorePath)) {
-            rootKeyStore.load(input, caKeyStorePassword);
+        try (InputStream input = Files.newInputStream(rootKeyStorePath)) {
+            rootKeyStore.load(input, rootKeyStorePassword);
         }
 
         Enumeration<String> aliases = rootKeyStore.aliases();
         String alias = aliases.nextElement();
         logger.debug("Loading CA certificate/private by alias {}", alias);
 
-        Key key = rootKeyStore.getKey(alias, caKeyStorePassword);
+        Key key = rootKeyStore.getKey(alias, rootKeyStorePassword);
         Objects.requireNonNull(key, "Specified key of the KeyStore not found!");
         RSAPrivateCrtKey privateCrtKey = (RSAPrivateCrtKey) key;
         privateKeyParameters = getPrivateKeyParameters(privateCrtKey);

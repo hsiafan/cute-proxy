@@ -9,6 +9,7 @@ import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,7 +25,7 @@ public class SSLContextManager {
 
     private static Logger logger = LoggerFactory.getLogger(SSLContextManager.class);
 
-    private String keyStorePath;
+    private Path rootKeyStorePath;
     private KeyStoreGenerator keyStoreGenerator;
     private BigInteger lastRootCertSN;
     // ssl context cache
@@ -32,12 +33,12 @@ public class SSLContextManager {
     // guard for set new root cert
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public SSLContextManager(String keyStorePath, char[] keyStorePassword) {
-        this.keyStorePath = keyStorePath;
+    public SSLContextManager(Path rootKeyStorePath, char[] keyStorePassword) {
+        this.rootKeyStorePath = rootKeyStorePath;
         long start = System.currentTimeMillis();
         KeyStoreGenerator keyStoreGenerator;
         try {
-            keyStoreGenerator = new KeyStoreGenerator(keyStorePath, keyStorePassword);
+            keyStoreGenerator = new KeyStoreGenerator(rootKeyStorePath, keyStorePassword);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -90,8 +91,8 @@ public class SSLContextManager {
         return sslContext;
     }
 
-    public String getKeyStorePath() {
-        return keyStorePath;
+    public Path getRootKeyStorePath() {
+        return rootKeyStorePath;
     }
 
     public KeyStoreGenerator getKeyStoreGenerator() {

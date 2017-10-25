@@ -5,8 +5,6 @@ import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.ssl.SSLContextManager;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -28,18 +26,14 @@ public class Context {
     }
 
 
+    /**
+     * Set new keyStore. This may cause create new SslContextManager if keyStore file changed.
+     */
     public void setKeyStoreSetting(KeyStoreSetting setting) {
         Objects.requireNonNull(setting);
         Path path = Paths.get(setting.usedKeyStore());
-        try {
-            if (sslContextManager == null ||
-                    Files.isSameFile(path, Paths.get(this.sslContextManager.getKeyStorePath()))) {
-                this.sslContextManager = new SSLContextManager(setting.usedKeyStore(),
-                        setting.usedPassword().toCharArray());
-            }
-        } catch (IOException e) {
-            this.sslContextManager = new SSLContextManager(setting.usedKeyStore(),
-                    setting.usedPassword().toCharArray());
+        if (sslContextManager == null || !path.equals(sslContextManager.getRootKeyStorePath())) {
+            this.sslContextManager = new SSLContextManager(path, setting.usedPassword().toCharArray());
         }
         this.keyStoreSetting = setting;
     }
