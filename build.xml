@@ -5,7 +5,6 @@
 
     <property name="JAVA_HOME" value="${java.home}"/>
     <property name="build.classes.dir" value="target/classes"/>
-    <property name="build.lib.dir" value="target/dependency"/>
     <property name="build.dist.dir" value="target/"/>
 
     <target name="deploy">
@@ -20,13 +19,11 @@
             <fileset dir="${build.classes.dir}" includes="**/*.css"/>
         </fx:csstobin>
 
-        <fx:resources id="appRes">
-            <fx:fileset dir="${build.lib.dir}"/>
-        </fx:resources>
-
-        <fx:jar destfile="${build.lib.dir}/byproxy-${app.version}.jar">
+        <fx:jar destfile="${libs.dir}/byproxy-${app.version}.jar">
             <fx:application refid="net.dongliu.byproxy"/>
-            <fx:resources refid="appRes"/>
+            <fx:resources id="appRes">
+                <fx:fileset dir="${libs.dir}"/>
+            </fx:resources>
             <fileset dir="${build.classes.dir}"/>
         </fx:jar>
 
@@ -36,7 +33,9 @@
                 <fx:jvmarg value="-Xmx512m"/>
             </fx:platform>
             <fx:application refId="net.dongliu.byproxy"/>
-            <fx:resources refid="appRes"/>
+            <fx:resources id="appRes">
+                <fx:fileset dir="${libs.dir}"/>
+            </fx:resources>
             <fx:info title="ByProxy" vendor="net.dongliu">
                 <fx:icon href="${icon.path}" kind="default"/>
             </fx:info>

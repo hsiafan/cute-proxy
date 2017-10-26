@@ -125,6 +125,7 @@
                         <id>copy-dependencies</id>
                         <phase>package</phase>
                         <configuration>
+                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>
@@ -149,9 +150,11 @@
                 </executions>
                 <configuration>
                     <target>
+                        <!--<dependencyfilesets/>-->
                         <property name="icon.path" value="${icon.path}"/>
                         <property name="app.version" value="${project.version}"/>
-                        <ant antfile="build.xml" target="deploy"/>
+                        <property name="libs.dir" value="${project.build.directory}/libs"/>
+                        <ant antfile="build.xml" target="deploy" inheritRefs="true"/>
                     </target>
                 </configuration>
             </plugin>
