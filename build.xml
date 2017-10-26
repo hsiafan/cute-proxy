@@ -21,17 +21,16 @@
         </fx:csstobin>
 
         <fx:resources id="appRes">
-            <fx:fileset dir="${build.dist.dir}" includes="byproxy.jar"/>
             <fx:fileset dir="${build.lib.dir}"/>
         </fx:resources>
 
-        <fx:jar destfile="${build.dist.dir}/byproxy.jar">
+        <fx:jar destfile="${build.lib.dir}/byproxy-${app.version}.jar">
             <fx:application refid="net.dongliu.byproxy"/>
             <fx:resources refid="appRes"/>
             <fileset dir="${build.classes.dir}"/>
         </fx:jar>
 
-        <fx:deploy outdir="${build.dist.dir}" outfile="byproxy" signBundle="false" nativeBundles="image">
+        <fx:deploy outdir="${build.dist.dir}" outfile="ByProxy" signBundle="false" nativeBundles="image">
             <!-- javafx9 remove the basedir attribute? -->
             <fx:platform j2se="9.0">
                 <fx:jvmarg value="-Xmx512m"/>
