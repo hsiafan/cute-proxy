@@ -85,6 +85,9 @@ public class UIUtils {
         });
     }
 
+    /**
+     * Copy text to clipboard
+     */
     public static void copyToClipBoard(String text) {
         Clipboard clipboard = Clipboard.getSystemClipboard();
         ClipboardContent content = new ClipboardContent();
@@ -93,7 +96,10 @@ public class UIUtils {
     }
 
 
-    public static <T> void runBackground(Task<T> task, String failedMessage) {
+    /**
+     * Run a task with process dialog
+     */
+    public static <T> void runTaskWithProcessDialog(Task<T> task, String failedMessage) {
         ProgressDialog progressDialog = new ProgressDialog();
         progressDialog.bindTask(task);
 

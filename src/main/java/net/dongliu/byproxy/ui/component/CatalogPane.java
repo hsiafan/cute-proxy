@@ -41,8 +41,8 @@ public class CatalogPane extends BorderPane {
     @FXML
     private ToggleGroup viewTypeGroup;
 
-    private Property<Message> selectedMessage = new SimpleObjectProperty<>();
-    private Property<TreeItem<ItemValue>> selectedTreeItem = new SimpleObjectProperty<>();
+    private Property<Message> currentMessage = new SimpleObjectProperty<>();
+    private Property<TreeItem<ItemValue>> currentTreeItem = new SimpleObjectProperty<>();
 
     public CatalogPane() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/catalog_view.fxml"));
@@ -64,7 +64,7 @@ public class CatalogPane extends BorderPane {
                 }
             }
         });
-        messageList.getSelectionModel().selectedItemProperty().addListener((ov, o, n) -> selectedMessage.setValue(n));
+        messageList.getSelectionModel().selectedItemProperty().addListener((ov, o, n) -> currentMessage.setValue(n));
 
         TreeItem<ItemValue> root = new TreeItem<>(new TreeNodeValue(""));
         root.setExpanded(true);
@@ -75,17 +75,17 @@ public class CatalogPane extends BorderPane {
         ReadOnlyObjectProperty<TreeItem<ItemValue>> selectTreeNode = messageTree.getSelectionModel().selectedItemProperty();
         selectTreeNode.addListener((ov, o, n) -> {
             if (n == null || n.getValue() instanceof TreeNodeValue) {
-                selectedMessage.setValue(null);
+                currentMessage.setValue(null);
             } else {
                 Message message = (Message) n.getValue();
-                selectedMessage.setValue(message);
+                currentMessage.setValue(message);
             }
         });
 
         ReadOnlyObjectProperty<Toggle> toggleProperty = viewTypeGroup.selectedToggleProperty();
         StringBinding typeProperty = createStringBinding(() -> (String) toggleProperty.get().getUserData(), toggleProperty);
 
-        selectedTreeItem.bind(Bindings.createObjectBinding(() -> {
+        currentTreeItem.bind(Bindings.createObjectBinding(() -> {
             if (!"tree".equals(typeProperty.get())) {
                 return null;
             }
@@ -206,11 +206,11 @@ public class CatalogPane extends BorderPane {
         messageList.getItems().removeAll(removed);
     }
 
-    public Property<Message> selectedMessageProperty() {
-        return selectedMessage;
+    public Property<Message> currentMessageProperty() {
+        return currentMessage;
     }
 
-    public Property<TreeItem<ItemValue>> selectedTreeItemProperty() {
-        return selectedTreeItem;
+    public Property<TreeItem<ItemValue>> currentTreeItemProperty() {
+        return currentTreeItem;
     }
 }

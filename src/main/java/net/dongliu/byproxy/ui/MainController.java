@@ -11,12 +11,12 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import net.dongliu.byproxy.Context;
-import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.ExitHooks;
+import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.Server;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
-import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.setting.ProxySetting;
+import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.ssl.KeyStoreGenerator;
 import net.dongliu.byproxy.struct.HttpRoundTripMessage;
 import net.dongliu.byproxy.struct.Message;
@@ -127,8 +127,8 @@ public class MainController {
             }
         });
 
-        Property<Message> selectedMessage = catalogPane.selectedMessageProperty();
-        selectedMessage.addListener((ov, old, message) -> {
+        Property<Message> currentMessage = catalogPane.currentMessageProperty();
+        currentMessage.addListener((ov, old, message) -> {
             if (message == null) {
                 hideContent();
             } else {
@@ -136,12 +136,11 @@ public class MainController {
             }
         });
 
-        ObservableValue<Boolean> messageSelected = UIUtils.observeNull(selectedMessage);
-        copyURLButton.disableProperty().bind(messageSelected);
-//        replayMenu.disableProperty().bind(messageSelected);
+        ObservableValue<Boolean> hasCurrentMessage = UIUtils.observeNull(currentMessage);
+        copyURLButton.disableProperty().bind(hasCurrentMessage);
 
-        Property<TreeItem<ItemValue>> selectedTreeItem = catalogPane.selectedTreeItemProperty();
-        deleteMenu.disableProperty().bind(UIUtils.observeNull(selectedTreeItem));
+        Property<TreeItem<ItemValue>> currentTreeItem = catalogPane.currentTreeItemProperty();
+        deleteMenu.disableProperty().bind(UIUtils.observeNull(currentTreeItem));
         loadConfigAndKeyStore();
 
     }
@@ -151,7 +150,9 @@ public class MainController {
      */
     private void loadConfigAndKeyStore() {
         InitContextTask task = new InitContextTask(context);
-        UIUtils.runBackground(task, "Init mainSetting failed");
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     /**
@@ -165,7 +166,7 @@ public class MainController {
         if (newConfig.isPresent()) {
             SaveSettingTask task = new SaveSettingTask(context, newConfig.get(), context.getKeyStoreSetting(),
                     context.getProxySetting());
-            UIUtils.runBackground(task, "append settings failed");
+            UIUtils.runTaskWithProcessDialog(task, "append settings failed");
         }
     }
 
@@ -177,7 +178,7 @@ public class MainController {
         if (newConfig.isPresent()) {
             SaveSettingTask task = new SaveSettingTask(context, context.getServerSetting(), newConfig.get(),
                     context.getProxySetting());
-            UIUtils.runBackground(task, "append key store failed");
+            UIUtils.runTaskWithProcessDialog(task, "append key store failed");
         }
     }
 
@@ -189,7 +190,7 @@ public class MainController {
         if (newConfig.isPresent()) {
             SaveSettingTask task = new SaveSettingTask(context, context.getServerSetting(), context.getKeyStoreSetting(),
                     newConfig.get());
-            UIUtils.runBackground(task, "append secondary proxy setting failed");
+            UIUtils.runTaskWithProcessDialog(task, "append secondary proxy setting failed");
         }
     }
 
@@ -243,7 +244,7 @@ public class MainController {
 
         catalogPane.clearAll();
         LoadTask task = new LoadTask(file.getPath(), catalogPane::addTreeItemMessage);
-        UIUtils.runBackground(task, "Load data failed!");
+        UIUtils.runTaskWithProcessDialog(task, "Load data failed!");
     }
 
     // save captured data to file
@@ -258,7 +259,7 @@ public class MainController {
         }
         Collection<Message> messages = catalogPane.getMessages();
         SaveTrafficDataTask saveTask = new SaveTrafficDataTask(file.getPath(), messages);
-        UIUtils.runBackground(saveTask, "Save data failed!");
+        UIUtils.runTaskWithProcessDialog(saveTask, "Save data failed!");
     }
 
 
@@ -292,13 +293,13 @@ public class MainController {
 
     @FXML
     private void copyUrl(ActionEvent event) {
-        String url = catalogPane.selectedMessageProperty().getValue().getUrl();
+        String url = catalogPane.currentMessageProperty().getValue().getUrl();
         UIUtils.copyToClipBoard(url);
     }
 
     @FXML
     private void deleteTreeNode(ActionEvent event) {
-        TreeItem<ItemValue> treeItem = catalogPane.selectedTreeItemProperty().getValue();
+        TreeItem<ItemValue> treeItem = catalogPane.currentTreeItemProperty().getValue();
         if (treeItem != null) {
             catalogPane.deleteTreeNode(treeItem);
         }
