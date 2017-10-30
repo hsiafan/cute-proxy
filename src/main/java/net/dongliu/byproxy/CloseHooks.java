@@ -9,8 +9,8 @@ import java.util.List;
 /**
  * @author Liu Dong
  */
-public class ExitHooks {
-    private static final Logger logger = LoggerFactory.getLogger(ExitHooks.class);
+public class CloseHooks {
+    private static final Logger logger = LoggerFactory.getLogger(CloseHooks.class);
     private static final List<Runnable> tasks = new ArrayList<>();
     private static boolean shutdown = false;
 
@@ -21,7 +21,7 @@ public class ExitHooks {
         tasks.add(runnable);
     }
 
-    public synchronized static void shutdownAll() {
+    public synchronized static void executeTasks() {
         if (shutdown) {
             throw new IllegalStateException("Already shutdown");
         }

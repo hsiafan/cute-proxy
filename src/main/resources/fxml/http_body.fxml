@@ -6,8 +6,8 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import net.dongliu.byproxy.ui.component.HttpBodyPane?>
-<?import net.dongliu.byproxy.ui.component.MyButton?>
-<fx:root type="HttpBodyPane" xmlns:fx="http://javafx.com/fxml">
+<?import net.dongliu.byproxy.ui.component.SimpleButton?>
+<fx:root type="net.dongliu.byproxy.ui.component.HttpBodyPane" xmlns:fx="http://javafx.com/fxml">
     <top>
         <HBox spacing="4" alignment="CENTER_LEFT">
             <padding>
@@ -17,10 +17,10 @@
             <ComboBox onAction="#setMimeType" fx:id="bodyTypeBox"/>
             <ComboBox onAction="#setCharset" fx:id="charsetBox"/>
 
-            <MyButton onAction="#exportBody">
+            <SimpleButton onAction="#exportBody">
                 <tooltipText>Save Content To File</tooltipText>
                 <iconPath>/images/ic_file_download_black_18dp.png</iconPath>
-            </MyButton>
+            </SimpleButton>
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="sizeLabel"/>
         </HBox>

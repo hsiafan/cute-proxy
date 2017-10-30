@@ -11,7 +11,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import net.dongliu.byproxy.Context;
-import net.dongliu.byproxy.ExitHooks;
+import net.dongliu.byproxy.CloseHooks;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.Server;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
@@ -56,9 +56,9 @@ public class MainController {
     @FXML
     private VBox root;
     @FXML
-    private MyButton startProxyButton;
+    private SimpleButton startProxyButton;
     @FXML
-    private MyButton stopProxyButton;
+    private SimpleButton stopProxyButton;
 
     @FXML
     private Label listenedAddressLabel;
@@ -120,7 +120,7 @@ public class MainController {
 
     @FXML
     private void initialize() {
-        ExitHooks.registerTask(() -> {
+        CloseHooks.registerTask(() -> {
             if (server != null) {
                 server.stop();
                 server = null;

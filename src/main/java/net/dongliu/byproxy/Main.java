@@ -25,7 +25,7 @@ public class Main extends Application {
         root.requestFocus();
 
         stage.setOnCloseRequest(e -> {
-            ExitHooks.shutdownAll();
+            CloseHooks.executeTasks();
             Platform.exit();
         });
     }

@@ -10,17 +10,17 @@ import javafx.scene.image.ImageView;
 import javafx.util.StringConverter;
 
 /**
- * Custom button
+ * Custom simple button
  *
  * @author Liu Dong
  */
-public class MyButton extends Button {
+public class SimpleButton extends Button {
 
     private StringProperty tooltipText = new SimpleStringProperty();
     private StringProperty iconPath = new SimpleStringProperty();
 
 
-    public MyButton() {
+    public SimpleButton() {
         super();
         init();
     }
@@ -43,7 +43,7 @@ public class MyButton extends Button {
                 return new Tooltip(string);
             }
         });
-        iconPath.addListener((observable, oldValue, newValue) -> 
+        iconPath.addListener((observable, oldValue, newValue) ->
                 graphicProperty().set(new ImageView(new Image(getClass().getResourceAsStream(newValue)))));
     }
 

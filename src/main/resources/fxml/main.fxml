@@ -20,7 +20,6 @@
         <Menu text="Edit">
             <MenuItem text="Copy URL" onAction="#copyUrl" disable="true" fx:id="copyURLButton"/>
             <MenuItem text="Delete" onAction="#deleteTreeNode" disable="true" fx:id="deleteMenu"/>
-            <!--<MenuItem text="Replay..." onAction="#replay" disable="true" fx:id="replayMenu"/>-->
             <MenuItem text="Clear All" onAction="#clearAll"/>
         </Menu>
         <Menu text="Tools">
@@ -62,27 +61,27 @@
         </SplitMenuButton>
 
         <Separator/>
-        <MyButton onAction="#open">
+        <SimpleButton onAction="#open">
             <iconPath>/images/ic_folder_open_black_24dp_1x.png</iconPath>
             <tooltipText>Open Saved File</tooltipText>
-        </MyButton>
-        <MyButton onAction="#save">
+        </SimpleButton>
+        <SimpleButton onAction="#save">
             <iconPath>/images/ic_save_black_24dp_1x.png</iconPath>
             <tooltipText>Save Messages to File</tooltipText>
-        </MyButton>
+        </SimpleButton>
 
-        <MyButton onAction="#startProxy" fx:id="startProxyButton">
+        <SimpleButton onAction="#startProxy" fx:id="startProxyButton">
             <iconPath>/images/ic_play_circle_outline_black_24dp_1x.png</iconPath>
             <tooltipText>Start/Stop HTTP Proxy</tooltipText>
-        </MyButton>
-        <MyButton onAction="#stopProxy" fx:id="stopProxyButton" disable="true">
+        </SimpleButton>
+        <SimpleButton onAction="#stopProxy" fx:id="stopProxyButton" disable="true">
             <iconPath>/images/ic_stop_black_24dp_1x.png</iconPath>
             <tooltipText>Start/Stop HTTP Proxy</tooltipText>
-        </MyButton>
-        <MyButton onAction="#clearAll">
+        </SimpleButton>
+        <SimpleButton onAction="#clearAll">
             <iconPath>/images/ic_clear_all_black_24dp_1x.png</iconPath>
             <tooltipText>Remove All Messages</tooltipText>
-        </MyButton>
+        </SimpleButton>
 
         <Pane HBox.hgrow="ALWAYS"/>
 
