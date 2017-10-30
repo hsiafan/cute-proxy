@@ -1,13 +1,13 @@
 package net.dongliu.byproxy.ui.task;
 
-import net.dongliu.byproxy.Context;
-import net.dongliu.byproxy.ssl.RootKeyStoreGenerator;
-import net.dongliu.byproxy.setting.KeyStoreSetting;
-import net.dongliu.byproxy.setting.ServerSetting;
-import net.dongliu.byproxy.setting.ProxySetting;
-import net.dongliu.byproxy.setting.Settings;
-import net.dongliu.byproxy.ui.UIUtils;
 import javafx.concurrent.Task;
+import net.dongliu.byproxy.Context;
+import net.dongliu.byproxy.setting.KeyStoreSetting;
+import net.dongliu.byproxy.setting.ProxySetting;
+import net.dongliu.byproxy.setting.ServerSetting;
+import net.dongliu.byproxy.setting.Settings;
+import net.dongliu.byproxy.ssl.RootKeyStoreGenerator;
+import net.dongliu.byproxy.ui.UIUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,9 +63,8 @@ public class InitContextTask extends Task<Void> {
                 logger.info("Generate new key store file");
                 updateMessage("Generating new key store...");
                 // generate one new key store
-                RootKeyStoreGenerator generator = new RootKeyStoreGenerator();
-                generator.generate(keyStorePassword, Settings.rootCertValidityDays);
-                byte[] keyStoreData = generator.getKeyStoreData();
+                RootKeyStoreGenerator generator = RootKeyStoreGenerator.getInstance();
+                byte[] keyStoreData = generator.generate(keyStorePassword, Settings.rootCertValidityDays);
                 Files.write(keyStorePath, keyStoreData);
             } else {
                 UIUtils.showMessageDialog("KeyStore file not found");

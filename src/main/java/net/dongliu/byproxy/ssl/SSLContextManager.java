@@ -1,5 +1,6 @@
 package net.dongliu.byproxy.ssl;
 
+import net.dongliu.byproxy.exception.SSLContextException;
 import net.dongliu.byproxy.setting.Settings;
 import net.dongliu.byproxy.utils.Networks;
 import org.slf4j.Logger;
@@ -40,7 +41,7 @@ public class SSLContextManager {
         try {
             keyStoreGenerator = new KeyStoreGenerator(rootKeyStorePath, keyStorePassword);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SSLContextException(e);
         }
         logger.info("Initialize KeyStoreGenerator cost {} ms", System.currentTimeMillis() - start);
         BigInteger rootCertSN = keyStoreGenerator.getRootCertSN();
@@ -70,7 +71,7 @@ public class SSLContextManager {
                 try {
                     return getSslContextInner(h);
                 } catch (Exception e) {
-                    throw new RuntimeException(e);
+                    throw new SSLContextException(e);
                 }
             });
         } finally {
@@ -82,12 +83,12 @@ public class SSLContextManager {
         char[] keyStorePassword = Settings.keyStorePassword;
         long start = System.currentTimeMillis();
         KeyStore keyStore = keyStoreGenerator.generateKeyStore(host, Settings.certValidityDays, keyStorePassword);
+        logger.info("Create certificate for {}, cost {} ms", host, System.currentTimeMillis() - start);
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         keyManagerFactory.init(keyStore, keyStorePassword);
         KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
         SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
         sslContext.init(keyManagers, null, new SecureRandom());
-        logger.info("Create ssh context for {}, cost {} ms", host, System.currentTimeMillis() - start);
         return sslContext;
     }
 

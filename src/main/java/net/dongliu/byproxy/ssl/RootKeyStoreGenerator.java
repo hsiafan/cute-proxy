@@ -26,18 +26,31 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * Generate ca root key store
+ * Generate ca root key store.
+ * First, generate one public-private key pair, then create a X509 certificate, including the generated public key.
+ * JDK do not have an open api for building X509 certificate, so we use  Bouncy Castle here.
  *
  * @author Liu Dong
  */
 public class RootKeyStoreGenerator {
 
-    // key store data of p#12 format
-    private byte[] keyStoreData;
-    // X.509 Certificate in der format
+    private static final RootKeyStoreGenerator instance = new RootKeyStoreGenerator();
 
-    // Generate a root ca key store
-    public void generate(char[] password, int validityDays) throws Exception {
+    private RootKeyStoreGenerator() {
+    }
+
+    public static RootKeyStoreGenerator getInstance() {
+        return instance;
+    }
+
+    /**
+     * Generate a root ca key store.
+     * The key store is stored by p#12 format, X.509 Certificate encoded in der format
+     *
+     * @return the key store binary data
+     * @throws Exception
+     */
+    public byte[] generate(char[] password, int validityDays) throws Exception {
         SecureRandom secureRandom = new SecureRandom();
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048, secureRandom);
@@ -92,7 +105,7 @@ public class RootKeyStoreGenerator {
                 new KeyStore.PasswordProtection(Settings.rootKeyStorePassword));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             keyStore.store(bos, password);
-            this.keyStoreData = bos.toByteArray();
+            return bos.toByteArray();
         }
     }
 
@@ -112,9 +125,5 @@ public class RootKeyStoreGenerator {
                 .build(signedWithPrivateKey);
         return new JcaX509CertificateConverter().setProvider(BouncyCastleProvider.PROVIDER_NAME)
                 .getCertificate(certificateBuilder.build(signer));
-    }
-
-    public byte[] getKeyStoreData() {
-        return keyStoreData;
     }
 }

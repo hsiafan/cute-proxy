@@ -1,5 +1,7 @@
 package net.dongliu.byproxy.ssl;
 
+import net.dongliu.byproxy.exception.SSLContextException;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -42,7 +44,7 @@ public class ClientSSLContextFactory implements Supplier<SSLContext> {
             sslContext = SSLContext.getInstance("TLS");
             sslContext.init(null, trustAllManagers, new SecureRandom());
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
-            throw new RuntimeException(e);
+            throw new SSLContextException(e);
         }
         return sslContext;
     }

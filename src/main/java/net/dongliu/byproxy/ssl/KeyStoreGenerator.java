@@ -9,6 +9,7 @@ import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.provider.X509CertificateObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +33,8 @@ import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_friendl
 import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_localKeyId;
 
 /**
- * Dynamic generate self signed certificate for mitm proxy, with specified root ca private key and certificate.
- * JDK do not have an open api for this, although Open JDK/SUN JDK does have a internal api can work.
- * So we use  Bouncy Castle here.
+ * Dynamic generate self signed certificate for mitm proxy, signed by private key in the root certificate, with SAN names.
+ * JDK do not have an open api for building X509 certificate, so we use  Bouncy Castle here.
  */
 public class KeyStoreGenerator {
     private static Logger logger = LoggerFactory.getLogger(KeyStoreGenerator.class);
@@ -46,7 +46,7 @@ public class KeyStoreGenerator {
     private final JcaX509ExtensionUtils jcaX509ExtensionUtils;
 
     static {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Security.addProvider(new BouncyCastleProvider());
     }
 
 
@@ -111,6 +111,7 @@ public class KeyStoreGenerator {
      * Generate a new KeyStore contains the certificate for the domain signed by root certificate
      * look at RFC 2818
      *
+     * @param host add to san extension, can be generic
      * @throws Exception
      */
     public KeyStore generateKeyStore(String host, int validityDays, char[] keyStorePassword) throws Exception {
