@@ -10,7 +10,6 @@ import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
-import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.ssl.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
@@ -22,9 +21,9 @@ import java.util.function.Supplier;
 
 import static io.netty.handler.codec.socksx.v5.Socks5CommandStatus.FAILURE;
 
-public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks5CommandRequest>
+public class Socks5ProxyHandler extends SimpleChannelInboundHandler<Socks5CommandRequest>
         implements TcpProxyHandlerTraits {
-    private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyConnectHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyHandler.class);
 
     @Nullable
     private final MessageListener messageListener;
@@ -34,16 +33,16 @@ public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
     @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public Socks5ProxyConnectHandler(@Nullable MessageListener messageListener,
-                                     @Nullable SSLContextManager sslContextManager,
-                                     @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public Socks5ProxyHandler(@Nullable MessageListener messageListener,
+                              @Nullable SSLContextManager sslContextManager,
+                              @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
         this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, Socks5CommandRequest request) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Socks5CommandRequest request) {
         Promise<Channel> promise = ctx.executor().newPromise();
         Bootstrap bootstrap = initBootStrap(promise, ctx.channel().eventLoop());
 
@@ -68,7 +67,7 @@ public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
                     request.dstPort()));
 
             responseFuture.addListener((ChannelFutureListener) f -> {
-                ctx.pipeline().remove(Socks5ProxyConnectHandler.this);
+                ctx.pipeline().remove(Socks5ProxyHandler.this);
                 NetAddress address = new NetAddress(request.dstAddr(), request.dstPort());
                 initTcpProxyHandlers(ctx, address, outboundChannel);
             });
@@ -76,7 +75,7 @@ public class Socks5ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
         logger.error("", e);
         NettyUtils.closeOnFlush(ctx.channel());
     }

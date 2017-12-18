@@ -138,7 +138,7 @@ public class HttpProxyPlainHandler extends ChannelInboundHandlerAdapter {
                 .option(SO_KEEPALIVE, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
+                    protected void initChannel(SocketChannel ch) {
                         if (proxyHandlerSupplier != null) {
                             ProxyHandler proxyHandler = proxyHandlerSupplier.get();
                             ch.pipeline().addLast(proxyHandler);

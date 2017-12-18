@@ -11,9 +11,7 @@ import io.netty.handler.proxy.ProxyHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.detector.HttpMatcher;
-import net.dongliu.byproxy.netty.detector.ProtocolDetector;
-import net.dongliu.byproxy.netty.detector.SocksProxyMatcher;
+import net.dongliu.byproxy.netty.detector.*;
 import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.ssl.SSLContextManager;
@@ -57,15 +55,18 @@ public class Server {
                 .localAddress(new InetSocketAddress(setting.getPort()))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
+                    protected void initChannel(SocketChannel ch) {
                         int timeoutSeconds = setting.getTimeout();
                         IdleStateHandler idleStateHandler = new IdleStateHandler(timeoutSeconds, timeoutSeconds,
                                 timeoutSeconds, TimeUnit.SECONDS);
                         ch.pipeline().addLast(idleStateHandler);
                         ch.pipeline().addLast(new CloseTimeoutChannelHandler());
                         ProtocolDetector protocolDetector = new ProtocolDetector(
-                                new SocksProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
-                                new HttpMatcher(messageListener, sslContextManager, proxyHandlerSupplier)
+                                new Socks5ProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
+                                new Socks4ProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
+                                new HttpTunnelProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
+                                new HttpProxyMatcher(messageListener, proxyHandlerSupplier),
+                                new HttpMatcher(sslContextManager)
                         );
                         ch.pipeline().addLast("protocol-detector", protocolDetector);
                     }

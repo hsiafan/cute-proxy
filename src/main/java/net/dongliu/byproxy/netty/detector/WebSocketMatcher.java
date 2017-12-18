@@ -19,13 +19,13 @@ public class WebSocketMatcher extends ProtocolMatcher {
     protected int match(ByteBuf buf) {
         if (ByteBufUtil.indexOf(HEAD_END, buf) == -1) {
             if (buf.readableBytes() > 8096) {
-                return DISMATCH;
+                return MISMATCH;
             }
             return PENDING;
         }
 
         if (ByteBufUtil.indexOf(WEB_SOCKET_UPGRADE, buf) == -1) {
-            return DISMATCH;
+            return MISMATCH;
         }
         return MATCH;
     }

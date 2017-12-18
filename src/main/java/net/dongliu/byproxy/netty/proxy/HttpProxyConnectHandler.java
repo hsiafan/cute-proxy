@@ -44,7 +44,7 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, HttpRequest request) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, HttpRequest request) {
         Promise<Channel> promise = ctx.executor().newPromise();
         Bootstrap bootstrap = initBootStrap(promise, ctx.channel().eventLoop());
 
@@ -74,7 +74,7 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
         logger.error("", e);
         NettyUtils.closeOnFlush(ctx.channel());
     }

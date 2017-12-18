@@ -1,8 +1,18 @@
 package net.dongliu.byproxy.netty.detector;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelPipeline;
+
+import java.util.Objects;
+import java.util.function.Consumer;
 
 public class SSLMatcher extends ProtocolMatcher {
+
+    private Consumer<ChannelPipeline> consumer;
+
+    public SSLMatcher(Consumer<ChannelPipeline> consumer) {
+        this.consumer = Objects.requireNonNull(consumer);
+    }
 
     @Override
     public int match(ByteBuf buf) {
@@ -15,6 +25,11 @@ public class SSLMatcher extends ProtocolMatcher {
         if (first == 22 && second <= 3 && third <= 3) {
             return MATCH;
         }
-        return DISMATCH;
+        return MISMATCH;
+    }
+
+    @Override
+    public void handlePipeline(ChannelPipeline pipeline) {
+        consumer.accept(pipeline);
     }
 }

@@ -9,7 +9,6 @@ import io.netty.handler.codec.socksx.v4.Socks4CommandType;
 import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
-import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.ssl.SSLContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +16,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
-public class Socks4ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMessage> {
-    private static final Logger logger = LoggerFactory.getLogger(Socks4ProxyAuthHandler.class);
+public class Socks4ProxyHandshakeHandler extends SimpleChannelInboundHandler<SocksMessage> {
+    private static final Logger logger = LoggerFactory.getLogger(Socks4ProxyHandshakeHandler.class);
 
     @Nullable
     private final MessageListener messageListener;
@@ -27,9 +26,9 @@ public class Socks4ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
     @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public Socks4ProxyAuthHandler(@Nullable MessageListener messageListener,
-                                  @Nullable SSLContextManager sslContextManager,
-                                  @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public Socks4ProxyHandshakeHandler(@Nullable MessageListener messageListener,
+                                       @Nullable SSLContextManager sslContextManager,
+                                       @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
         this.proxyHandlerSupplier = proxyHandlerSupplier;
@@ -44,7 +43,7 @@ public class Socks4ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
         }
         Socks4CommandRequest socksV4CmdRequest = (Socks4CommandRequest) socksRequest;
         if (socksV4CmdRequest.type() == Socks4CommandType.CONNECT) {
-            ctx.pipeline().addLast(new Socks4ProxyConnectHandler(messageListener, sslContextManager,
+            ctx.pipeline().addLast(new Socks4ProxyHandler(messageListener, sslContextManager,
                     proxyHandlerSupplier));
             ctx.pipeline().remove(this);
             ctx.fireChannelRead(socksRequest);

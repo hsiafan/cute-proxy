@@ -121,7 +121,7 @@ public class HttpInterceptor extends ChannelDuplexHandler {
                 this.httpMessage = null;
 
                 // connection upgrade
-                //TODO: should check response header too
+                //TODO: should check response header?
                 if (upgradeWebSocket) {
                     ctx.fireChannelRead(msg);
                     String url = message.getUrl().replaceAll("^http", "ws");

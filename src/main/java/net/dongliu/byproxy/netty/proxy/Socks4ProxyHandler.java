@@ -20,9 +20,9 @@ import java.util.function.Supplier;
 import static io.netty.handler.codec.socksx.v4.Socks4CommandStatus.REJECTED_OR_FAILED;
 import static io.netty.handler.codec.socksx.v4.Socks4CommandStatus.SUCCESS;
 
-public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks4CommandRequest>
+public class Socks4ProxyHandler extends SimpleChannelInboundHandler<Socks4CommandRequest>
         implements TcpProxyHandlerTraits {
-    private static final Logger logger = LoggerFactory.getLogger(Socks4ProxyConnectHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(Socks4ProxyHandler.class);
 
     @Nullable
     private final MessageListener messageListener;
@@ -32,16 +32,16 @@ public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
     @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public Socks4ProxyConnectHandler(@Nullable MessageListener messageListener,
-                                     @Nullable SSLContextManager sslContextManager,
-                                     @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public Socks4ProxyHandler(@Nullable MessageListener messageListener,
+                              @Nullable SSLContextManager sslContextManager,
+                              @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
         this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, Socks4CommandRequest request) throws Exception {
+    public void channelRead0(ChannelHandlerContext ctx, Socks4CommandRequest request) {
         Promise<Channel> promise = ctx.executor().newPromise();
         Bootstrap bootstrap = initBootStrap(promise, ctx.channel().eventLoop());
 
@@ -62,7 +62,7 @@ public class Socks4ProxyConnectHandler extends SimpleChannelInboundHandler<Socks
             ChannelFuture responseFuture = ctx.channel().writeAndFlush(new DefaultSocks4CommandResponse(SUCCESS));
 
             responseFuture.addListener((ChannelFutureListener) channelFuture -> {
-                ctx.pipeline().remove(Socks4ProxyConnectHandler.this);
+                ctx.pipeline().remove(Socks4ProxyHandler.this);
                 NetAddress address = new NetAddress(request.dstAddr(), request.dstPort());
                 initTcpProxyHandlers(ctx, address, outboundChannel);
             });

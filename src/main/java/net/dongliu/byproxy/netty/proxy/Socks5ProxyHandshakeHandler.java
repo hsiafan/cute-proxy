@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
-public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMessage> {
-    private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyAuthHandler.class);
+public class Socks5ProxyHandshakeHandler extends SimpleChannelInboundHandler<SocksMessage> {
+    private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyHandshakeHandler.class);
 
     @Nullable
     private final MessageListener messageListener;
@@ -25,9 +25,9 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
     @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public Socks5ProxyAuthHandler(@Nullable MessageListener messageListener,
-                                  @Nullable SSLContextManager sslContextManager,
-                                  @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public Socks5ProxyHandshakeHandler(@Nullable MessageListener messageListener,
+                                       @Nullable SSLContextManager sslContextManager,
+                                       @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
         this.proxyHandlerSupplier = proxyHandlerSupplier;
@@ -40,9 +40,6 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
             return;
         }
         if (socksRequest instanceof Socks5InitialRequest) {
-            // auth support example
-            //ctx.pipeline().addFirst(new Socks5PasswordAuthRequestDecoder());
-            //ctx.write(new DefaultSocks5AuthMethodResponse(Socks5AuthMethod.PASSWORD));
             ctx.pipeline().addFirst(new Socks5CommandRequestDecoder());
             ctx.write(new DefaultSocks5InitialResponse(Socks5AuthMethod.NO_AUTH));
         } else if (socksRequest instanceof Socks5PasswordAuthRequest) {
@@ -51,7 +48,7 @@ public class Socks5ProxyAuthHandler extends SimpleChannelInboundHandler<SocksMes
         } else if (socksRequest instanceof Socks5CommandRequest) {
             Socks5CommandRequest socks5CmdRequest = (Socks5CommandRequest) socksRequest;
             if (socks5CmdRequest.type() == Socks5CommandType.CONNECT) {
-                ctx.pipeline().addLast(new Socks5ProxyConnectHandler(messageListener, sslContextManager,
+                ctx.pipeline().addLast(new Socks5ProxyHandler(messageListener, sslContextManager,
                         proxyHandlerSupplier));
                 ctx.pipeline().remove(this);
                 ctx.fireChannelRead(socksRequest);

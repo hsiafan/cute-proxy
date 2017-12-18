@@ -22,15 +22,15 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
 
     private ByteBuf buf;
 
-    public ProtocolDetector(ProtocolMatcher... matcherList) {
-        if (matcherList.length == 0) {
+    public ProtocolDetector(ProtocolMatcher... matchers) {
+        if (matchers.length == 0) {
             throw new IllegalArgumentException("No matcher for ProtocolDetector");
         }
-        this.matcherList = matcherList;
+        this.matcherList = matchers;
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (!(msg instanceof ByteBuf)) {
             logger.error("unexpected message type for ProtocolDetector: {}", msg.getClass());
             NettyUtils.closeOnFlush(ctx.channel());
@@ -51,7 +51,6 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
                 matcher.handlePipeline(ctx.pipeline());
                 ctx.pipeline().remove(this);
                 ctx.fireChannelRead(buf);
-                buf = null;
                 return;
             }
 
@@ -69,7 +68,7 @@ public class ProtocolDetector extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         if (buf != null) {
             buf.release();
             buf = null;

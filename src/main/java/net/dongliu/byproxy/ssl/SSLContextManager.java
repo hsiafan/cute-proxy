@@ -13,7 +13,7 @@ import java.math.BigInteger;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -33,6 +33,13 @@ public class SSLContextManager {
     private final ConcurrentHashMap<String, SSLContext> sslContextCache = new ConcurrentHashMap<>();
     // guard for set new root cert
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
+
+    private final ExecutorService threadPool = Executors.newCachedThreadPool(r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        t.setName("ssl-context-creator");
+        return t;
+    });
 
     public SSLContextManager(Path rootKeyStorePath, char[] keyStorePassword) {
         this.rootKeyStorePath = rootKeyStorePath;
@@ -58,6 +65,13 @@ public class SSLContextManager {
         } finally {
             lock.writeLock().unlock();
         }
+    }
+
+    /**
+     * Create ssl context for the host, running in thread pool
+     */
+    public CompletableFuture<SSLContext> createSSLContextAsync(String host) {
+        return CompletableFuture.supplyAsync(() -> createSSlContext(host), threadPool);
     }
 
     /**

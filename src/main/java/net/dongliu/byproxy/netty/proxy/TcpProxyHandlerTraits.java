@@ -25,9 +25,13 @@ import net.dongliu.byproxy.ssl.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
 
 import javax.annotation.Nullable;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import java.util.function.Supplier;
 
+/**
+ * Common methods for handle http/socks proxy
+ */
 public interface TcpProxyHandlerTraits {
 
     default Bootstrap initBootStrap(Promise<Channel> promise, EventLoopGroup eventLoopGroup) {
@@ -38,7 +42,7 @@ public interface TcpProxyHandlerTraits {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
+                    protected void initChannel(SocketChannel ch) {
                         Supplier<ProxyHandler> proxyHandlerSupplier = proxyHandlerSupplier();
                         if (proxyHandlerSupplier != null) {
                             ProxyHandler proxyHandler = proxyHandlerSupplier.get();
@@ -49,11 +53,12 @@ public interface TcpProxyHandlerTraits {
                 });
     }
 
-    default void initTcpProxyHandlers(ChannelHandlerContext ctx, NetAddress address, Channel outboundChannel) {
-        boolean intercept = messageListener() != null;
+    default void initTcpProxyHandlers(ChannelHandlerContext ctx, NetAddress address, Channel outChannel) {
+        MessageListener messageListener = messageListener();
+        boolean intercept = messageListener != null;
         if (!intercept) {
-            ctx.pipeline().addLast(new ReplayHandler(outboundChannel));
-            outboundChannel.pipeline().addLast(new ReplayHandler(ctx.channel()));
+            ctx.pipeline().addLast(new ReplayHandler(outChannel));
+            outChannel.pipeline().addLast(new ReplayHandler(ctx.channel()));
             return;
         }
 
@@ -63,31 +68,33 @@ public interface TcpProxyHandlerTraits {
         }
 
         ProtocolDetector protocolDetector = new ProtocolDetector(
-                new SSLMatcher().onMatched(p -> {
-                    //TODO: create ssl context is slow, should execute in another executor?
-                    SSLEngine serverSSLEngine = sslContextManager.createSSlContext(address.getHost()).createSSLEngine();
-                    serverSSLEngine.setUseClientMode(false);
-                    p.addLast("ssl", new SslHandler(serverSSLEngine));
+                new SSLMatcher(pipeline -> {
+                    SSLContext serverContext = sslContextManager.createSSlContext(address.getHost());
+                    SSLEngine serverEngine = serverContext.createSSLEngine();
+                    serverEngine.setUseClientMode(false);
+                    pipeline.addLast("ssl", new SslHandler(serverEngine));
 
-                    SSLEngine sslEngine = ClientSSLContextFactory.getInstance().get()
-                            .createSSLEngine(address.getHost(), address.getPort()); // using SNI
+                    SSLContext sslContext = ClientSSLContextFactory.getInstance().get();
+                    SSLEngine sslEngine = sslContext.createSSLEngine(address.getHost(), address.getPort()); // using SNI
                     sslEngine.setUseClientMode(true);
-                    outboundChannel.pipeline().addLast(new SslHandler(sslEngine));
-                    initPlainHandler(ctx, address, outboundChannel, true);
+                    outChannel.pipeline().addLast(new SslHandler(sslEngine));
+                    initInterceptorHandler(ctx, address, messageListener, outChannel, true);
                 }),
-                new AnyMatcher().onMatched(p -> initPlainHandler(ctx, address, outboundChannel, false))
+                new AnyMatcher(p -> initInterceptorHandler(ctx, address, messageListener, outChannel, false))
         );
         ctx.pipeline().addLast(protocolDetector);
     }
 
-    default void initPlainHandler(ChannelHandlerContext ctx, NetAddress address, Channel outboundChannel, boolean ssl) {
+    private static void initInterceptorHandler(ChannelHandlerContext ctx, NetAddress address,
+                                               MessageListener messageListener,
+                                               Channel outboundChannel, boolean ssl) {
 
         ctx.pipeline().addLast(new HttpServerCodec());
         ctx.pipeline().addLast("", new HttpServerExpectContinueHandler());
         ctx.pipeline().addLast("tcp-tunnel-handler", new ReplayHandler(outboundChannel));
 
         outboundChannel.pipeline().addLast(new HttpClientCodec());
-        HttpInterceptor interceptor = new HttpInterceptor(ssl, address, messageListener()).onUpgrade(() -> {
+        HttpInterceptor interceptor = new HttpInterceptor(ssl, address, messageListener).onUpgrade(() -> {
             ctx.pipeline().remove(HttpServerCodec.class);
             WebSocketFrameDecoder frameDecoder = new WebSocket13FrameDecoder(true, true, 65536, false);
             WebSocketFrameEncoder frameEncoder = new WebSocket13FrameEncoder(false);

@@ -15,17 +15,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class ResourceLoader {
     private static ResourceLoader instance = new ResourceLoader();
 
-    private ExecutorService resourceLoaderExecutor = Executors.newSingleThreadExecutor(
-            new ThreadFactory() {
-                private AtomicLong seq = new AtomicLong();
-
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread thread = new Thread(r);
-                    thread.setDaemon(true);
-                    thread.setName("Resource-Loader-" + seq.getAndIncrement());
-                    return thread;
-                }
+    private ExecutorService resourceLoaderExecutor = Executors.newSingleThreadExecutor(r -> {
+                Thread thread = new Thread(r);
+                thread.setDaemon(true);
+                thread.setName("Resource-Loader");
+                return thread;
             }
     );
 

@@ -20,7 +20,7 @@ public class BodySaver {
     private ExecutorService executor = Executors.newSingleThreadExecutor(runnable -> {
         Thread thread = new Thread(runnable);
         thread.setDaemon(true);
-        thread.setName("BodySaver-worker-1");
+        thread.setName("BodySaver-worker");
         return thread;
     });
 

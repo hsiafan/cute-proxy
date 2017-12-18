@@ -2,35 +2,38 @@ package net.dongliu.byproxy.netty.detector;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.http.HttpContentCompressor;
-import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
-import io.netty.handler.stream.ChunkedWriteHandler;
-import net.dongliu.byproxy.netty.web.HttpRequestHandler;
-import net.dongliu.byproxy.ssl.SSLContextManager;
+import io.netty.handler.proxy.ProxyHandler;
+import net.dongliu.byproxy.MessageListener;
+import net.dongliu.byproxy.netty.proxy.HttpProxyPlainHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
 
 /**
- * Matcher for plain http request.
+ * Matcher for plain http proxy request.
  */
-public class HttpMatcher extends ProtocolMatcher {
-    private static final Logger logger = LoggerFactory.getLogger(HttpMatcher.class);
+public class HttpProxyMatcher extends ProtocolMatcher {
+    private static final Logger logger = LoggerFactory.getLogger(HttpProxyMatcher.class);
 
     private static Set<String> methods = Set.of("GET", "POST", "PUT", "HEAD", "OPTIONS", "PATCH", "DELETE",
             "TRACE");
 
     @Nullable
-    private final SSLContextManager sslContextManager;
+    private final MessageListener messageListener;
+    @Nullable
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public HttpMatcher(@Nullable SSLContextManager sslContextManager) {
-        this.sslContextManager = sslContextManager;
+    public HttpProxyMatcher(@Nullable MessageListener messageListener,
+                            @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
+        this.messageListener = messageListener;
+        this.proxyHandlerSupplier = proxyHandlerSupplier;
     }
 
     @Override
@@ -51,9 +54,10 @@ public class HttpMatcher extends ProtocolMatcher {
 
         String method = buf.toString(0, index, US_ASCII);
         char firstURI = (char) (buf.getByte(firstURIIndex + buf.readerIndex()) & 0xff);
-        if (!methods.contains(method) || firstURI != '/') {
+        if (!methods.contains(method) || firstURI == '/') {
             return MISMATCH;
         }
+
 
         return MATCH;
     }
@@ -61,10 +65,7 @@ public class HttpMatcher extends ProtocolMatcher {
     @Override
     public void handlePipeline(ChannelPipeline pipeline) {
         pipeline.addLast(new HttpServerCodec());
-        pipeline.addLast(new HttpServerExpectContinueHandler());
-        pipeline.addLast(new HttpObjectAggregator(65536));
-        pipeline.addLast(new ChunkedWriteHandler());
-        pipeline.addLast(new HttpContentCompressor());
-        pipeline.addLast(new HttpRequestHandler(sslContextManager));
+        pipeline.addLast("", new HttpServerExpectContinueHandler());
+        pipeline.addLast(new HttpProxyPlainHandler(messageListener, proxyHandlerSupplier));
     }
 }
