@@ -18,7 +18,7 @@ class BufferListInputStream extends InputStream {
     }
 
     @Override
-    public synchronized int read() throws IOException {
+    public synchronized int read() {
         ByteBuffer buffer = indexBuffer();
         if (buffer == null) {
             return -1;
@@ -27,7 +27,7 @@ class BufferListInputStream extends InputStream {
     }
 
     @Override
-    public synchronized int read(byte[] b, int off, int len) throws IOException {
+    public synchronized int read(byte[] b, int off, int len) {
         if (b == null) {
             throw new NullPointerException();
         } else if (off < 0 || len < 0 || len > b.length - off) {
@@ -46,7 +46,7 @@ class BufferListInputStream extends InputStream {
     }
 
     @Override
-    public synchronized long skip(long n) throws IOException {
+    public synchronized long skip(long n) {
         if (n <= 0) {
             return 0;
         }
@@ -76,7 +76,7 @@ class BufferListInputStream extends InputStream {
     }
 
     @Override
-    public synchronized void close() throws IOException {
+    public synchronized void close() {
         bufferList.clear();
     }
 }

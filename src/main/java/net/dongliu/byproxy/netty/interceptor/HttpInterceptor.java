@@ -31,8 +31,7 @@ public class HttpInterceptor extends ChannelDuplexHandler {
     private final NetAddress address;
     private final MessageListener messageListener;
 
-    private Runnable onUpgrade = () -> {
-    };
+    private final Runnable onUpgrade;
 
     public HttpInterceptor(boolean ssl, NetAddress address, MessageListener messageListener, Runnable onUpgrade) {
         this.ssl = ssl;

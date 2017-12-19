@@ -19,6 +19,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -42,9 +43,9 @@ public class Body implements Serializable {
 
     public Body(@Nullable BodyType type, @Nullable Charset charset,
                 @Nullable String contentEncoding) {
-        this.type = Objects.requireNonNullElse(type, BodyType.unknown);
-        this.charset = Objects.requireNonNullElse(charset, StandardCharsets.UTF_8);
-        this.contentEncoding = Objects.requireNonNullElse(contentEncoding, "");
+        this.type = requireNonNullElse(type, BodyType.unknown);
+        this.charset = requireNonNullElse(charset, StandardCharsets.UTF_8);
+        this.contentEncoding = requireNonNullElse(contentEncoding, "");
         this.chunkList = new ArrayList<>();
     }
 
@@ -128,7 +129,7 @@ public class Body implements Serializable {
         return this.size;
     }
 
-    public InputStream getInputStream() throws FileNotFoundException {
+    public InputStream getInputStream() {
         if (!finished) {
             throw new IllegalStateException("Http body not finished yet");
         }
@@ -139,7 +140,7 @@ public class Body implements Serializable {
     /**
      * Get content as input stream, with content decompressed is needed
      */
-    public InputStream getDecodedInputStream() throws IOException {
+    public InputStream getDecodedInputStream() {
         InputStream input = getInputStream();
         if (size() == 0) {
             return input;
