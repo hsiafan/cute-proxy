@@ -34,15 +34,21 @@ public class HttpInterceptor extends ChannelDuplexHandler {
     private Runnable onUpgrade = () -> {
     };
 
-    public HttpInterceptor(boolean ssl, NetAddress address, MessageListener messageListener) {
+    public HttpInterceptor(boolean ssl, NetAddress address, MessageListener messageListener, Runnable onUpgrade) {
         this.ssl = ssl;
         this.address = address;
         this.messageListener = messageListener;
+        this.onUpgrade = onUpgrade;
+    }
+
+    public HttpInterceptor(boolean ssl, NetAddress address, MessageListener messageListener) {
+        this(ssl, address, messageListener, () -> {
+        });
     }
 
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
         if (!(msg instanceof HttpObject)) {
             logger.debug("not http message: {}", msg.getClass().getName());
             ctx.write(msg, promise);
@@ -71,13 +77,12 @@ public class HttpInterceptor extends ChannelDuplexHandler {
 
         if (msg instanceof HttpContent) {
             HttpRoundTripMessage message = this.httpMessage;
-            BodySaver saver = BodySaver.getInstance();
             ByteBuf content = ((HttpContent) msg).content();
             if (content.readableBytes() > 0) {
-                saver.append(message.getRequestBody(), content, ctx.executor());
+                message.getRequestBody().append(content.nioBuffer());
             }
             if (msg instanceof LastHttpContent) {
-                saver.finish(message.getRequestBody());
+                message.getRequestBody().finish();
 
             }
         }
@@ -111,13 +116,12 @@ public class HttpInterceptor extends ChannelDuplexHandler {
         }
 
         if (msg instanceof HttpContent) {
-            BodySaver saver = BodySaver.getInstance();
             ByteBuf content = ((HttpContent) msg).content();
             if (content.readableBytes() > 0) {
-                saver.append(message.getResponseBody(), content, ctx.executor());
+                message.getResponseBody().append(content.nioBuffer());
             }
             if (msg instanceof LastHttpContent) {
-                saver.finish(message.getResponseBody());
+                message.getResponseBody().finish();
                 this.httpMessage = null;
 
                 // connection upgrade
@@ -169,13 +173,10 @@ public class HttpInterceptor extends ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.error("", cause);
+        if (cause.getMessage() == null || !cause.getMessage().contains("Connection reset by peer")) {
+            logger.error("", cause);
+        }
         super.exceptionCaught(ctx, cause);
     }
 
-
-    public HttpInterceptor onUpgrade(Runnable runnable) {
-        this.onUpgrade = Objects.requireNonNull(runnable);
-        return this;
-    }
 }

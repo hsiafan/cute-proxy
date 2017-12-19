@@ -17,9 +17,5 @@ public class NettyUtils {
         }
     }
 
-    private static final DefaultEventExecutor executor = new DefaultEventExecutor();
-
-    public static EventExecutor sslThreadPool() {
-        return executor;
-    }
+    public static final EventExecutor saveExecutor = new DefaultEventExecutor();
 }

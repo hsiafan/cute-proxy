@@ -1,6 +1,7 @@
 package net.dongliu.byproxy.netty.interceptor;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.EmptyByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -25,7 +26,6 @@ public class WebSocketInterceptor extends ChannelDuplexHandler {
     private final String host;
     private final String url;
     private final MessageListener messageListener;
-    private final BodySaver saver = BodySaver.getInstance();
 
     public WebSocketInterceptor(String host, String url, MessageListener messageListener) {
         this.host = host;
@@ -34,18 +34,22 @@ public class WebSocketInterceptor extends ChannelDuplexHandler {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         filterWebSocketFrame(ctx, msg, false);
         ctx.fireChannelRead(msg);
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
         filterWebSocketFrame(ctx, msg, true);
         ctx.write(msg, promise);
     }
 
     private void filterWebSocketFrame(ChannelHandlerContext ctx, Object msg, boolean request) {
+        if (msg instanceof EmptyByteBuf) {
+            ((EmptyByteBuf) msg).release();
+            return;
+        }
         if (!(msg instanceof WebSocketFrame)) {
             logger.debug("not web-socket frame type: {}", msg.getClass().getName());
         }
@@ -78,9 +82,9 @@ public class WebSocketInterceptor extends ChannelDuplexHandler {
             } else {
                 ContinuationWebSocketFrame frame = (ContinuationWebSocketFrame) msg;
                 ByteBuf content = frame.content();
-                saver.append(message.getBody(), content, ctx.executor());
+                message.getBody().append(content.nioBuffer());
                 if (frame.isFinalFragment()) {
-                    saver.finish(message.getBody());
+                    message.getBody().finish();
                     if (request) {
                         requestMessage = message;
                     } else {
@@ -99,11 +103,11 @@ public class WebSocketInterceptor extends ChannelDuplexHandler {
         BodyType bodyType = type == WebSocketMessage.TYPE_TEXT ? BodyType.text : BodyType.binary;
         Body body = new Body(bodyType, null, null);
         ByteBuf content = frame.content();
-        saver.append(body, content, ctx.executor());
+        body.append(content.nioBuffer());
         message.setBody(body);
         messageListener.onWebSocket(message);
         if (frame.isFinalFragment()) {
-            saver.finish(body);
+            body.finish();
         } else {
             if (request) {
                 responseMessage = message;

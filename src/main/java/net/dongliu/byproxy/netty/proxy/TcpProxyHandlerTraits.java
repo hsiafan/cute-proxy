@@ -94,7 +94,7 @@ public interface TcpProxyHandlerTraits {
         ctx.pipeline().addLast("tcp-tunnel-handler", new ReplayHandler(outboundChannel));
 
         outboundChannel.pipeline().addLast(new HttpClientCodec());
-        HttpInterceptor interceptor = new HttpInterceptor(ssl, address, messageListener).onUpgrade(() -> {
+        HttpInterceptor interceptor = new HttpInterceptor(ssl, address, messageListener, () -> {
             ctx.pipeline().remove(HttpServerCodec.class);
             WebSocketFrameDecoder frameDecoder = new WebSocket13FrameDecoder(true, true, 65536, false);
             WebSocketFrameEncoder frameEncoder = new WebSocket13FrameEncoder(false);

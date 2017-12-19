@@ -1,17 +1,21 @@
 package net.dongliu.byproxy.store;
 
-import java.nio.ByteBuffer;
+import io.netty.util.concurrent.FastThreadLocal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Create, manage DataStores
+ * Create, manage DataStores, using thread-local.
  */
 class DataStoreManager {
-    private static final int MAX_REGION_SIZE = 16 * 1024 * 1024; // 16M
-    private static final int INITIAL_REGION_SIZE = 1024 * 1024; // 1M
+    private static final Logger logger = LoggerFactory.getLogger(DataStoreManager.class);
+    private static final int CHUNK_SIZE = 4 * 1024 * 1024; // 4M
     private static DataStoreManager instance = new DataStoreManager();
 
-    private DataStore store = createStore();
-    private int regionSize = INITIAL_REGION_SIZE;
+    private FastThreadLocal<DataStore> storeLocal = new FastThreadLocal<>();
+    private AtomicLong totalSize = new AtomicLong();
 
 
     /**
@@ -21,26 +25,32 @@ class DataStoreManager {
         return instance;
     }
 
-    public synchronized Chunk store(ByteBuffer buffer) {
-        int size = buffer.remaining();
-        if (size > INITIAL_REGION_SIZE) {
+    /**
+     * Return one data store can store the size of data.
+     */
+    public DataStore fetchStore(int size) {
+        if (size < 0) {
+            throw new IllegalArgumentException("size less than 0");
+        }
+        if (size > CHUNK_SIZE) {
             throw new RuntimeException("too large buffer size");
         }
-        int pos = store.write(buffer);
-        if (pos == -1) {
-            store = createStore();
-            pos = store.write(buffer);
+        DataStore dataStore = storeLocal.get();
+        if (dataStore != null && dataStore.remaining() > size) {
+            return dataStore;
         }
-        return new Chunk(store, pos, size);
+        dataStore = createStore();
+        storeLocal.set(dataStore);
+        return dataStore;
     }
 
-    private synchronized DataStore createStore() {
+    private DataStore createStore() {
+        logger.debug("allocate data store with size {}, total size:{}", CHUNK_SIZE, totalSize.get());
         DataStore store;
-        if (regionSize < MAX_REGION_SIZE) {
-            store = new OffHeapStore(regionSize);
-            regionSize *= 2;
+        if (totalSize.getAndAdd(CHUNK_SIZE) < 128 * 1024 * 1024) {
+            store = new OffHeapStore(CHUNK_SIZE);
         } else {
-            store = new MMappedStore(regionSize);
+            store = new MMappedStore(CHUNK_SIZE);
         }
         return store;
     }

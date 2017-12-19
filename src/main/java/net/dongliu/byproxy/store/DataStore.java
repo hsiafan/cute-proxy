@@ -3,7 +3,7 @@ package net.dongliu.byproxy.store;
 import java.nio.ByteBuffer;
 
 /**
- * Store byte data, using ByteBuffer
+ * Store byte data, using ByteBuffer. This class is NOT thread-safe.
  */
 abstract class DataStore {
 
@@ -11,6 +11,13 @@ abstract class DataStore {
 
     protected DataStore(ByteBuffer buffer) {
         this.buffer = buffer;
+    }
+
+    /**
+     * The remaining size of this data store.
+     */
+    public int remaining() {
+        return buffer.remaining();
     }
 
     /**

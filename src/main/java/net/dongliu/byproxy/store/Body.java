@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -27,14 +26,13 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Liu Dong
  */
-@ThreadSafe
 public class Body implements Serializable {
     private static final long serialVersionUID = -5119917294712380816L;
     private static Logger logger = LoggerFactory.getLogger(Body.class);
 
-    private long size;
+    private volatile long size;
     // http body has been finished
-    private boolean finished;
+    private volatile boolean finished;
 
     private volatile BodyType type;
     private volatile Charset charset;
@@ -102,32 +100,35 @@ public class Body implements Serializable {
     /**
      * Append new data to this body
      */
-    public synchronized void append(ByteBuffer buffer) {
-        if (buffer.remaining() == 0) {
+    public void append(ByteBuffer buffer) {
+        int size = buffer.remaining();
+        if (size == 0) {
             return;
         }
         DataStoreManager manager = DataStoreManager.getInstance();
-        this.size += buffer.remaining();
-        Chunk chunk = manager.store(buffer);
+        this.size += size;
+        DataStore dataStore = manager.fetchStore(size);
+        int offset = dataStore.write(buffer);
+        Chunk chunk = new Chunk(dataStore, offset, size);
         chunkList.add(chunk);
     }
 
-    public synchronized void finish() {
+    public void finish() {
         this.finished = true;
     }
 
-    public synchronized boolean isFinished() {
+    public boolean isFinished() {
         return finished;
     }
 
     /**
      * The len of data
      */
-    public synchronized long size() {
+    public long size() {
         return this.size;
     }
 
-    public synchronized InputStream getInputStream() throws FileNotFoundException {
+    public InputStream getInputStream() throws FileNotFoundException {
         if (!finished) {
             throw new IllegalStateException("Http body not finished yet");
         }
@@ -138,7 +139,7 @@ public class Body implements Serializable {
     /**
      * Get content as input stream, with content decompressed is needed
      */
-    public synchronized InputStream getDecodedInputStream() throws IOException {
+    public InputStream getDecodedInputStream() throws IOException {
         InputStream input = getInputStream();
         if (size() == 0) {
             return input;
@@ -167,7 +168,7 @@ public class Body implements Serializable {
         return input;
     }
 
-    private synchronized void writeObject(ObjectOutputStream out) throws IOException {
+    private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeBoolean(finished);
         out.writeObject(type);
         out.writeUTF(charset.name());

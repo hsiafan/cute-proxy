@@ -97,7 +97,7 @@ public class SSLContextManager {
         char[] keyStorePassword = Settings.keyStorePassword;
         long start = System.currentTimeMillis();
         KeyStore keyStore = keyStoreGenerator.generateKeyStore(host, Settings.certValidityDays, keyStorePassword);
-        logger.info("Create certificate for {}, cost {} ms", host, System.currentTimeMillis() - start);
+        logger.debug("Create certificate for {}, cost {} ms", host, System.currentTimeMillis() - start);
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         keyManagerFactory.init(keyStore, keyStorePassword);
         KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();

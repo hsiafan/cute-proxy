@@ -48,7 +48,8 @@ public class Server {
     public void start() throws Exception {
         ServerBootstrap bootstrap = new ServerBootstrap();
         master = new NioEventLoopGroup(1, new DefaultThreadFactory("netty-master"));
-        worker = new NioEventLoopGroup(Runtime.getRuntime().availableProcessors() * 2,
+        worker = new NioEventLoopGroup(
+                Math.min(Runtime.getRuntime().availableProcessors() * 2, 16),
                 new DefaultThreadFactory("netty-worker"));
         bootstrap.group(master, worker)
                 .channel(NioServerSocketChannel.class)
