@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.struct;
 
-import net.dongliu.byproxy.ui.ItemValue;
+import net.dongliu.byproxy.ui.component.Item;
 
 import java.io.Serializable;
 
@@ -9,7 +9,7 @@ import java.io.Serializable;
  *
  * @author Liu Dong
  */
-public abstract class Message implements ItemValue, Serializable {
+public abstract class Message extends Item implements Serializable {
     private static final long serialVersionUID = 434844783179505084L;
     private String host;
     private String url;

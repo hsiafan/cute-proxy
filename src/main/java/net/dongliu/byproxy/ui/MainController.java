@@ -139,7 +139,7 @@ public class MainController {
         ObservableValue<Boolean> hasCurrentMessage = UIUtils.observeNull(currentMessage);
         copyURLButton.disableProperty().bind(hasCurrentMessage);
 
-        Property<TreeItem<ItemValue>> currentTreeItem = catalogPane.currentTreeItemProperty();
+        Property<TreeItem<Item>> currentTreeItem = catalogPane.currentTreeItemProperty();
         deleteMenu.disableProperty().bind(UIUtils.observeNull(currentTreeItem));
         loadConfigAndKeyStore();
 
@@ -299,9 +299,9 @@ public class MainController {
 
     @FXML
     private void deleteTreeNode(ActionEvent event) {
-        TreeItem<ItemValue> treeItem = catalogPane.currentTreeItemProperty().getValue();
+        TreeItem<Item> treeItem = catalogPane.currentTreeItemProperty().getValue();
         if (treeItem != null) {
-            catalogPane.deleteTreeNode(treeItem);
+            catalogPane.deleteTreeItem(treeItem);
         }
     }
 }

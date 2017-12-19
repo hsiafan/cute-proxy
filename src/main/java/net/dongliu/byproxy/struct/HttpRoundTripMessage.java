@@ -56,4 +56,9 @@ public class HttpRoundTripMessage extends Message implements Serializable {
     public void setResponseBody(@Nullable Body responseBody) {
         this.responseBody = Objects.requireNonNull(responseBody);
     }
+
+    @Override
+    public String toString() {
+        return "HttpRoundTripMessage{url=" + getUrl() + "}";
+    }
 }

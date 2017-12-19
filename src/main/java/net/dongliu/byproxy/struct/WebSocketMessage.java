@@ -45,4 +45,9 @@ public class WebSocketMessage extends Message implements Serializable {
     public void setBody(Body body) {
         this.body = body;
     }
+
+    @Override
+    public String toString() {
+        return "WebSocketMessage{url=" + getUrl() + "}";
+    }
 }

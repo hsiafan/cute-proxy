@@ -16,8 +16,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
 import net.dongliu.byproxy.struct.Message;
-import net.dongliu.byproxy.ui.ItemValue;
-import net.dongliu.byproxy.ui.TreeNodeValue;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.utils.Networks;
 
@@ -37,12 +35,12 @@ public class CatalogPane extends BorderPane {
     @FXML
     private ListView<Message> messageList;
     @FXML
-    private TreeView<ItemValue> messageTree;
+    private TreeView<Item> messageTree;
     @FXML
     private ToggleGroup viewTypeGroup;
 
     private Property<Message> currentMessage = new SimpleObjectProperty<>();
-    private Property<TreeItem<ItemValue>> currentTreeItem = new SimpleObjectProperty<>();
+    private Property<TreeItem<Item>> currentTreeItem = new SimpleObjectProperty<>();
 
     public CatalogPane() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/catalog_view.fxml"));
@@ -53,7 +51,7 @@ public class CatalogPane extends BorderPane {
 
     @FXML
     void initialize() {
-        messageList.setCellFactory(listView -> new ListCell<Message>() {
+        messageList.setCellFactory(listView -> new ListCell<>() {
             @Override
             public void updateItem(Message item, boolean empty) {
                 super.updateItem(item, empty);
@@ -66,15 +64,15 @@ public class CatalogPane extends BorderPane {
         });
         messageList.getSelectionModel().selectedItemProperty().addListener((ov, o, n) -> currentMessage.setValue(n));
 
-        TreeItem<ItemValue> root = new TreeItem<>(new TreeNodeValue(""));
+        TreeItem<Item> root = new TreeItem<>(new TreeNode(""));
         root.setExpanded(true);
         messageTree.setRoot(root);
         messageTree.setShowRoot(false);
         messageTree.setCellFactory(new TreeCellFactory());
         messageTree.setOnMouseClicked(new TreeViewMouseHandler());
-        ReadOnlyObjectProperty<TreeItem<ItemValue>> selectTreeNode = messageTree.getSelectionModel().selectedItemProperty();
+        ReadOnlyObjectProperty<TreeItem<Item>> selectTreeNode = messageTree.getSelectionModel().selectedItemProperty();
         selectTreeNode.addListener((ov, o, n) -> {
-            if (n == null || n.getValue() instanceof TreeNodeValue) {
+            if (n == null || n.getValue() instanceof TreeNode) {
                 currentMessage.setValue(null);
             } else {
                 Message message = (Message) n.getValue();
@@ -106,29 +104,88 @@ public class CatalogPane extends BorderPane {
 
     public void clearAll() {
         messageList.getItems().clear();
-        messageTree.setRoot(new TreeItem<>(new TreeNodeValue("")));
+        messageTree.setRoot(new TreeItem<>(new TreeNode("")));
     }
 
     public void addTreeItemMessage(Message message) {
         messageList.getItems().add(message);
-        TreeItem<ItemValue> root = messageTree.getRoot();
+        TreeItem<Item> root = messageTree.getRoot();
         String host = Networks.genericMultiCDNS(message.getHost());
+        insertNewMessage(message, root, host);
+    }
 
-
-        for (TreeItem<ItemValue> item : root.getChildren()) {
-            TreeNodeValue node = (TreeNodeValue) item.getValue();
-            if (node.getPattern().equals(host)) {
-                item.getChildren().add(new TreeItem<>(message));
-                node.increaseChildren();
-                return;
+    private void insertNewMessage(Message message, TreeItem<Item> root, String host) {
+        TreeItem<Item> cItem = null;
+        int cResult = TreeNode.MISS;
+        int nodeEndPos = 0;
+        for (TreeItem<Item> item : root.getChildren()) {
+            Item value = item.getValue();
+            if (!(value instanceof TreeNode)) {
+                break;
+            }
+            nodeEndPos++;
+            TreeNode node = (TreeNode) value;
+            int result = node.match(host);
+            if (result > cResult) {
+                cItem = item;
+                cResult = result;
             }
         }
 
-        TreeNodeValue node = new TreeNodeValue(host);
-        TreeItem<ItemValue> nodeItem = new TreeItem<>(node);
-        root.getChildren().add(nodeItem);
-        nodeItem.getChildren().add(new TreeItem<>(message));
-        node.increaseChildren();
+        if (cResult == TreeNode.MISS) {
+            // no one matches, create new top level node
+            TreeNode node = new TreeNode(host);
+            TreeItem<Item> nodeItem = new TreeItem<>(node);
+            root.getChildren().add(nodeEndPos, nodeItem);
+            nodeItem.getChildren().add(new TreeItem<>(message));
+            node.increaseChildren();
+            return;
+        }
+
+        if (cResult == TreeNode.EQUAL) {
+            // exactly match
+            cItem.getChildren().add(new TreeItem<>(message));
+            return;
+        }
+
+        if (cResult == TreeNode.IS_SUB) {
+            // host is sub domain of node pattern
+            insertNewMessage(message, cItem, host);
+            return;
+        }
+
+        if (cResult == TreeNode.IS_SUPER) {
+            // node pattern is sub domain of host
+            TreeNode newNode = new TreeNode(host);
+            TreeItem<Item> newItem = new TreeItem<>(newNode);
+            root.getChildren().add(nodeEndPos, newItem);
+            root.getChildren().remove(cItem);
+            newItem.getChildren().add(cItem);
+            TreeItem<Item> leaf = new TreeItem<>(message);
+            newItem.getChildren().add(leaf);
+        }
+
+        // share common domain suffix
+        String rootPath = ((TreeNode) (root.getValue())).getPattern();
+        String commonPattern = host.substring(host.length() - cResult, host.length());
+        if (commonPattern.equals(rootPath)) {
+            TreeNode newNode = new TreeNode(host);
+            TreeItem<Item> newTreeItem = new TreeItem<>(newNode);
+            root.getChildren().add(nodeEndPos, newTreeItem);
+            TreeItem<Item> leaf = new TreeItem<>(message);
+            newTreeItem.getChildren().add(leaf);
+        } else {
+            TreeNode parentNode = new TreeNode(commonPattern);
+            TreeItem<Item> parentItem = new TreeItem<>(parentNode);
+            root.getChildren().add(nodeEndPos, parentItem);
+            root.getChildren().remove(cItem);
+            parentItem.getChildren().add(cItem);
+            TreeNode newNode = new TreeNode(host);
+            TreeItem<Item> newItem = new TreeItem<>(newNode);
+            parentItem.getChildren().add(newItem);
+            TreeItem<Item> leaf = new TreeItem<>(message);
+            newItem.getChildren().add(leaf);
+        }
     }
 
     public Collection<Message> getMessages() {
@@ -136,19 +193,19 @@ public class CatalogPane extends BorderPane {
         return new ArrayList<>(items);
     }
 
-    private static class TreeCellFactory implements Callback<TreeView<ItemValue>, TreeCell<ItemValue>> {
+    private static class TreeCellFactory implements Callback<TreeView<Item>, TreeCell<Item>> {
 
         @Override
-        public TreeCell<ItemValue> call(TreeView<ItemValue> treeView) {
-            return new TreeCell<ItemValue>() {
+        public TreeCell<Item> call(TreeView<Item> treeView) {
+            return new TreeCell<>() {
                 @Override
-                protected void updateItem(ItemValue itemValue, boolean empty) {
-                    super.updateItem(itemValue, empty);
+                protected void updateItem(Item item, boolean empty) {
+                    super.updateItem(item, empty);
 
                     if (empty) {
                         setText(null);
                     } else {
-                        setText(itemValue.displayText());
+                        setText(item.displayText());
                     }
                 }
             };
@@ -164,23 +221,23 @@ public class CatalogPane extends BorderPane {
                 return;
             }
 
-            TreeItem<ItemValue> treeItem = messageTree.getSelectionModel().getSelectedItem();
+            TreeItem<Item> treeItem = messageTree.getSelectionModel().getSelectedItem();
             if (treeItem == null) {
                 return;
             }
-            ItemValue itemValue = treeItem.getValue();
+            Item item = treeItem.getValue();
 
             ContextMenu contextMenu = new ContextMenu();
 
-            if (itemValue instanceof Message) {
-                Message message = (Message) itemValue;
+            if (item instanceof Message) {
+                Message message = (Message) item;
                 MenuItem copyMenu = new MenuItem("Copy URL");
                 copyMenu.setOnAction(e -> UIUtils.copyToClipBoard(message.getUrl()));
                 contextMenu.getItems().add(copyMenu);
             }
 
             MenuItem deleteMenu = new MenuItem("Delete");
-            deleteMenu.setOnAction(e -> deleteTreeNode(treeItem));
+            deleteMenu.setOnAction(e -> deleteTreeItem(treeItem));
             contextMenu.getItems().add(deleteMenu);
 
 
@@ -188,29 +245,32 @@ public class CatalogPane extends BorderPane {
         }
     }
 
-    public void deleteTreeNode(TreeItem<ItemValue> treeItem) {
-        TreeItem<ItemValue> parent = treeItem.getParent();
+    public void deleteTreeItem(TreeItem<Item> treeItem) {
+        TreeItem<Item> parent = treeItem.getParent();
         parent.getChildren().remove(treeItem);
+
         // also remove from list view
-        ItemValue value = treeItem.getValue();
         List<Message> removed = new ArrayList<>();
-        if (value instanceof Message) {
-            Message message = (Message) value;
-            removed.add(message);
-        } else {
-            for (TreeItem<ItemValue> child : treeItem.getChildren()) {
-                Message message = (Message) child.getValue();
-                removed.add(message);
-            }
-        }
+        findAllLeafs(treeItem, removed);
         messageList.getItems().removeAll(removed);
+    }
+
+    private void findAllLeafs(TreeItem<Item> item, List<Message> messageList) {
+        Item value = item.getValue();
+        if (value instanceof Message) {
+            messageList.add((Message) value);
+            return;
+        }
+        for (TreeItem<Item> ni : item.getChildren()) {
+            findAllLeafs(ni, messageList);
+        }
     }
 
     public Property<Message> currentMessageProperty() {
         return currentMessage;
     }
 
-    public Property<TreeItem<ItemValue>> currentTreeItemProperty() {
+    public Property<TreeItem<Item>> currentTreeItemProperty() {
         return currentTreeItem;
     }
 }
