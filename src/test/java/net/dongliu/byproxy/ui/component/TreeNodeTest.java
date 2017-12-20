@@ -10,11 +10,11 @@ public class TreeNodeTest {
     public void match() {
 
         TreeNode treeNode = new TreeNode("www.baidu.com");
-        assertEquals(0, treeNode.match("www.baidu.com"));
-        assertEquals(-1, treeNode.match("www.test.com"));
+        assertEquals(TreeNode.EQUAL, treeNode.match("www.baidu.com"));
+        assertEquals(TreeNode.MISS, treeNode.match("www.test.com"));
         assertEquals(9, treeNode.match("w.baidu.com"));
-        assertEquals(-2, treeNode.match("v2.www.baidu.com"));
-        assertEquals(-3, treeNode.match("baidu.com"));
+        assertEquals(TreeNode.IS_SUB, treeNode.match("v2.www.baidu.com"));
+        assertEquals(TreeNode.IS_SUPER, treeNode.match("baidu.com"));
         assertEquals(9, treeNode.match("www2.baidu.com"));
         assertEquals(9, treeNode.match("rm.www2.baidu.com"));
 
