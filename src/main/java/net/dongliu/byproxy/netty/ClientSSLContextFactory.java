@@ -1,8 +1,12 @@
-package net.dongliu.byproxy.ssl;
+package net.dongliu.byproxy.netty;
 
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import net.dongliu.byproxy.exception.SSLContextException;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.KeyManagementException;
@@ -10,9 +14,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.function.Supplier;
 
-public class ClientSSLContextFactory implements Supplier<SSLContext> {
+public class ClientSSLContextFactory implements Supplier<SslContext> {
 
-    private SSLContext context = createClientSSlContext();
+    private SslContext context = createNettyClientSSlContext();
     private static ClientSSLContextFactory instance = new ClientSSLContextFactory();
 
     public static ClientSSLContextFactory getInstance() {
@@ -20,8 +24,16 @@ public class ClientSSLContextFactory implements Supplier<SSLContext> {
     }
 
     @Override
-    public SSLContext get() {
+    public SslContext get() {
         return context;
+    }
+
+    private static SslContext createNettyClientSSlContext() {
+        try {
+            return SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+        } catch (SSLException e) {
+            throw new SSLContextException(e);
+        }
     }
 
     private static SSLContext createClientSSlContext() {

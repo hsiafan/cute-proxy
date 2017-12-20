@@ -10,7 +10,7 @@ import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
-import net.dongliu.byproxy.ssl.SSLContextManager;
+import net.dongliu.byproxy.netty.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
 import net.dongliu.byproxy.utils.Networks;
 import org.slf4j.Logger;

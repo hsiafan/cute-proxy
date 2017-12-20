@@ -3,7 +3,7 @@ package net.dongliu.byproxy;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
 import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.setting.ServerSetting;
-import net.dongliu.byproxy.ssl.SSLContextManager;
+import net.dongliu.byproxy.netty.SSLContextManager;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

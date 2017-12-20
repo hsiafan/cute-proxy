@@ -13,7 +13,7 @@
         <maven.compiler.source>9</maven.compiler.source>
         <maven.compiler.target>9</maven.compiler.target>
         <maven.compiler.release>9</maven.compiler.release>
-        <netty.version>4.1.15.Final</netty.version>
+        <netty.version>4.1.19.Final</netty.version>
         <slf4j.version>1.7.21</slf4j.version>
         <bouncycastle.version>1.55</bouncycastle.version>
     </properties>

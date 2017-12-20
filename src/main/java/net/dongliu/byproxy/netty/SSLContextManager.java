@@ -1,7 +1,11 @@
-package net.dongliu.byproxy.ssl;
+package net.dongliu.byproxy.netty;
 
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import net.dongliu.byproxy.exception.SSLContextException;
 import net.dongliu.byproxy.setting.Settings;
+import net.dongliu.byproxy.ssl.KeyStoreGenerator;
+import net.dongliu.byproxy.ssl.PrivateKeyAndCertChain;
 import net.dongliu.byproxy.utils.Networks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +17,7 @@ import java.math.BigInteger;
 import java.nio.file.Path;
 import java.security.KeyStore;
 import java.security.SecureRandom;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -30,16 +34,9 @@ public class SSLContextManager {
     private KeyStoreGenerator keyStoreGenerator;
     private BigInteger lastRootCertSN;
     // ssl context cache
-    private final ConcurrentHashMap<String, SSLContext> sslContextCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, SslContext> sslContextCache = new ConcurrentHashMap<>();
     // guard for set new root cert
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-
-    private final ExecutorService threadPool = Executors.newCachedThreadPool(r -> {
-        Thread t = new Thread(r);
-        t.setDaemon(true);
-        t.setName("ssl-context-creator");
-        return t;
-    });
 
     public SSLContextManager(Path rootKeyStorePath, char[] keyStorePassword) {
         this.rootKeyStorePath = rootKeyStorePath;
@@ -68,22 +65,15 @@ public class SSLContextManager {
     }
 
     /**
-     * Create ssl context for the host, running in thread pool
-     */
-    public CompletableFuture<SSLContext> createSSLContextAsync(String host) {
-        return CompletableFuture.supplyAsync(() -> createSSlContext(host), threadPool);
-    }
-
-    /**
      * Create ssl context for the host
      */
-    public SSLContext createSSlContext(String host) {
+    public SslContext createSSlContext(String host) {
         host = Networks.wildcardHost(host);
         lock.readLock().lock();
         try {
             return sslContextCache.computeIfAbsent(host, h -> {
                 try {
-                    return getSslContextInner(h);
+                    return getNettySslContextInner(h);
                 } catch (Exception e) {
                     throw new SSLContextException(e);
                 }
@@ -104,6 +94,21 @@ public class SSLContextManager {
         SSLContext sslContext = SSLContext.getInstance("TLSv1.2");
         sslContext.init(keyManagers, null, new SecureRandom());
         return sslContext;
+    }
+
+    private SslContext getNettySslContextInner(String host) throws Exception {
+        long start = System.currentTimeMillis();
+        PrivateKeyAndCertChain keyAndCertChain = keyStoreGenerator.generateCertChain(host, Settings.certValidityDays);
+        logger.debug("Create certificate for {}, cost {} ms", host, System.currentTimeMillis() - start);
+        return SslContextBuilder.forServer(keyAndCertChain.getPrivateKey(), keyAndCertChain.getCertificateChain())
+//                .ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE)
+//                .applicationProtocolConfig(new ApplicationProtocolConfig(
+//                        ApplicationProtocolConfig.Protocol.ALPN,
+//                        SelectorFailureBehavior.NO_ADVERTISE,
+//                        SelectedListenerFailureBehavior.ACCEPT,
+//                        ApplicationProtocolNames.HTTP_2,
+//                        ApplicationProtocolNames.HTTP_1_1))
+                .build();
     }
 
     public Path getRootKeyStorePath() {

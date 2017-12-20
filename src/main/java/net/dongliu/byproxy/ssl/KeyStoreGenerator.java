@@ -1,6 +1,7 @@
 package net.dongliu.byproxy.ssl;
 
 
+import net.dongliu.byproxy.setting.Settings;
 import net.dongliu.byproxy.utils.Networks;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
@@ -115,6 +116,23 @@ public class KeyStoreGenerator {
      * @throws Exception
      */
     public KeyStore generateKeyStore(String host, int validityDays, char[] keyStorePassword) throws Exception {
+        PrivateKeyAndCertChain keyAndCertChain = generateCertChain(host, validityDays);
+
+        KeyStore store = KeyStore.getInstance("PKCS12");
+        store.load(null, null);
+        store.setKeyEntry(Settings.certAliasName, keyAndCertChain.getPrivateKey(), keyStorePassword,
+                keyAndCertChain.getCertificateChain());
+        return store;
+    }
+
+    /**
+     * Generate cert for the domain signed by root certificate
+     * look at RFC 2818
+     *
+     * @param host add to san extension, can be generic
+     * @throws Exception
+     */
+    public PrivateKeyAndCertChain generateCertChain(String host, int validityDays) throws Exception {
         logger.debug("Generating certificate for host {}", host);
         // generate the key pair for the new certificate
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -177,14 +195,9 @@ public class KeyStoreGenerator {
         clientCertificate.setBagAttribute(pkcs_9_at_friendlyName, new DERBMPString("Certificate for ByProxy App"));
         clientCertificate.setBagAttribute(pkcs_9_at_localKeyId,
                 jcaX509ExtensionUtils.createSubjectKeyIdentifier(publicKey));
-        KeyStore store = KeyStore.getInstance("PKCS12");
-        store.load(null, null);
 
-        X509Certificate[] chain = new X509Certificate[]{clientCertificate, rootCert};
-        store.setKeyEntry("ByProxy app", privateKey, keyStorePassword, chain);
-        return store;
+        return new PrivateKeyAndCertChain(privateKey, new X509Certificate[]{clientCertificate, rootCert});
     }
-
 
     private static byte[] signData(ASN1ObjectIdentifier sigOID, byte[] data,
                                    RSAPrivateCrtKeyParameters privateKeyParameters,

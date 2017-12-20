@@ -14,7 +14,6 @@ import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.detector.*;
 import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.setting.ServerSetting;
-import net.dongliu.byproxy.ssl.SSLContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

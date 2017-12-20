@@ -8,7 +8,7 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import net.dongliu.byproxy.netty.web.HttpRequestHandler;
-import net.dongliu.byproxy.ssl.SSLContextManager;
+import net.dongliu.byproxy.netty.SSLContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

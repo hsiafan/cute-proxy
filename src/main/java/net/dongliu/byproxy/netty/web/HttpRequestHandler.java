@@ -7,7 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import net.dongliu.byproxy.netty.NettyUtils;
-import net.dongliu.byproxy.ssl.SSLContextManager;
+import net.dongliu.byproxy.netty.SSLContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

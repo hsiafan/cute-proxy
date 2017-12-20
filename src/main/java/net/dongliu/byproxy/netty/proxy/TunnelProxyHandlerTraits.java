@@ -12,21 +12,21 @@ import io.netty.handler.codec.http.websocketx.WebSocket13FrameEncoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameEncoder;
 import io.netty.handler.proxy.ProxyHandler;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
+import net.dongliu.byproxy.netty.ClientSSLContextFactory;
 import net.dongliu.byproxy.netty.NettySettings;
+import net.dongliu.byproxy.netty.SSLContextManager;
 import net.dongliu.byproxy.netty.detector.AnyMatcher;
 import net.dongliu.byproxy.netty.detector.ProtocolDetector;
 import net.dongliu.byproxy.netty.detector.SSLMatcher;
 import net.dongliu.byproxy.netty.interceptor.HttpInterceptor;
-import net.dongliu.byproxy.ssl.ClientSSLContextFactory;
-import net.dongliu.byproxy.ssl.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
 
 import javax.annotation.Nullable;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import java.util.function.Supplier;
 
 /**
@@ -69,15 +69,14 @@ public interface TunnelProxyHandlerTraits {
 
         ProtocolDetector protocolDetector = new ProtocolDetector(
                 new SSLMatcher(pipeline -> {
-                    SSLContext serverContext = sslContextManager.createSSlContext(address.getHost());
-                    SSLEngine serverEngine = serverContext.createSSLEngine();
-                    serverEngine.setUseClientMode(false);
-                    pipeline.addLast("ssl", new SslHandler(serverEngine));
+                    SslContext serverContext = sslContextManager.createSSlContext(address.getHost());
+                    pipeline.addLast("ssl", serverContext.newHandler(ctx.alloc()));
+//                    pipeline.addLast(new ProtocolNegotiationHandler());
 
-                    SSLContext sslContext = ClientSSLContextFactory.getInstance().get();
-                    SSLEngine sslEngine = sslContext.createSSLEngine(address.getHost(), address.getPort()); // using SNI
-                    sslEngine.setUseClientMode(true);
-                    outChannel.pipeline().addLast(new SslHandler(sslEngine));
+                    SslContextBuilder.forClient().trustManager();
+                    SslContext sslContext = ClientSSLContextFactory.getInstance().get();
+                    SslHandler sslHandler = sslContext.newHandler(ctx.alloc(), address.getHost(), address.getPort());
+                    outChannel.pipeline().addLast(sslHandler);
                     initInterceptorHandler(ctx, address, messageListener, outChannel, true);
                 }),
                 new AnyMatcher(p -> initInterceptorHandler(ctx, address, messageListener, outChannel, false))

@@ -17,6 +17,11 @@ public class Settings {
     public static final char[] rootKeyStorePassword = "123456".toCharArray();
     public static final char[] keyStorePassword = "123456".toCharArray();
 
+    /**
+     * alias name for self assigned cert
+     */
+    public static final String certAliasName = "ByProxy app";
+
     private static final Path parentPath = Paths.get(System.getProperty("user.home"), ".ByProxy");
 
     public static Path getParentPath() {

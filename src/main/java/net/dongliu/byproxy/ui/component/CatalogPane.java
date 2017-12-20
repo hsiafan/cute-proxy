@@ -163,6 +163,7 @@ public class CatalogPane extends BorderPane {
             newItem.getChildren().add(cItem);
             TreeItem<Item> leaf = new TreeItem<>(message);
             newItem.getChildren().add(leaf);
+            return;
         }
 
         // share common domain suffix
