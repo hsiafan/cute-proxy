@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import static io.netty.handler.codec.socksx.v5.Socks5CommandStatus.FAILURE;
 
 public class Socks5ProxyHandler extends SimpleChannelInboundHandler<Socks5CommandRequest>
-        implements TcpProxyHandlerTraits {
+        implements TunnelProxyHandlerTraits {
     private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyHandler.class);
 
     @Nullable

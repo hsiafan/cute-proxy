@@ -30,9 +30,9 @@ import javax.net.ssl.SSLEngine;
 import java.util.function.Supplier;
 
 /**
- * Common methods for handle http/socks proxy
+ * Common methods for handle http tunnel proxy and socks proxy
  */
-public interface TcpProxyHandlerTraits {
+public interface TunnelProxyHandlerTraits {
 
     default Bootstrap initBootStrap(Promise<Channel> promise, EventLoopGroup eventLoopGroup) {
         return new Bootstrap()

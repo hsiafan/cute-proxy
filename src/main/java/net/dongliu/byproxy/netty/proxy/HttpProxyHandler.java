@@ -29,10 +29,10 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
- * Plain http proxy for non-connect-tunnel proxy requests
+ * Handle http 1.x proxy request
  */
-public class HttpProxyPlainHandler extends ChannelInboundHandlerAdapter {
-    private static final Logger logger = LoggerFactory.getLogger(HttpProxyPlainHandler.class);
+public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
+    private static final Logger logger = LoggerFactory.getLogger(HttpProxyHandler.class);
 
     private final Bootstrap bootstrap = new Bootstrap();
     private Channel clientOutChannel;
@@ -45,8 +45,8 @@ public class HttpProxyPlainHandler extends ChannelInboundHandlerAdapter {
     @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public HttpProxyPlainHandler(@Nullable MessageListener messageListener,
-                                 @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public HttpProxyHandler(@Nullable MessageListener messageListener,
+                            @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.proxyHandlerSupplier = proxyHandlerSupplier;
     }

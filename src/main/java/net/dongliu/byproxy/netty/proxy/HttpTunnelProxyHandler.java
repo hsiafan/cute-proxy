@@ -23,9 +23,12 @@ import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
 import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpRequest>
-        implements TcpProxyHandlerTraits {
-    private static final Logger logger = LoggerFactory.getLogger(HttpProxyConnectHandler.class);
+/**
+ * Handle http connect tunnel proxy request
+ */
+public class HttpTunnelProxyHandler extends SimpleChannelInboundHandler<HttpRequest>
+        implements TunnelProxyHandlerTraits {
+    private static final Logger logger = LoggerFactory.getLogger(HttpTunnelProxyHandler.class);
 
     @Nullable
     private final MessageListener messageListener;
@@ -35,9 +38,9 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
     @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public HttpProxyConnectHandler(@Nullable MessageListener messageListener,
-                                   @Nullable SSLContextManager sslContextManager,
-                                   @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public HttpTunnelProxyHandler(@Nullable MessageListener messageListener,
+                                  @Nullable SSLContextManager sslContextManager,
+                                  @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
         this.proxyHandlerSupplier = proxyHandlerSupplier;
@@ -66,7 +69,7 @@ public class HttpProxyConnectHandler extends SimpleChannelInboundHandler<HttpReq
             Channel outboundChannel = future.getNow();
             ChannelFuture responseFuture = ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, OK));
             responseFuture.addListener((ChannelFutureListener) channelFuture -> {
-                ctx.pipeline().remove(HttpProxyConnectHandler.this);
+                ctx.pipeline().remove(HttpTunnelProxyHandler.this);
                 ctx.pipeline().remove(HttpServerCodec.class);
                 initTcpProxyHandlers(ctx, address, outboundChannel);
             });

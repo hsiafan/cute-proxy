@@ -21,7 +21,7 @@ import static io.netty.handler.codec.socksx.v4.Socks4CommandStatus.REJECTED_OR_F
 import static io.netty.handler.codec.socksx.v4.Socks4CommandStatus.SUCCESS;
 
 public class Socks4ProxyHandler extends SimpleChannelInboundHandler<Socks4CommandRequest>
-        implements TcpProxyHandlerTraits {
+        implements TunnelProxyHandlerTraits {
     private static final Logger logger = LoggerFactory.getLogger(Socks4ProxyHandler.class);
 
     @Nullable
