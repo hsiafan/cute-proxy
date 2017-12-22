@@ -1,6 +1,7 @@
 package net.dongliu.byproxy.ui.component;
 
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Tree tree view non-leaf node
@@ -43,6 +44,9 @@ class TreeNode extends Item implements Serializable {
     static final int IS_SUB = Integer.MAX_VALUE - 2;
     static final int MISS = 0;
 
+    // top domains, and not country
+    private static final Set<String> topDomains = Set.of("com", "net", "org", "co");
+
     /**
      * MISS means not share common part;
      * EQUAL means equals;
@@ -55,32 +59,34 @@ class TreeNode extends Item implements Serializable {
             return EQUAL;
         }
 
-        int parts = 0;
-        int pos = 0;
-        int i = 0;
-        for (; i < Math.min(domain.length(), pattern.length()); i++) {
-            if (pattern.charAt(pattern.length() - i - 1) != domain.charAt(domain.length() - i - 1)) {
-                break;
+        String[] patternItems = pattern.split("\\.");
+        String[] domainItems = domain.split("\\.");
+        int size = Math.min(patternItems.length, domainItems.length);
+        int length = 0;
+        int topNum = 0;
+        for (int i = 0; i < size; i++) {
+            String patternItem = patternItems[patternItems.length - i - 1];
+            String domainItem = domainItems[domainItems.length - i - 1];
+            if (!patternItem.equals(domainItem)) {
+                if (i - topNum < 2) {
+                    return MISS;
+                }
+                return length - 1;
             }
-            if (pattern.charAt(pattern.length() - i - 1) == '.') {
-                pos = i;
-                parts++;
+            length += patternItem.length() + 1;
+            if (i == 1) {
+                if (topDomains.contains(patternItem)) {
+                    topNum = 1;
+                }
             }
         }
 
-        if (i == pattern.length() && domain.length() > i && domain.charAt(domain.length() - i - 1) == '.') {
+
+        if (patternItems.length == size) {
             return IS_SUB;
         }
-        if (i == domain.length() && pattern.length() > i && pattern.charAt(pattern.length() - i - 1) == '.') {
-            return IS_SUPER;
-        }
 
-        if (parts >= 2) {
-            return pos;
-        }
-
-
-        return MISS;
+        return IS_SUPER;
     }
 
     @Override

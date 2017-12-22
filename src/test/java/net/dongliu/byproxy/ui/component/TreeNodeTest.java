@@ -19,5 +19,7 @@ public class TreeNodeTest {
         assertEquals(9, treeNode.match("rm.www2.baidu.com"));
 
         assertEquals(9, new TreeNode("s.weibo.com").match("rm.api.weibo.com"));
+
+        assertEquals(TreeNode.MISS, new TreeNode("v.admaster.com.cn").match("sbeacon.sina.com.cn"));
     }
 }
