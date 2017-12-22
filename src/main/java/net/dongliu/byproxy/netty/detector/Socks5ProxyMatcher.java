@@ -20,15 +20,11 @@ import java.util.function.Supplier;
 public class Socks5ProxyMatcher extends ProtocolMatcher {
     private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyMatcher.class);
 
-    @Nullable
     private final MessageListener messageListener;
-    @Nullable
     private final SSLContextManager sslContextManager;
-    @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public Socks5ProxyMatcher(@Nullable MessageListener messageListener,
-                              @Nullable SSLContextManager sslContextManager,
+    public Socks5ProxyMatcher(MessageListener messageListener, SSLContextManager sslContextManager,
                               Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;

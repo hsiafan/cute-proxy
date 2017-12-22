@@ -17,7 +17,6 @@ import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -40,13 +39,10 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
 
     private final Queue<HttpContent> queue = new ArrayDeque<>();
 
-    @Nullable
     private final MessageListener messageListener;
-    @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public HttpProxyHandler(@Nullable MessageListener messageListener,
-                            @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public HttpProxyHandler(MessageListener messageListener, Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.proxyHandlerSupplier = proxyHandlerSupplier;
     }

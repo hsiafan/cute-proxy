@@ -5,13 +5,14 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpUtil;
 import net.dongliu.byproxy.netty.NettyUtils;
 import net.dongliu.byproxy.netty.SSLContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.*;
 import static io.netty.handler.codec.http.HttpHeaderValues.KEEP_ALIVE;
@@ -24,10 +25,9 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final Logger logger = LoggerFactory.getLogger(HttpRequestHandler.class);
 
-    @Nullable
     private final SSLContextManager sslContextManager;
 
-    public HttpRequestHandler(@Nullable SSLContextManager sslContextManager) {
+    public HttpRequestHandler(SSLContextManager sslContextManager) {
         this.sslContextManager = sslContextManager;
     }
 

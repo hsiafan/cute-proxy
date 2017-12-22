@@ -10,7 +10,6 @@ import net.dongliu.byproxy.netty.proxy.HttpProxyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -25,13 +24,10 @@ public class HttpProxyMatcher extends ProtocolMatcher {
     private static Set<String> methods = Set.of("GET", "POST", "PUT", "HEAD", "OPTIONS", "PATCH", "DELETE",
             "TRACE");
 
-    @Nullable
     private final MessageListener messageListener;
-    @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public HttpProxyMatcher(@Nullable MessageListener messageListener,
-                            @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public HttpProxyMatcher(MessageListener messageListener, Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.proxyHandlerSupplier = proxyHandlerSupplier;
     }

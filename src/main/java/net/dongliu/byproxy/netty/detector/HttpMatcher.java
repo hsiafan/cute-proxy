@@ -7,12 +7,11 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import net.dongliu.byproxy.netty.web.HttpRequestHandler;
 import net.dongliu.byproxy.netty.SSLContextManager;
+import net.dongliu.byproxy.netty.web.HttpRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -26,10 +25,9 @@ public class HttpMatcher extends ProtocolMatcher {
     private static Set<String> methods = Set.of("GET", "POST", "PUT", "HEAD", "OPTIONS", "PATCH", "DELETE",
             "TRACE");
 
-    @Nullable
     private final SSLContextManager sslContextManager;
 
-    public HttpMatcher(@Nullable SSLContextManager sslContextManager) {
+    public HttpMatcher(SSLContextManager sslContextManager) {
         this.sslContextManager = sslContextManager;
     }
 
