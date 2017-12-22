@@ -1,10 +1,13 @@
 package net.dongliu.byproxy.struct;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
 import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.Set;
 
 /**
@@ -14,6 +17,7 @@ import java.util.Set;
  */
 @Immutable
 public class ContentType {
+    private static final Logger logger = LoggerFactory.getLogger(ContentType.class);
 
     public static final ContentType UNKNOWN = new ContentType("", null);
     private final String rawMimeType;
@@ -54,7 +58,8 @@ public class ContentType {
         }
         try {
             return Charset.forName(encoding);
-        } catch (UnsupportedCharsetException e) {
+        } catch (IllegalCharsetNameException e) {
+            logger.warn("unknown charset: {}", encoding);
             return null;
         }
     }
@@ -91,5 +96,9 @@ public class ContentType {
 
     public Set<String> getTextSubTypes() {
         return textSubTypes;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Charset.forName("utf-8"));
     }
 }

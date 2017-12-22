@@ -30,7 +30,7 @@
         <fx:deploy outdir="${build.dist.dir}" outfile="ByProxy" signBundle="false" nativeBundles="image">
             <!-- javafx9 remove the basedir attribute? -->
             <fx:platform j2se="9.0">
-                <fx:jvmarg value="-Xmx512m"/>
+                <!--<fx:jvmarg value="-Xmx512m"/>-->
             </fx:platform>
             <fx:application refId="net.dongliu.byproxy"/>
             <fx:resources id="appRes">
