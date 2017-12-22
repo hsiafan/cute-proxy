@@ -15,7 +15,7 @@ public class BodyTest {
     @Test
     @Ignore
     public void write() throws Exception {
-        Body body = new Body(null, null, null);
+        Body body = new Body(BodyType.binary, null, "");
         byte[] data = new byte[1024];
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) i;

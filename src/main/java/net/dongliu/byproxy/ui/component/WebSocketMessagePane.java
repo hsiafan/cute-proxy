@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
-import net.dongliu.byproxy.struct.WebSocketMessage;
+import net.dongliu.byproxy.data.WebSocketMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

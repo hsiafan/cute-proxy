@@ -8,7 +8,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
-import net.dongliu.byproxy.struct.HttpRoundTripMessage;
+import net.dongliu.byproxy.data.HttpMessage;
 
 import java.io.IOException;
 
@@ -29,7 +29,7 @@ public class HttpRoundTripMessagePane extends SplitPane {
     @FXML
     private HttpBodyPane bodyPane;
 
-    private ObjectProperty<HttpRoundTripMessage> roundTripMessage = new SimpleObjectProperty<>();
+    private ObjectProperty<HttpMessage> roundTripMessage = new SimpleObjectProperty<>();
 
     public HttpRoundTripMessagePane() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_round_trip_message.fxml"));
@@ -41,8 +41,8 @@ public class HttpRoundTripMessagePane extends SplitPane {
     @FXML
     private void initialize() {
         roundTripMessage.addListener((o, old, newValue) -> {
-            requestHeaderPane.setHttpHeader(newValue.getRequestHeader());
-            responseHeaderPane.setHttpHeader(newValue.getResponseHeader());
+            requestHeaderPane.setHeaders(newValue.getRequestHeader());
+            responseHeaderPane.setHeaders(newValue.getResponseHeader());
             showHttpBody(bodyToggleGroup.getSelectedToggle());
         });
         bodyToggleGroup.selectedToggleProperty().addListener((ob, old, value) -> showHttpBody(value));
@@ -58,7 +58,7 @@ public class HttpRoundTripMessagePane extends SplitPane {
         }
     }
 
-    public void setRoundTripMessage(HttpRoundTripMessage httpRoundTripMessage) {
-        this.roundTripMessage.set(httpRoundTripMessage);
+    public void setRoundTripMessage(HttpMessage httpMessage) {
+        this.roundTripMessage.set(httpMessage);
     }
 }

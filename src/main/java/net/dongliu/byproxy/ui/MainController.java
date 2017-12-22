@@ -10,17 +10,16 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import net.dongliu.byproxy.Context;
 import net.dongliu.byproxy.CloseHooks;
-import net.dongliu.byproxy.MessageListener;
+import net.dongliu.byproxy.Context;
+import net.dongliu.byproxy.data.HttpMessage;
+import net.dongliu.byproxy.data.Message;
+import net.dongliu.byproxy.data.WebSocketMessage;
 import net.dongliu.byproxy.netty.Server;
 import net.dongliu.byproxy.setting.KeyStoreSetting;
 import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.setting.ServerSetting;
 import net.dongliu.byproxy.ssl.KeyStoreGenerator;
-import net.dongliu.byproxy.struct.HttpRoundTripMessage;
-import net.dongliu.byproxy.struct.Message;
-import net.dongliu.byproxy.struct.WebSocketMessage;
 import net.dongliu.byproxy.ui.component.*;
 import net.dongliu.byproxy.ui.task.InitContextTask;
 import net.dongliu.byproxy.ui.task.LoadTask;
@@ -77,17 +76,8 @@ public class MainController {
         startProxyMenu.setDisable(true);
         try {
             server = new Server(context.getServerSetting(), context.getSslContextManager(),
-                    context.getProxySetting(), new MessageListener() {
-                @Override
-                public void onHttpRequest(HttpRoundTripMessage message) {
-                    Platform.runLater(() -> catalogPane.addTreeItemMessage(message));
-                }
-
-                @Override
-                public void onWebSocket(WebSocketMessage message) {
-                    Platform.runLater(() -> catalogPane.addTreeItemMessage(message));
-                }
-            });
+                    context.getProxySetting(),
+                    message -> Platform.runLater(() -> catalogPane.addTreeItemMessage(message)));
             server.start();
         } catch (Throwable t) {
             logger.error("Start proxy failed", t);
@@ -206,8 +196,8 @@ public class MainController {
      * Show message content in right area
      */
     private void showMessage(Message message) {
-        if (message instanceof HttpRoundTripMessage) {
-            httpRoundTripMessagePane.setRoundTripMessage((HttpRoundTripMessage) message);
+        if (message instanceof HttpMessage) {
+            httpRoundTripMessagePane.setRoundTripMessage((HttpMessage) message);
             webSocketMessagePane.setVisible(false);
             httpRoundTripMessagePane.setVisible(true);
 //            httpRoundTripMessagePane.setStyle("-fx-background-color:white;");

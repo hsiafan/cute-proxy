@@ -10,7 +10,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpUtil;
 import net.dongliu.byproxy.netty.NettyUtils;
-import net.dongliu.byproxy.netty.proxy.ServerSSLContextManager;
+import net.dongliu.byproxy.netty.handler.ServerSSLContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

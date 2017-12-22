@@ -5,8 +5,8 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.proxy.ServerSSLContextManager;
-import net.dongliu.byproxy.netty.proxy.HttpTunnelProxyHandler;
+import net.dongliu.byproxy.netty.handler.ServerSSLContextManager;
+import net.dongliu.byproxy.netty.handler.HttpTunnelProxyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

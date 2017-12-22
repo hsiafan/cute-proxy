@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
 import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.proxy.HttpProxyHandler;
+import net.dongliu.byproxy.netty.handler.HttpProxyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

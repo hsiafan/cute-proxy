@@ -6,8 +6,8 @@ import io.netty.handler.codec.socksx.v5.Socks5InitialRequestDecoder;
 import io.netty.handler.codec.socksx.v5.Socks5ServerEncoder;
 import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.proxy.ServerSSLContextManager;
-import net.dongliu.byproxy.netty.proxy.Socks5ProxyHandler;
+import net.dongliu.byproxy.netty.handler.ServerSSLContextManager;
+import net.dongliu.byproxy.netty.handler.Socks5ProxyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

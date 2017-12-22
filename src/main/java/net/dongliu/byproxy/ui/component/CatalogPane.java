@@ -15,7 +15,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
-import net.dongliu.byproxy.struct.Message;
+import net.dongliu.byproxy.data.Message;
 import net.dongliu.byproxy.ui.UIUtils;
 import net.dongliu.byproxy.utils.Networks;
 

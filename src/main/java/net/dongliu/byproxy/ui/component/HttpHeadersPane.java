@@ -6,7 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextArea;
-import net.dongliu.byproxy.struct.Headers;
+import net.dongliu.byproxy.data.HttpHeaders;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ public class HttpHeadersPane extends SplitPane {
     @FXML
     private TextArea headerText;
 
-    private ObjectProperty<Headers> httpHeader = new SimpleObjectProperty<>();
+    private ObjectProperty<HttpHeaders> headers = new SimpleObjectProperty<>();
 
     public HttpHeadersPane() throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_header.fxml"));
@@ -34,21 +34,21 @@ public class HttpHeadersPane extends SplitPane {
 
     @FXML
     private void initialize() {
-        httpHeader.addListener((o, old, message) -> {
+        headers.addListener((o, old, message) -> {
             if (message == null) {
                 headerText.clear();
                 cookieText.clear();
                 return;
             }
-            headerText.setText(String.join("\n", httpHeader.get().toRawLines()));
-            String s = httpHeader.get().getCookieValues().stream()
+            headerText.setText(String.join("\n", headers.get().toRawLines()));
+            String s = headers.get().getCookieValues().stream()
                     .map(c -> c.getName() + "=" + c.getValue())
                     .collect(joining("\n"));
             cookieText.setText(s);
         });
     }
 
-    public void setHttpHeader(Headers headers) {
-        this.httpHeader.set(headers);
+    public void setHeaders(HttpHeaders httpHeaders) {
+        this.headers.set(httpHeaders);
     }
 }

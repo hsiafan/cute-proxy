@@ -12,7 +12,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.detector.*;
-import net.dongliu.byproxy.netty.proxy.ServerSSLContextManager;
+import net.dongliu.byproxy.netty.handler.ServerSSLContextManager;
 import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.setting.ServerSetting;
 import org.slf4j.Logger;

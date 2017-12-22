@@ -1,6 +1,6 @@
 package net.dongliu.byproxy.store;
 
-import net.dongliu.byproxy.struct.ContentType;
+import net.dongliu.byproxy.data.ContentType;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.z.ZCompressorInputStream;
 import org.brotli.dec.BrotliInputStream;
@@ -11,14 +11,14 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.toList;
 
@@ -41,22 +41,18 @@ public class Body implements Serializable {
 
     private List<Chunk> chunkList;
 
-    public Body(@Nullable BodyType type, @Nullable Charset charset,
-                @Nullable String contentEncoding) {
-        this.type = requireNonNullElse(type, BodyType.unknown);
-        this.charset = requireNonNullElse(charset, StandardCharsets.UTF_8);
-        this.contentEncoding = requireNonNullElse(contentEncoding, "");
+    public Body(BodyType type, @Nullable Charset charset, String contentEncoding) {
+        this.type = requireNonNull(type);
+        this.charset = requireNonNullElse(charset, UTF_8);
+        this.contentEncoding = requireNonNull(contentEncoding);
         this.chunkList = new ArrayList<>();
     }
 
 
-    public static Body create(@Nullable ContentType contentType, @Nullable String contentEncoding) {
-        if (contentType == null) {
-            return new Body(null, null, contentEncoding);
-        }
+    public static Body create(ContentType contentType, String contentEncoding) {
         BodyType bodyType;
-        bodyType = getHttpBodyType(contentType);
-        return new Body(bodyType, contentType.getCharset(), contentEncoding);
+        bodyType = getHttpBodyType(requireNonNull(contentType));
+        return new Body(bodyType, contentType.getCharset(), requireNonNull(contentEncoding));
     }
 
     private static BodyType getHttpBodyType(ContentType contentType) {
