@@ -11,7 +11,6 @@ import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
-import net.dongliu.byproxy.netty.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,7 @@ import static io.netty.handler.codec.socksx.v5.Socks5CommandStatus.FAILURE;
 public class Socks5ProxyHandler extends TunnelProxyHandler<Socks5Message> {
     private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyHandler.class);
 
-    public Socks5ProxyHandler(MessageListener messageListener, SSLContextManager sslContextManager,
+    public Socks5ProxyHandler(MessageListener messageListener, ServerSSLContextManager sslContextManager,
                               Supplier<ProxyHandler> proxyHandlerSupplier) {
         super(messageListener, sslContextManager, proxyHandlerSupplier);
     }

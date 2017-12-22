@@ -11,7 +11,6 @@ import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
-import net.dongliu.byproxy.netty.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,7 @@ import static io.netty.handler.codec.socksx.v4.Socks4CommandStatus.SUCCESS;
 public class Socks4ProxyHandler extends TunnelProxyHandler<Socks4Message> {
     private static final Logger logger = LoggerFactory.getLogger(Socks4ProxyHandler.class);
 
-    public Socks4ProxyHandler(MessageListener messageListener, SSLContextManager sslContextManager,
+    public Socks4ProxyHandler(MessageListener messageListener, ServerSSLContextManager sslContextManager,
                               Supplier<ProxyHandler> proxyHandlerSupplier) {
         super(messageListener, sslContextManager, proxyHandlerSupplier);
     }

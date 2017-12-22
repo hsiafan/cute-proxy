@@ -12,6 +12,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.detector.*;
+import net.dongliu.byproxy.netty.proxy.ServerSSLContextManager;
 import net.dongliu.byproxy.setting.ProxySetting;
 import net.dongliu.byproxy.setting.ServerSetting;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class Server {
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
     private final ServerSetting setting;
-    private final SSLContextManager sslContextManager;
+    private final ServerSSLContextManager sslContextManager;
     private final MessageListener messageListener;
     @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
@@ -41,7 +42,7 @@ public class Server {
     private EventLoopGroup worker;
 
 
-    public Server(ServerSetting setting, SSLContextManager sslContextManager,
+    public Server(ServerSetting setting, ServerSSLContextManager sslContextManager,
                   ProxySetting proxySetting, MessageListener messageListener) {
         this.setting = requireNonNull(setting);
         this.sslContextManager = requireNonNull(sslContextManager);

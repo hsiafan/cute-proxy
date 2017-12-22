@@ -13,7 +13,6 @@ import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
 import net.dongliu.byproxy.MessageListener;
 import net.dongliu.byproxy.netty.NettyUtils;
-import net.dongliu.byproxy.netty.SSLContextManager;
 import net.dongliu.byproxy.utils.NetAddress;
 import net.dongliu.byproxy.utils.Networks;
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class HttpTunnelProxyHandler extends TunnelProxyHandler<HttpRequest> {
     private static final Logger logger = LoggerFactory.getLogger(HttpTunnelProxyHandler.class);
 
-    public HttpTunnelProxyHandler(MessageListener messageListener, SSLContextManager sslContextManager,
+    public HttpTunnelProxyHandler(MessageListener messageListener, ServerSSLContextManager sslContextManager,
                                   Supplier<ProxyHandler> proxyHandlerSupplier) {
         super(messageListener, sslContextManager, proxyHandlerSupplier);
     }

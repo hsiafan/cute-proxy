@@ -6,12 +6,11 @@ import io.netty.handler.codec.socksx.v5.Socks5InitialRequestDecoder;
 import io.netty.handler.codec.socksx.v5.Socks5ServerEncoder;
 import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.SSLContextManager;
+import net.dongliu.byproxy.netty.proxy.ServerSSLContextManager;
 import net.dongliu.byproxy.netty.proxy.Socks5ProxyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 /**
@@ -21,10 +20,10 @@ public class Socks5ProxyMatcher extends ProtocolMatcher {
     private static final Logger logger = LoggerFactory.getLogger(Socks5ProxyMatcher.class);
 
     private final MessageListener messageListener;
-    private final SSLContextManager sslContextManager;
+    private final ServerSSLContextManager sslContextManager;
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public Socks5ProxyMatcher(MessageListener messageListener, SSLContextManager sslContextManager,
+    public Socks5ProxyMatcher(MessageListener messageListener, ServerSSLContextManager sslContextManager,
                               Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
