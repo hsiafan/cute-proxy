@@ -76,10 +76,8 @@ public class MainController {
         startProxyButton.setDisable(true);
         startProxyMenu.setDisable(true);
         try {
-            server = new Server(context.getServerSetting());
-            server.setSslContextManager(context.getSslContextManager());
-            server.setProxySetting(context.getProxySetting());
-            server.setMessageListener(new MessageListener() {
+            server = new Server(context.getServerSetting(), context.getSslContextManager(),
+                    context.getProxySetting(), new MessageListener() {
                 @Override
                 public void onHttpRequest(HttpRoundTripMessage message) {
                     Platform.runLater(() -> catalogPane.addTreeItemMessage(message));

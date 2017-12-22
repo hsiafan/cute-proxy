@@ -19,12 +19,16 @@ public class ProxyHandlerSupplier implements Supplier<ProxyHandler> {
 
     public ProxyHandlerSupplier(ProxySetting proxySetting) {
         this.proxySetting = proxySetting;
-        // create InetSocketAddress now so dns resolve will not block netty event loop.
+        // Java InetSocketAddress always do dns resolver.
+        // we just create InetSocketAddress now so dns resolve will not block netty event loop.
         this.address = new InetSocketAddress(proxySetting.getHost(), proxySetting.getPort());
     }
 
     @Override
     public ProxyHandler get() {
+        if (!proxySetting.isUse()) {
+            return null;
+        }
         ProxyHandler proxyHandler = newProxyHandler();
         proxyHandler.setConnectTimeoutMillis(NettySettings.CONNECT_TIMEOUT);
         return proxyHandler;

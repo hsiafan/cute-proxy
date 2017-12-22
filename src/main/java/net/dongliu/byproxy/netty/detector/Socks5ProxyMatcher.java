@@ -6,8 +6,8 @@ import io.netty.handler.codec.socksx.v5.Socks5InitialRequestDecoder;
 import io.netty.handler.codec.socksx.v5.Socks5ServerEncoder;
 import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.proxy.Socks5ProxyHandshakeHandler;
 import net.dongliu.byproxy.netty.SSLContextManager;
+import net.dongliu.byproxy.netty.proxy.Socks5ProxyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +50,8 @@ public class Socks5ProxyMatcher extends ProtocolMatcher {
 
     @Override
     public void handlePipeline(ChannelPipeline pipeline) {
-        pipeline.addLast(Socks5ServerEncoder.DEFAULT);
-        pipeline.addLast(new Socks5InitialRequestDecoder());
-        pipeline.addLast(new Socks5ProxyHandshakeHandler(messageListener, sslContextManager, proxyHandlerSupplier));
+        pipeline.addLast("socks5-server-encoder", Socks5ServerEncoder.DEFAULT);
+        pipeline.addLast("socks5-initial-decoder", new Socks5InitialRequestDecoder());
+        pipeline.addLast(new Socks5ProxyHandler(messageListener, sslContextManager, proxyHandlerSupplier));
     }
 }

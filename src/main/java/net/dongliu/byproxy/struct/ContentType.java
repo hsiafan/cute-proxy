@@ -19,7 +19,6 @@ import java.util.Set;
 public class ContentType {
     private static final Logger logger = LoggerFactory.getLogger(ContentType.class);
 
-    public static final ContentType UNKNOWN = new ContentType("", null);
     private final String rawMimeType;
     private final MimeType mimeType;
     @Nullable
@@ -44,7 +43,7 @@ public class ContentType {
             int idx = item.indexOf("=");
             if (idx > 0) {
                 if (item.substring(0, idx).trim().equalsIgnoreCase("charset")) {
-                    encoding = item.substring(idx + 1).trim();
+                    encoding = item.substring(idx + 1).trim().replace("\"", "").replace("'", "");
                 }
             }
         }

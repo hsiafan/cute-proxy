@@ -22,26 +22,31 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Proxy and http server by netty
  */
 public class Server {
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
-    private ServerSetting setting;
+    private final ServerSetting setting;
+    private final SSLContextManager sslContextManager;
+    private final MessageListener messageListener;
     @Nullable
-    private SSLContextManager sslContextManager;
-    @Nullable
-    private MessageListener messageListener;
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
     private ChannelFuture bindFuture;
     private EventLoopGroup master;
     private EventLoopGroup worker;
-    @Nullable
-    private Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public Server(ServerSetting setting) {
-        this.setting = setting;
+
+    public Server(ServerSetting setting, SSLContextManager sslContextManager,
+                  ProxySetting proxySetting, MessageListener messageListener) {
+        this.setting = requireNonNull(setting);
+        this.sslContextManager = requireNonNull(sslContextManager);
+        this.messageListener = requireNonNull(messageListener);
+        this.proxyHandlerSupplier = new ProxyHandlerSupplier(requireNonNull(proxySetting));
     }
 
     public void start() throws Exception {
@@ -74,23 +79,6 @@ public class Server {
 
         bindFuture = bootstrap.bind().sync();
         logger.info("proxy server start");
-    }
-
-
-    public void setSslContextManager(@Nullable SSLContextManager sslContextManager) {
-        this.sslContextManager = sslContextManager;
-    }
-
-    public void setMessageListener(MessageListener messageListener) {
-        this.messageListener = messageListener;
-    }
-
-    public void setProxySetting(ProxySetting proxySetting) {
-        if (proxySetting == null || !proxySetting.isUse()) {
-            proxyHandlerSupplier = null;
-            return;
-        }
-        this.proxyHandlerSupplier = new ProxyHandlerSupplier(proxySetting);
     }
 
     public void stop() {

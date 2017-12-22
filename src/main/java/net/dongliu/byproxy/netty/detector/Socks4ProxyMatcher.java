@@ -6,7 +6,7 @@ import io.netty.handler.codec.socksx.v4.Socks4ServerDecoder;
 import io.netty.handler.codec.socksx.v4.Socks4ServerEncoder;
 import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.byproxy.MessageListener;
-import net.dongliu.byproxy.netty.proxy.Socks4ProxyHandshakeHandler;
+import net.dongliu.byproxy.netty.proxy.Socks4ProxyHandler;
 import net.dongliu.byproxy.netty.SSLContextManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +52,6 @@ public class Socks4ProxyMatcher extends ProtocolMatcher {
     public void handlePipeline(ChannelPipeline pipeline) {
         pipeline.addLast(Socks4ServerEncoder.INSTANCE);
         pipeline.addLast(new Socks4ServerDecoder());
-        pipeline.addLast(new Socks4ProxyHandshakeHandler(messageListener, sslContextManager, proxyHandlerSupplier));
+        pipeline.addLast(new Socks4ProxyHandler(messageListener, sslContextManager, proxyHandlerSupplier));
     }
 }

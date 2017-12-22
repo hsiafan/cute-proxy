@@ -1,7 +1,10 @@
 package net.dongliu.byproxy.netty.proxy;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpServerCodec;
@@ -16,7 +19,6 @@ import net.dongliu.byproxy.utils.Networks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.BAD_GATEWAY;
@@ -26,24 +28,12 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 /**
  * Handle http connect tunnel proxy request
  */
-public class HttpTunnelProxyHandler extends SimpleChannelInboundHandler<HttpRequest>
-        implements TunnelProxyHandlerTraits {
+public class HttpTunnelProxyHandler extends TunnelProxyHandler<HttpRequest> {
     private static final Logger logger = LoggerFactory.getLogger(HttpTunnelProxyHandler.class);
 
-    @Nullable
-    private final MessageListener messageListener;
-
-    @Nullable
-    private final SSLContextManager sslContextManager;
-    @Nullable
-    private final Supplier<ProxyHandler> proxyHandlerSupplier;
-
-    public HttpTunnelProxyHandler(@Nullable MessageListener messageListener,
-                                  @Nullable SSLContextManager sslContextManager,
-                                  @Nullable Supplier<ProxyHandler> proxyHandlerSupplier) {
-        this.messageListener = messageListener;
-        this.sslContextManager = sslContextManager;
-        this.proxyHandlerSupplier = proxyHandlerSupplier;
+    public HttpTunnelProxyHandler(MessageListener messageListener, SSLContextManager sslContextManager,
+                                  Supplier<ProxyHandler> proxyHandlerSupplier) {
+        super(messageListener, sslContextManager, proxyHandlerSupplier);
     }
 
     @Override
@@ -80,23 +70,5 @@ public class HttpTunnelProxyHandler extends SimpleChannelInboundHandler<HttpRequ
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
         logger.error("", e);
         NettyUtils.closeOnFlush(ctx.channel());
-    }
-
-    @Nullable
-    @Override
-    public MessageListener messageListener() {
-        return messageListener;
-    }
-
-    @Nullable
-    @Override
-    public SSLContextManager sslContextManager() {
-        return sslContextManager;
-    }
-
-    @Nullable
-    @Override
-    public Supplier<ProxyHandler> proxyHandlerSupplier() {
-        return proxyHandlerSupplier;
     }
 }

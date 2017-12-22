@@ -26,15 +26,24 @@ import net.dongliu.byproxy.netty.detector.SSLMatcher;
 import net.dongliu.byproxy.netty.interceptor.HttpInterceptor;
 import net.dongliu.byproxy.utils.NetAddress;
 
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 /**
- * Common methods for handle http tunnel proxy and socks proxy
+ * for socks/http connect tunnel
  */
-public interface TunnelProxyHandlerTraits {
+public abstract class TunnelProxyHandler<T> extends SimpleChannelInboundHandler<T> {
+    private final MessageListener messageListener;
+    private final SSLContextManager sslContextManager;
+    private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    default Bootstrap initBootStrap(Promise<Channel> promise, EventLoopGroup eventLoopGroup) {
+    public TunnelProxyHandler(MessageListener messageListener, SSLContextManager sslContextManager,
+                              Supplier<ProxyHandler> proxyHandlerSupplier) {
+        this.messageListener = messageListener;
+        this.sslContextManager = sslContextManager;
+        this.proxyHandlerSupplier = proxyHandlerSupplier;
+    }
+
+    protected Bootstrap initBootStrap(Promise<Channel> promise, EventLoopGroup eventLoopGroup) {
         return new Bootstrap()
                 .group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
@@ -43,7 +52,6 @@ public interface TunnelProxyHandlerTraits {
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
-                        Supplier<ProxyHandler> proxyHandlerSupplier = proxyHandlerSupplier();
                         ProxyHandler proxyHandler = proxyHandlerSupplier.get();
                         if (proxyHandler != null) {
                             ch.pipeline().addLast(proxyHandler);
@@ -53,18 +61,12 @@ public interface TunnelProxyHandlerTraits {
                 });
     }
 
-    default void initTcpProxyHandlers(ChannelHandlerContext ctx, NetAddress address, Channel outChannel) {
-        MessageListener messageListener = messageListener();
+    protected void initTcpProxyHandlers(ChannelHandlerContext ctx, NetAddress address, Channel outChannel) {
         boolean intercept = messageListener != null;
         if (!intercept) {
             ctx.pipeline().addLast(new ReplayHandler(outChannel));
             outChannel.pipeline().addLast(new ReplayHandler(ctx.channel()));
             return;
-        }
-
-        SSLContextManager sslContextManager = sslContextManager();
-        if (sslContextManager == null) {
-            throw new RuntimeException("SSLContextManager must be set when use mitm");
         }
 
         ProtocolDetector protocolDetector = new ProtocolDetector(
@@ -104,13 +106,4 @@ public interface TunnelProxyHandlerTraits {
         outboundChannel.pipeline().addLast("tcp-tunnel-handler", new ReplayHandler(ctx.channel()));
 
     }
-
-    @Nullable
-    MessageListener messageListener();
-
-    @Nullable
-    SSLContextManager sslContextManager();
-
-    @Nullable
-    Supplier<ProxyHandler> proxyHandlerSupplier();
 }
