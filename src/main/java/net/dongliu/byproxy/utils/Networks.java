@@ -3,7 +3,6 @@ package net.dongliu.byproxy.utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -65,7 +64,6 @@ public class Networks {
     }
 
 
-    @Nonnull
     public static List<NetworkInfo> getNetworkInfoList() {
         Enumeration<NetworkInterface> networkInterfaces;
         try {

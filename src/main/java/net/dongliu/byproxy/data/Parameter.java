@@ -1,14 +1,11 @@
 package net.dongliu.byproxy.data;
 
 
-import javax.annotation.concurrent.Immutable;
-
 /**
  * Parameter
  *
  * @author Liu Dong
  */
-@Immutable
 public class Parameter implements KeyValue {
     private final String name;
     private final String value;

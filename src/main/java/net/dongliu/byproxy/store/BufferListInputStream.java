@@ -1,7 +1,5 @@
 package net.dongliu.byproxy.store;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -59,7 +57,6 @@ class BufferListInputStream extends InputStream {
         return toSkip;
     }
 
-    @Nullable
     private ByteBuffer indexBuffer() {
         if (index >= bufferList.size()) {
             return null;

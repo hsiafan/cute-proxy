@@ -10,22 +10,15 @@
     <version>0.10.0</version>
 
     <properties>
-        <maven.compiler.source>9</maven.compiler.source>
-        <maven.compiler.target>9</maven.compiler.target>
-        <maven.compiler.release>9</maven.compiler.release>
+        <maven.compiler.source>10</maven.compiler.source>
+        <maven.compiler.target>10</maven.compiler.target>
+        <maven.compiler.release>10</maven.compiler.release>
         <netty.version>4.1.19.Final</netty.version>
         <slf4j.version>1.7.21</slf4j.version>
         <bouncycastle.version>1.55</bouncycastle.version>
     </properties>
 
     <dependencies>
-        <!-- common libs -->
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-
         <!-- netty -->
         <dependency>
             <groupId>io.netty</groupId>
@@ -52,12 +45,12 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.13</version>
+            <version>1.17</version>
         </dependency>
         <dependency>
             <groupId>org.brotli</groupId>
             <artifactId>dec</artifactId>
-            <version>0.1.0</version>
+            <version>0.1.2</version>
         </dependency>
 
         <!-- image support for .ico -->
@@ -83,12 +76,12 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.0</version>
+            <version>2.8.5</version>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.10.2</version>
+            <version>1.11.3</version>
         </dependency>
 
         <!-- log -->
@@ -100,7 +93,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
+            <version>1.3.0-alpha4</version>
         </dependency>
 
         <!-- test -->
@@ -110,10 +103,21 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>16.0.2</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
+            </plugin>
             <plugin>
                 <!-- copy all dependencies of your app to target folder-->
                 <!--  javafx ant use extended fileset, cannot cast from ant fileset. just copy to a directory-->

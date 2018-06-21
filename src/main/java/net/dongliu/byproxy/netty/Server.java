@@ -18,7 +18,6 @@ import net.dongliu.byproxy.setting.ServerSetting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -34,7 +33,6 @@ public class Server {
     private final ServerSetting setting;
     private final ServerSSLContextManager sslContextManager;
     private final MessageListener messageListener;
-    @Nullable
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
     private ChannelFuture bindFuture;

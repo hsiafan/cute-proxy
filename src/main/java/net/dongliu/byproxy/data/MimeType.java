@@ -1,15 +1,12 @@
 package net.dongliu.byproxy.data;
 
-import javax.annotation.concurrent.Immutable;
-
 /**
  * Http content type
  *
  * @author Liu Dong
  */
-@Immutable
 public class MimeType {
-    
+
     private final String type;
     private final String subType;
 

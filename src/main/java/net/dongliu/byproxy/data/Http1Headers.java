@@ -1,7 +1,6 @@
 package net.dongliu.byproxy.data;
 
 
-import javax.annotation.concurrent.Immutable;
 import java.io.Serializable;
 import java.util.List;
 
@@ -10,7 +9,6 @@ import java.util.List;
  *
  * @author Liu Dong
  */
-@Immutable
 public abstract class Http1Headers extends HttpHeaders implements Serializable {
     private static final long serialVersionUID = 8364988912653478880L;
 

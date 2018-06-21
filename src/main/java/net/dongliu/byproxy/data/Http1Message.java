@@ -3,7 +3,6 @@ package net.dongliu.byproxy.data;
 import net.dongliu.byproxy.store.Body;
 import net.dongliu.byproxy.utils.NetAddress;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
 import static java.util.Objects.requireNonNull;
@@ -17,9 +16,7 @@ public class Http1Message extends HttpMessage implements Serializable {
     private static final long serialVersionUID = -8007788167253549079L;
     private final Http1RequestHeaders requestHeader;
     private final Body requestBody;
-    @Nullable
     private volatile Http1ResponseHeaders responseHeader;
-    @Nullable
     private volatile Body responseBody;
 
     public Http1Message(String scheme, NetAddress address, Http1RequestHeaders requestHeader, Body requestBody) {
@@ -51,7 +48,6 @@ public class Http1Message extends HttpMessage implements Serializable {
         return requestBody;
     }
 
-    @Nullable
     public Http1ResponseHeaders getResponseHeader() {
         return responseHeader;
     }
@@ -60,12 +56,11 @@ public class Http1Message extends HttpMessage implements Serializable {
         this.responseHeader = requireNonNull(responseHeader);
     }
 
-    @Nullable
     public Body getResponseBody() {
         return responseBody;
     }
 
-    public void setResponseBody(@Nullable Body responseBody) {
+    public void setResponseBody(Body responseBody) {
         this.responseBody = requireNonNull(responseBody);
     }
 

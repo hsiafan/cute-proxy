@@ -4,8 +4,6 @@ package net.dongliu.byproxy.data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.Immutable;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Set;
@@ -15,18 +13,17 @@ import java.util.Set;
  *
  * @author Liu Dong
  */
-@Immutable
 public class ContentType {
     private static final Logger logger = LoggerFactory.getLogger(ContentType.class);
 
     private final String rawMimeType;
     private final MimeType mimeType;
-    @Nullable
+    // may be null
     private final Charset charset;
 
     public static ContentType binary = ContentType.parse("application/octet-stream");
 
-    public ContentType(String rawMimeType, @Nullable Charset charset) {
+    public ContentType(String rawMimeType, Charset charset) {
         this.rawMimeType = rawMimeType;
         this.mimeType = MimeType.parse(rawMimeType);
         this.charset = charset;
@@ -52,8 +49,7 @@ public class ContentType {
         return new ContentType(type, toCharsetSafe(encoding));
     }
 
-    @Nullable
-    private static Charset toCharsetSafe(@Nullable String encoding) {
+    private static Charset toCharsetSafe(String encoding) {
         if (encoding == null) {
             return null;
         }
@@ -86,7 +82,6 @@ public class ContentType {
         return mimeType;
     }
 
-    @Nullable
     public Charset getCharset() {
         return charset;
     }

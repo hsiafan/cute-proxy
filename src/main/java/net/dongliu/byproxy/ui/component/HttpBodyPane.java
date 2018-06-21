@@ -21,7 +21,6 @@ import net.dongliu.byproxy.ui.beautifier.*;
 import net.dongliu.byproxy.utils.Readers;
 import net.dongliu.byproxy.utils.Strings;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -81,7 +80,7 @@ public class HttpBodyPane extends BorderPane {
             BodyType.html, new HtmlBeautifier()
     );
 
-    private void refreshBody(@Nullable Body body) throws IOException {
+    private void refreshBody(Body body) throws IOException {
         if (body == null) {
             this.setCenter(new Text());
             return;

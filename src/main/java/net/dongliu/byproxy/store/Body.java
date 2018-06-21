@@ -7,7 +7,6 @@ import org.brotli.dec.BrotliInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -41,7 +40,7 @@ public class Body implements Serializable {
 
     private List<Chunk> chunkList;
 
-    public Body(BodyType type, @Nullable Charset charset, String contentEncoding) {
+    public Body(BodyType type, Charset charset, String contentEncoding) {
         this.type = requireNonNull(type);
         this.charset = requireNonNullElse(charset, UTF_8);
         this.contentEncoding = requireNonNull(contentEncoding);
