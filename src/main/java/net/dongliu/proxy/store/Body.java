@@ -1,11 +1,10 @@
 package net.dongliu.proxy.store;
 
 import net.dongliu.proxy.data.ContentType;
-import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
-import org.apache.commons.compress.compressors.z.ZCompressorInputStream;
 import org.brotli.dec.BrotliInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.tukaani.xz.LZMAInputStream;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -148,12 +147,10 @@ public class Body implements Serializable {
                 input = new GZIPInputStream(input);
             } else if ("deflate".equalsIgnoreCase(contentEncoding)) {
                 input = new InflaterInputStream(getInputStream(), new Inflater(true));
-            } else if (contentEncoding.equalsIgnoreCase("compress")) {
-                input = new ZCompressorInputStream(input);
             } else if ("br".equalsIgnoreCase(contentEncoding)) {
                 input = new BrotliInputStream(input);
             } else if ("lzma".equalsIgnoreCase(contentEncoding)) {
-                input = new LZMACompressorInputStream(input);
+                input = new LZMAInputStream(input, -1);
             } else {
                 logger.warn("unsupported content-encoding: {}", contentEncoding);
             }

@@ -60,9 +60,9 @@ public class HttpBodyPane extends BorderPane {
         });
 
         charsetBox.getItems().addAll(StandardCharsets.UTF_8, StandardCharsets.UTF_16, StandardCharsets.US_ASCII,
-                StandardCharsets.ISO_8859_1,
-                Charset.forName("GB18030"), Charset.forName("GBK"), Charset.forName("GB2312"),
-                Charset.forName("BIG5"));
+                StandardCharsets.ISO_8859_1, Charset.forName("GB18030"), Charset.forName("GBK"),
+                Charset.forName("GB2312"), Charset.forName("BIG5")
+        );
         bodyTypeBox.getItems().addAll(BodyType.values());
         beautify.addListener((ob, old, value) -> {
             try {

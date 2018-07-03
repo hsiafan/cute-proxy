@@ -1,9 +1,17 @@
 module net.dongliu.proxy {
     requires javafx.fxml;
-    requires bcprov.jdk15on;
-    requires bcpkix.jdk15on;
+    requires javafx.graphics;
+    requires javafx.controls;
+    requires javafx.swing;
+    requires java.sql;
+    requires jdk.charsets;
+
+    // modular jar
+    requires org.slf4j;
+    requires ch.qos.logback.classic;
+
+    // dependency with stable module name
     requires io.netty.handler;
-    requires slf4j.api;
     requires io.netty.codec;
     requires io.netty.buffer;
     requires io.netty.transport;
@@ -11,18 +19,16 @@ module net.dongliu.proxy {
     requires io.netty.common;
     requires io.netty.codec.http;
     requires io.netty.codec.http2;
-
-    requires javafx.graphics;
-    requires javafx.controls;
-    requires javafx.swing;
-    requires org.apache.commons.compress;
     requires io.netty.codec.socks;
     requires org.jsoup;
+    requires org.tukaani.xz;
+
+    // dependency without stable module name
     requires image4j;
     requires dec;
-    // gson requires this module
-    requires java.sql;
     requires gson;
+    requires bcprov.jdk15on;
+    requires bcpkix.jdk15on;
 
     // open for javafx reflection
     opens net.dongliu.proxy;
