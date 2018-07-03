@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.byproxy.ui.component.KeyStoreSettingDialog?>
+<?import net.dongliu.proxy.ui.component.KeyStoreSettingDialog?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<fx:root type="net.dongliu.byproxy.ui.component.KeyStoreSettingDialog" xmlns:fx="http://javafx.com/fxml">
+<fx:root type="net.dongliu.proxy.ui.component.KeyStoreSettingDialog" xmlns:fx="http://javafx.com/fxml">
     <title>KeyStore Setting</title>
     <GridPane hgap="6" vgap="4">
         <padding>

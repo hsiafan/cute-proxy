@@ -4,8 +4,8 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.dongliu</groupId>
-    <artifactId>byproxy</artifactId>
-    <name>ByProxy</name>
+    <artifactId>monkey-proxy</artifactId>
+    <name>Monkey Proxy</name>
     <packaging>jar</packaging>
     <version>0.10.0</version>
 
@@ -174,7 +174,7 @@
                 </os>
             </activation>
             <properties>
-                <icon.path>src/main/deploy/package/windows/ByProxy.ico</icon.path>
+                <icon.path>src/main/deploy/package/windows/icon.ico</icon.path>
             </properties>
         </profile>
         <profile>
@@ -185,7 +185,7 @@
                 </os>
             </activation>
             <properties>
-                <icon.path>src/main/deploy/package/macosx/ByProxy.icns</icon.path>
+                <icon.path>src/main/deploy/package/macosx/icon.icns</icon.path>
             </properties>
         </profile>
         <profile>
@@ -196,7 +196,7 @@
                 </os>
             </activation>
             <properties>
-                <icon.path>src/main/deploy/package/linux/ByProxy.png</icon.path>
+                <icon.path>src/main/deploy/package/linux/icon.png</icon.path>
             </properties>
         </profile>
     </profiles>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.byproxy.ui.component.HttpBodyPane?>
-<?import net.dongliu.byproxy.ui.component.WebSocketMessagePane?>
+<?import net.dongliu.proxy.ui.component.HttpBodyPane?>
+<?import net.dongliu.proxy.ui.component.WebSocketMessagePane?>
 <?import javafx.scene.text.Text?>
-<fx:root type="net.dongliu.byproxy.ui.component.WebSocketMessagePane" xmlns:fx="http://javafx.com/fxml">
+<fx:root type="net.dongliu.proxy.ui.component.WebSocketMessagePane" xmlns:fx="http://javafx.com/fxml">
     <top>
         <Text fx:id="description"/>
     </top>

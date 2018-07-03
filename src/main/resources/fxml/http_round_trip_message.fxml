@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.byproxy.ui.component.HttpHeadersPane?>
-<?import net.dongliu.byproxy.ui.component.HttpRoundTripMessagePane?>
-<?import net.dongliu.byproxy.ui.component.HttpBodyPane?>
+<?import net.dongliu.proxy.ui.component.HttpHeadersPane?>
+<?import net.dongliu.proxy.ui.component.HttpRoundTripMessagePane?>
+<?import net.dongliu.proxy.ui.component.HttpBodyPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.control.RadioButton?>

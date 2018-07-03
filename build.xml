@@ -12,31 +12,31 @@
                  uri="javafx:com.sun.javafx.tools.ant"
                  classpath="${JAVA_HOME}/lib/ant-javafx.jar"/>
 
-        <fx:application id="net.dongliu.byproxy" name="ByProxy" mainClass="net.dongliu.byproxy.Main"
+        <fx:application id="net.dongliu.proxy" name="Monkey Proxy" mainClass="net.dongliu.proxy.Main"
                         version="${app.version}"/>
 
         <fx:csstobin outdir="${build.classes.dir}">
             <fileset dir="${build.classes.dir}" includes="**/*.css"/>
         </fx:csstobin>
 
-        <fx:jar destfile="${libs.dir}/byproxy-${app.version}.jar">
-            <fx:application refid="net.dongliu.byproxy"/>
+        <fx:jar destfile="${libs.dir}/monkey-proxy-${app.version}.jar">
+            <fx:application refid="net.dongliu.proxy"/>
             <fx:resources id="appRes">
                 <fx:fileset dir="${libs.dir}"/>
             </fx:resources>
             <fileset dir="${build.classes.dir}"/>
         </fx:jar>
 
-        <fx:deploy outdir="${build.dist.dir}" outfile="ByProxy" signBundle="false" nativeBundles="image">
+        <fx:deploy outdir="${build.dist.dir}" outfile="MonkeyProxy" signBundle="false" nativeBundles="image">
             <!-- javafx9 remove the basedir attribute? -->
             <fx:platform j2se="9.0">
                 <!--<fx:jvmarg value="-Xmx512m"/>-->
             </fx:platform>
-            <fx:application refId="net.dongliu.byproxy"/>
+            <fx:application refId="net.dongliu.proxy"/>
             <fx:resources id="appRes">
                 <fx:fileset dir="${libs.dir}"/>
             </fx:resources>
-            <fx:info title="ByProxy" vendor="net.dongliu">
+            <fx:info title="MonkeyProxy" vendor="net.dongliu">
                 <fx:icon href="${icon.path}" kind="default"/>
             </fx:info>
         </fx:deploy>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.byproxy.ui.component.CatalogPane?>
+<?import net.dongliu.proxy.ui.component.CatalogPane?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<fx:root type="net.dongliu.byproxy.ui.component.CatalogPane" xmlns:fx="http://javafx.com/fxml">
+<fx:root type="net.dongliu.proxy.ui.component.CatalogPane" xmlns:fx="http://javafx.com/fxml">
     <top>
         <HBox spacing="4" alignment="CENTER">
             <padding>

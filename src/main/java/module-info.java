@@ -1,4 +1,4 @@
-module net.dongliu.byproxy {
+module net.dongliu.proxy {
     requires javafx.fxml;
     requires bcprov.jdk15on;
     requires bcpkix.jdk15on;
@@ -24,9 +24,10 @@ module net.dongliu.byproxy {
     requires java.sql;
     requires gson;
 
-    opens net.dongliu.byproxy;
-    opens net.dongliu.byproxy.ui;
-    opens net.dongliu.byproxy.ui.component;
+    // open for javafx reflection
+    opens net.dongliu.proxy;
+    opens net.dongliu.proxy.ui;
+    opens net.dongliu.proxy.ui.component;
     opens styles;
     opens images;
 }

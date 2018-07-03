@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.byproxy.ui.component.MainSettingDialog?>
+<?import net.dongliu.proxy.ui.component.MainSettingDialog?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<fx:root type="net.dongliu.byproxy.ui.component.MainSettingDialog" xmlns:fx="http://javafx.com/fxml">
+<fx:root type="net.dongliu.proxy.ui.component.MainSettingDialog" xmlns:fx="http://javafx.com/fxml">
     <title>Settings</title>
     <GridPane xmlns:fx="http://javafx.com/fxml" hgap="6" vgap="4">
         <padding>
