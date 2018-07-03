@@ -93,7 +93,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.3.0-alpha4</version>
+            <version>1.2.3</version>
         </dependency>
 
         <!-- test -->
@@ -117,10 +117,17 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.ow2.asm</groupId>
+                        <artifactId>asm</artifactId>
+                        <version>6.1.1</version>
+                    </dependency>
+                </dependencies>
             </plugin>
+
+            <!-- copy all dependencies of your app to target folder, for call javapackager-->
             <plugin>
-                <!-- copy all dependencies of your app to target folder-->
-                <!--  javafx ant use extended fileset, cannot cast from ant fileset. just copy to a directory-->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.3</version>
@@ -128,39 +135,82 @@
                     <execution>
                         <id>copy-dependencies</id>
                         <phase>package</phase>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                    <includeScope>runtime</includeScope>
+                    <overWriteReleases>false</overWriteReleases>
+                    <overWriteSnapshots>false</overWriteSnapshots>
+                    <overWriteIfNewer>true</overWriteIfNewer>
+                </configuration>
             </plugin>
+            <!-- just call javapackager directly via maven exec plugin -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.7</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.3.2</version>
                 <executions>
                     <execution>
+                        <id>fx-createjar</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>run</goal>
+                            <goal>exec</goal>
                         </goals>
+                        <configuration>
+                            <executable>javapackager</executable>
+                            <arguments>
+                                <argument>-createjar</argument>
+                                <argument>-nocss2bin</argument>
+                                <argument>-appclass</argument>
+                                <argument>net.dongliu.proxy.Main</argument>
+                                <argument>-classpath</argument>
+                                <argument>./*</argument>
+                                <argument>-srcdir</argument>
+                                <argument>${project.build.outputDirectory}/</argument>
+                                <argument>-outdir</argument>
+                                <argument>${project.build.directory}/libs</argument>
+                                <argument>-outfile</argument>
+                                <argument>${project.build.finalName}.jar</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>fx-deploy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>javapackager</executable>
+                            <arguments>
+                                <argument>-deploy</argument>
+                                <argument>-name</argument>
+                                <argument>Monkey Proxy</argument>
+                                <argument>-title</argument>
+                                <argument>Monkey Proxy</argument>
+                                <argument>-vendor</argument>
+                                <argument>hsiafan</argument>
+                                <argument>-appclass</argument>
+                                <argument>net.dongliu.proxy.Main</argument>
+                                <argument>-srcdir</argument>
+                                <argument>${project.build.directory}/libs</argument>
+                                <argument>-outdir</argument>
+                                <argument>${project.build.directory}</argument>
+                                <argument>-outfile</argument>
+                                <argument>Monkey Proxy</argument>
+                                <argument>-native</argument>
+                                <argument>image</argument>
+                                <argument>-nosign</argument>
+                                <argument>-Bicon=${icon.path}</argument>
+                                <argument>-BappVersion=${project.version}</argument>
+                            </arguments>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <target>
-                        <!--<dependencyfilesets/>-->
-                        <property name="icon.path" value="${icon.path}"/>
-                        <property name="app.version" value="${project.version}"/>
-                        <property name="libs.dir" value="${project.build.directory}/libs"/>
-                        <ant antfile="build.xml" target="deploy" inheritRefs="true"/>
-                    </target>
-                </configuration>
             </plugin>
         </plugins>
     </build>
