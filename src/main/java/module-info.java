@@ -7,6 +7,7 @@ module net.dongliu.proxy {
     requires jdk.charsets;
 
     // modular jar
+    requires net.dongliu.commons;
     requires org.slf4j;
     requires ch.qos.logback.classic;
 

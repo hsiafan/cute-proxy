@@ -20,6 +20,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>net.dongliu</groupId>
+            <artifactId>commons</artifactId>
+            <version>6.8.1</version>
+        </dependency>
         <!-- netty -->
         <dependency>
             <groupId>io.netty</groupId>

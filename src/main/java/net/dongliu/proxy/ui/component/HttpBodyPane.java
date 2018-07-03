@@ -14,11 +14,11 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import net.dongliu.commons.io.Readers;
 import net.dongliu.proxy.store.Body;
 import net.dongliu.proxy.store.BodyType;
 import net.dongliu.proxy.ui.UIUtils;
 import net.dongliu.proxy.ui.beautifier.*;
-import net.dongliu.proxy.utils.Readers;
 import net.dongliu.proxy.utils.Strings;
 
 import java.io.*;
