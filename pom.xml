@@ -7,7 +7,7 @@
     <artifactId>monkey-proxy</artifactId>
     <name>Monkey Proxy</name>
     <packaging>jar</packaging>
-    <version>0.10.0</version>
+    <version>0.11.0</version>
 
     <properties>
         <maven.compiler.source>10</maven.compiler.source>
