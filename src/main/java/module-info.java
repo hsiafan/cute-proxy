@@ -5,6 +5,7 @@ module net.dongliu.proxy {
     requires javafx.swing;
     requires java.sql;
     requires jdk.charsets;
+    requires jdk.crypto.cryptoki;
 
     // modular jar
     requires net.dongliu.commons;
