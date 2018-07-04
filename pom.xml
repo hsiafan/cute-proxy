@@ -377,10 +377,11 @@
                                 <argument>-native</argument>
                                 <argument>image</argument>
                                 <argument>-nosign</argument>
-                                <argument>-Bicon=${icon.path}</argument>
+                                <argument>-BdropinResourcesRoot=${basedir}/src/main/deploy</argument>
                                 <argument>-BappVersion=${project.version}</argument>
                                 <argument>-BjlinkOptions=strip-debug &#xD;&#xA; compress=1</argument>
                                 <argument>-Bverbose=true</argument>
+                                <argument>-Bidentifier=net.dongliu.proxy</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -388,41 +389,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>windows_profile</id>
-            <activation>
-                <os>
-                    <family>Windows</family>
-                </os>
-            </activation>
-            <properties>
-                <icon.path>src/main/deploy/package/windows/icon.ico</icon.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>osx_profile</id>
-            <activation>
-                <os>
-                    <family>mac</family>
-                </os>
-            </activation>
-            <properties>
-                <icon.path>src/main/deploy/package/macosx/icon.icns</icon.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>linux_profile</id>
-            <activation>
-                <os>
-                    <name>linux</name>
-                </os>
-            </activation>
-            <properties>
-                <icon.path>src/main/deploy/package/linux/icon.png</icon.path>
-            </properties>
-        </profile>
-    </profiles>
-
 </project>
