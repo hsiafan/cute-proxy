@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * The proxy mainSetting infos
  *
@@ -17,7 +19,7 @@ public class ServerSetting implements Serializable {
     private final int timeout;
 
     public ServerSetting(String host, int port, int timeout) {
-        this.host = host;
+        this.host = requireNonNull(host);
         this.port = port;
         this.timeout = timeout;
     }
@@ -30,19 +32,19 @@ public class ServerSetting implements Serializable {
     }
 
 
-    public static ServerSetting getDefault() {
+    public static ServerSetting newDefaultServerSetting() {
         return new ServerSetting("", 2080, 1800);
     }
 
-    public String getHost() {
+    public String host() {
         return host;
     }
 
-    public int getPort() {
+    public int port() {
         return port;
     }
 
-    public int getTimeout() {
+    public int timeout() {
         return timeout;
     }
 }

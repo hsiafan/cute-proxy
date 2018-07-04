@@ -3,7 +3,8 @@ package net.dongliu.proxy.data;
 import net.dongliu.proxy.exception.HttpDecodeException;
 
 import java.io.Serializable;
-import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * The http status line
@@ -18,18 +19,13 @@ public class StatusLine implements Serializable {
     private transient String raw;
 
     public StatusLine(String version, int code, String reason) {
-        this.version = version;
+        this.version = requireNonNull(version);
         this.code = code;
-        this.reason = reason;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("StatusLine(%s %d %s)", version, code, reason);
+        this.reason = requireNonNull(reason);
     }
 
     public static StatusLine parse(String str) {
-        Objects.requireNonNull(str);
+        requireNonNull(str);
         int idx = str.indexOf(' ');
         if (idx < 0) {
             throw new HttpDecodeException("Invalid http status line: " + str);
@@ -51,19 +47,19 @@ public class StatusLine implements Serializable {
         return statusLine;
     }
 
-    public String getVersion() {
+    public String version() {
         return version;
     }
 
-    public int getCode() {
+    public int code() {
         return code;
     }
 
-    public String getReason() {
+    public String reason() {
         return reason;
     }
 
-    public String raw() {
+    public String rawStatusLine() {
         if (raw == null) {
             raw = version + " " + code + " " + reason;
         }
@@ -88,5 +84,10 @@ public class StatusLine implements Serializable {
         result = 31 * result + code;
         result = 31 * result + reason.hashCode();
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("StatusLine(%s %d %s)", version, code, reason);
     }
 }

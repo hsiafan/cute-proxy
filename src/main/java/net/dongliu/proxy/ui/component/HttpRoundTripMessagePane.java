@@ -41,8 +41,8 @@ public class HttpRoundTripMessagePane extends SplitPane {
     @FXML
     private void initialize() {
         roundTripMessage.addListener((o, old, newValue) -> {
-            requestHeaderPane.setHeaders(newValue.getRequestHeader());
-            responseHeaderPane.setHeaders(newValue.getResponseHeader());
+            requestHeaderPane.setHeaders(newValue.requestHeader());
+            responseHeaderPane.setHeaders(newValue.ResponseHeader());
             showHttpBody(bodyToggleGroup.getSelectedToggle());
         });
         bodyToggleGroup.selectedToggleProperty().addListener((ob, old, value) -> showHttpBody(value));
@@ -52,9 +52,9 @@ public class HttpRoundTripMessagePane extends SplitPane {
     private void showHttpBody(Toggle value) {
         Object userData = value.getUserData();
         if (userData.equals("request")) {
-            bodyPane.setBody(roundTripMessage.get().getRequestBody());
+            bodyPane.setBody(roundTripMessage.get().requestBody());
         } else if (userData.equals("response")) {
-            bodyPane.setBody(roundTripMessage.get().getResponseBody());
+            bodyPane.setBody(roundTripMessage.get().responseBody());
         }
     }
 

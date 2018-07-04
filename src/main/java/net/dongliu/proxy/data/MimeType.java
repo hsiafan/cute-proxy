@@ -1,5 +1,7 @@
 package net.dongliu.proxy.data;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Http content type
  *
@@ -11,8 +13,8 @@ public class MimeType {
     private final String subType;
 
     public MimeType(String type, String subType) {
-        this.type = type;
-        this.subType = subType;
+        this.type = requireNonNull(type);
+        this.subType = requireNonNull(subType);
     }
 
     public static MimeType parse(String str) {

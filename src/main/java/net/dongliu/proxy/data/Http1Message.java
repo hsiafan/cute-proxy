@@ -31,41 +31,41 @@ public class Http1Message extends HttpMessage implements Serializable {
         if (!(scheme.equals("https") && address.getPort() == 443 || scheme.equals("http") && address.getPort() == 80)) {
             sb.append(":").append(address.getPort());
         }
-        sb.append(requestHeader.getRequestLine().getPath());
+        sb.append(requestHeader.getRequestLine().path());
         return sb.toString();
     }
 
     @Override
     public String displayText() {
-        return getUrl();
+        return url();
     }
 
-    public Http1RequestHeaders getRequestHeader() {
+    public Http1RequestHeaders requestHeader() {
         return requestHeader;
     }
 
-    public Body getRequestBody() {
+    public Body requestBody() {
         return requestBody;
     }
 
-    public Http1ResponseHeaders getResponseHeader() {
+    public Http1ResponseHeaders ResponseHeader() {
         return responseHeader;
     }
 
-    public void setResponseHeader(Http1ResponseHeaders responseHeader) {
+    public void responseHeader(Http1ResponseHeaders responseHeader) {
         this.responseHeader = requireNonNull(responseHeader);
     }
 
-    public Body getResponseBody() {
+    public Body responseBody() {
         return responseBody;
     }
 
-    public void setResponseBody(Body responseBody) {
+    public void responseBody(Body responseBody) {
         this.responseBody = requireNonNull(responseBody);
     }
 
     @Override
     public String toString() {
-        return "Http1Message{url=" + getUrl() + "}";
+        return "Http1Message{url=" + url() + "}";
     }
 }

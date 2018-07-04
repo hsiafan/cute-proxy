@@ -3,15 +3,16 @@ package net.dongliu.proxy.netty.detector;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelPipeline;
 
-import java.util.Objects;
 import java.util.function.Consumer;
+
+import static java.util.Objects.requireNonNull;
 
 public class SSLMatcher extends ProtocolMatcher {
 
     private Consumer<ChannelPipeline> consumer;
 
     public SSLMatcher(Consumer<ChannelPipeline> consumer) {
-        this.consumer = Objects.requireNonNull(consumer);
+        this.consumer = requireNonNull(consumer);
     }
 
     @Override

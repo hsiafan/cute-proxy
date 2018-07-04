@@ -1,52 +1,57 @@
 package net.dongliu.proxy.data;
 
 import java.time.Instant;
-import java.util.Objects;
+import java.util.Optional;
 
-public class Cookie implements KeyValue {
+import static java.util.Objects.requireNonNull;
+
+/**
+ * Http Cookie
+ */
+public class Cookie implements NameValue {
     private final String domain;
     private final String path;
     private final String name;
     private final String value;
-    private final Instant expiry;
+    private final Optional<Instant> expiry;
     private final boolean secure;
 
-    public Cookie(String domain, String path, String name, String value, Instant expiry, boolean secure) {
-        this.domain = Objects.requireNonNull(domain);
-        this.path = Objects.requireNonNull(path);
-        this.name = Objects.requireNonNull(name);
-        this.value = Objects.requireNonNull(value);
-        this.expiry = expiry;
+    public Cookie(String domain, String path, String name, String value, Optional<Instant> expiry, boolean secure) {
+        this.domain = requireNonNull(domain);
+        this.path = requireNonNull(path);
+        this.name = requireNonNull(name);
+        this.value = requireNonNull(value);
+        this.expiry = requireNonNull(expiry);
         this.secure = secure;
     }
 
     public boolean expired(Instant now) {
-        return expiry != null && expiry.isBefore(now);
+        return expiry.isPresent() && expiry.get().isBefore(now);
     }
 
-    public String getDomain() {
+    public String domain() {
         return domain;
     }
 
-    public String getPath() {
+    public String path() {
         return path;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return name;
     }
 
     @Override
-    public String getValue() {
+    public String value() {
         return value;
     }
 
-    public Instant getExpiry() {
+    public Optional<Instant> expiry() {
         return expiry;
     }
 
-    public boolean isSecure() {
+    public boolean secure() {
         return secure;
     }
 }

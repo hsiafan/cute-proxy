@@ -1,9 +1,9 @@
 package net.dongliu.proxy;
 
+import net.dongliu.proxy.netty.handler.ServerSSLContextManager;
 import net.dongliu.proxy.setting.KeyStoreSetting;
 import net.dongliu.proxy.setting.ProxySetting;
 import net.dongliu.proxy.setting.ServerSetting;
-import net.dongliu.proxy.netty.handler.ServerSSLContextManager;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,7 +29,7 @@ public class Context {
     /**
      * Set new keyStore. This may cause create new SslContextManager if keyStore file changed.
      */
-    public void setKeyStoreSetting(KeyStoreSetting setting) {
+    public void keyStoreSetting(KeyStoreSetting setting) {
         Objects.requireNonNull(setting);
         Path path = Paths.get(setting.usedKeyStore());
         if (sslContextManager == null || !path.equals(sslContextManager.getRootKeyStorePath())) {
@@ -38,11 +38,11 @@ public class Context {
         this.keyStoreSetting = setting;
     }
 
-    public void setServerSetting(ServerSetting serverSetting) {
+    public void serverSetting(ServerSetting serverSetting) {
         this.serverSetting = Objects.requireNonNull(serverSetting);
     }
 
-    public void setProxySetting(ProxySetting proxySetting) {
+    public void proxySetting(ProxySetting proxySetting) {
         this.proxySetting = Objects.requireNonNull(proxySetting);
     }
 
@@ -50,19 +50,19 @@ public class Context {
         return instance;
     }
 
-    public ServerSetting getServerSetting() {
+    public ServerSetting serverSetting() {
         return serverSetting;
     }
 
-    public KeyStoreSetting getKeyStoreSetting() {
+    public KeyStoreSetting keyStoreSetting() {
         return keyStoreSetting;
     }
 
-    public ProxySetting getProxySetting() {
+    public ProxySetting proxySetting() {
         return proxySetting;
     }
 
-    public ServerSSLContextManager getSslContextManager() {
+    public ServerSSLContextManager sslContextManager() {
         return sslContextManager;
     }
 }

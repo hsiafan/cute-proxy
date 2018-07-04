@@ -1,13 +1,10 @@
 package net.dongliu.proxy.ui;
 
 import javafx.application.Platform;
-import javafx.beans.property.Property;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.TreeItem;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import net.dongliu.proxy.CloseHooks;
@@ -16,10 +13,7 @@ import net.dongliu.proxy.data.HttpMessage;
 import net.dongliu.proxy.data.Message;
 import net.dongliu.proxy.data.WebSocketMessage;
 import net.dongliu.proxy.netty.Server;
-import net.dongliu.proxy.setting.KeyStoreSetting;
-import net.dongliu.proxy.setting.ProxySetting;
 import net.dongliu.proxy.setting.ServerSetting;
-import net.dongliu.proxy.ssl.KeyStoreGenerator;
 import net.dongliu.proxy.ui.component.*;
 import net.dongliu.proxy.ui.task.InitContextTask;
 import net.dongliu.proxy.ui.task.LoadTask;
@@ -33,7 +27,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.security.cert.CertificateEncodingException;
 import java.util.Collection;
-import java.util.Optional;
 
 /**
  * The main UI Controller
@@ -75,8 +68,8 @@ public class MainController {
         startProxyButton.setDisable(true);
         startProxyMenu.setDisable(true);
         try {
-            server = new Server(context.getServerSetting(), context.getSslContextManager(),
-                    context.getProxySetting(),
+            server = new Server(context.serverSetting(), context.sslContextManager(),
+                    context.proxySetting(),
                     message -> Platform.runLater(() -> catalogPane.addTreeItemMessage(message)));
             server.start();
         } catch (Throwable t) {
@@ -115,7 +108,7 @@ public class MainController {
             }
         });
 
-        Property<Message> currentMessage = catalogPane.currentMessageProperty();
+        var currentMessage = catalogPane.currentMessageProperty();
         currentMessage.addListener((ov, old, message) -> {
             if (message == null) {
                 hideContent();
@@ -124,10 +117,10 @@ public class MainController {
             }
         });
 
-        ObservableValue<Boolean> hasCurrentMessage = UIUtils.observeNull(currentMessage);
+        var hasCurrentMessage = UIUtils.observeNull(currentMessage);
         copyURLButton.disableProperty().bind(hasCurrentMessage);
 
-        Property<TreeItem<Item>> currentTreeItem = catalogPane.currentTreeItemProperty();
+        var currentTreeItem = catalogPane.currentTreeItemProperty();
         deleteMenu.disableProperty().bind(UIUtils.observeNull(currentTreeItem));
         loadConfigAndKeyStore();
 
@@ -137,7 +130,7 @@ public class MainController {
      * Load app mainSetting, and keyStore contains private key/certs
      */
     private void loadConfigAndKeyStore() {
-        InitContextTask task = new InitContextTask(context);
+        var task = new InitContextTask(context);
         Thread thread = new Thread(task);
         thread.setDaemon(true);
         thread.start();
@@ -148,35 +141,35 @@ public class MainController {
      */
     @FXML
     private void updateSetting(ActionEvent e) throws IOException {
-        MainSettingDialog dialog = new MainSettingDialog();
-        dialog.mainSettingProperty().setValue(context.getServerSetting());
-        Optional<ServerSetting> newConfig = dialog.showAndWait();
+        var dialog = new MainSettingDialog();
+        dialog.mainSettingProperty().setValue(context.serverSetting());
+        var newConfig = dialog.showAndWait();
         if (newConfig.isPresent()) {
-            SaveSettingTask task = new SaveSettingTask(context, newConfig.get(), context.getKeyStoreSetting(),
-                    context.getProxySetting());
+            var task = new SaveSettingTask(context, newConfig.get(), context.keyStoreSetting(),
+                    context.proxySetting());
             UIUtils.runTaskWithProcessDialog(task, "append settings failed");
         }
     }
 
     @FXML
     private void setKeyStore(ActionEvent e) throws IOException {
-        KeyStoreSettingDialog dialog = new KeyStoreSettingDialog();
-        dialog.keyStoreSettingProperty().setValue(context.getKeyStoreSetting());
-        Optional<KeyStoreSetting> newConfig = dialog.showAndWait();
+        var dialog = new KeyStoreSettingDialog();
+        dialog.keyStoreSettingProperty().setValue(context.keyStoreSetting());
+        var newConfig = dialog.showAndWait();
         if (newConfig.isPresent()) {
-            SaveSettingTask task = new SaveSettingTask(context, context.getServerSetting(), newConfig.get(),
-                    context.getProxySetting());
+            var task = new SaveSettingTask(context, context.serverSetting(), newConfig.get(),
+                    context.proxySetting());
             UIUtils.runTaskWithProcessDialog(task, "append key store failed");
         }
     }
 
     @FXML
     private void setProxy(ActionEvent e) throws IOException {
-        ProxySettingDialog dialog = new ProxySettingDialog();
-        dialog.proxySettingProperty().setValue(context.getProxySetting());
-        Optional<ProxySetting> newConfig = dialog.showAndWait();
+        var dialog = new ProxySettingDialog();
+        dialog.proxySettingProperty().setValue(context.proxySetting());
+        var newConfig = dialog.showAndWait();
         if (newConfig.isPresent()) {
-            SaveSettingTask task = new SaveSettingTask(context, context.getServerSetting(), context.getKeyStoreSetting(),
+            var task = new SaveSettingTask(context, context.serverSetting(), context.keyStoreSetting(),
                     newConfig.get());
             UIUtils.runTaskWithProcessDialog(task, "append secondary proxy setting failed");
         }
@@ -186,9 +179,9 @@ public class MainController {
      * Get listened addresses, show in toolbar
      */
     private void updateListenedAddress() {
-        ServerSetting config = context.getServerSetting();
-        String host = config.getHost().trim();
-        int port = config.getPort();
+        ServerSetting config = context.serverSetting();
+        String host = config.host().trim();
+        int port = config.port();
         Platform.runLater(() -> listenedAddressLabel.setText("Listened " + host + ":" + port));
     }
 
@@ -253,7 +246,7 @@ public class MainController {
 
     @FXML
     private void exportPem(ActionEvent e) throws CertificateEncodingException, IOException {
-        KeyStoreGenerator generator = Context.getInstance().getSslContextManager().getKeyStoreGenerator();
+        var generator = Context.getInstance().sslContextManager().getKeyStoreGenerator();
         byte[] data = generator.exportRootCert(true);
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Pem file", "*.pem"));
@@ -267,7 +260,7 @@ public class MainController {
 
     @FXML
     private void exportCrt(ActionEvent e) throws CertificateEncodingException, IOException {
-        KeyStoreGenerator generator = Context.getInstance().getSslContextManager().getKeyStoreGenerator();
+        var generator = Context.getInstance().sslContextManager().getKeyStoreGenerator();
         byte[] data = generator.exportRootCert(false);
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Crt file", "*.crt"));
@@ -281,13 +274,13 @@ public class MainController {
 
     @FXML
     private void copyUrl(ActionEvent event) {
-        String url = catalogPane.currentMessageProperty().getValue().getUrl();
+        String url = catalogPane.currentMessageProperty().getValue().url();
         UIUtils.copyToClipBoard(url);
     }
 
     @FXML
     private void deleteTreeNode(ActionEvent event) {
-        TreeItem<Item> treeItem = catalogPane.currentTreeItemProperty().getValue();
+        var treeItem = catalogPane.currentTreeItemProperty().getValue();
         if (treeItem != null) {
             catalogPane.deleteTreeItem(treeItem);
         }

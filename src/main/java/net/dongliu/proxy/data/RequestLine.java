@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * The http request line
  *
@@ -20,14 +22,9 @@ public class RequestLine implements Serializable {
     private transient String raw;
 
     public RequestLine(String method, String path, String version) {
-        this.method = method;
-        this.path = path;
-        this.version = version;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("RequestLine(%s %s %s)", method, path, version);
+        this.method = requireNonNull(method);
+        this.path = requireNonNull(path);
+        this.version = requireNonNull(version);
     }
 
     public static RequestLine parse(String str) {
@@ -60,19 +57,19 @@ public class RequestLine implements Serializable {
         version = in.readUTF();
     }
 
-    public String getMethod() {
+    public String method() {
         return method;
     }
 
-    public String getPath() {
+    public String path() {
         return path;
     }
 
-    public String getVersion() {
+    public String version() {
         return version;
     }
 
-    public String raw() {
+    public String rawRequestLine() {
         if (raw == null) {
             raw = method + " " + path + " " + version;
         }
@@ -98,4 +95,10 @@ public class RequestLine implements Serializable {
         result = 31 * result + version.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return String.format("RequestLine(%s %s %s)", method, path, version);
+    }
+
 }

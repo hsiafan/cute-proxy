@@ -25,14 +25,14 @@ public class Http1ResponseHeaders extends Http1Headers implements Serializable {
 
     @Override
     public String toString() {
-        return "Http1ResponseHeaders(statusLine=" + statusLine.raw() + ", headers=" + super.toString() + ")";
+        return "Http1ResponseHeaders(statusLine=" + statusLine.rawStatusLine() + ", headers=" + super.toString() + ")";
     }
 
     @Override
-    public List<String> toRawLines() {
-        List<String> rawLines = new ArrayList<>(getHeaders().size() + 1);
-        rawLines.add(statusLine.raw());
-        getHeaders().stream().map(Header::raw).forEach(rawLines::add);
+    public List<String> rawLines() {
+        List<String> rawLines = new ArrayList<>(headers().size() + 1);
+        rawLines.add(statusLine.rawStatusLine());
+        headers().stream().map(Header::rawHeader).forEach(rawLines::add);
         return rawLines;
     }
 
@@ -45,13 +45,13 @@ public class Http1ResponseHeaders extends Http1Headers implements Serializable {
          * a message-body is explicitly forbidden in 1xx (informational), 204 (no content), and 304 (not modified)
          * responses
          */
-        int code = statusLine.getCode();
+        int code = statusLine.code();
         return !(code >= 100 && code < 200 || code == 204 || code == 304);
     }
 
     @Override
-    public List<KeyValue> getCookieValues() {
-        return getHeaders("Set-Cookie").stream().map(CookieUtils::parseCookieHeader).collect(toList());
+    public List<NameValue> cookieValues() {
+        return headers("Set-Cookie").stream().map(CookieUtils::parseCookieHeader).collect(toList());
     }
 
     public StatusLine getStatusLine() {

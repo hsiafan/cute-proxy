@@ -2,7 +2,11 @@ package net.dongliu.proxy.setting;
 
 import java.io.Serializable;
 
+import static java.util.Objects.requireNonNull;
+
 /**
+ * Proxy Setting
+ *
  * @author Liu Dong
  */
 public class ProxySetting implements Serializable {
@@ -11,6 +15,7 @@ public class ProxySetting implements Serializable {
     private String host;
     private int port;
     private String user;
+    // should use char[]?
     private String password;
     private boolean use;
 
@@ -19,39 +24,39 @@ public class ProxySetting implements Serializable {
     public static final String TYPE_HTTP = "http";
 
     public ProxySetting(String type, String host, int port, String user, String password, boolean use) {
-        this.type = type;
-        this.host = host;
+        this.type = requireNonNull(type);
+        this.host = requireNonNull(host);
         this.port = port;
-        this.user = user;
-        this.password = password;
+        this.user = requireNonNull(user);
+        this.password = requireNonNull(password);
         this.use = use;
     }
 
-    public static ProxySetting getDefault() {
+    public static ProxySetting newDefaultProxySetting() {
         return new ProxySetting(TYPE_SOCKS5, "", 0, "", "", false);
     }
 
-    public String getType() {
+    public String type() {
         return type;
     }
 
-    public String getHost() {
+    public String host() {
         return host;
     }
 
-    public int getPort() {
+    public int port() {
         return port;
     }
 
-    public String getUser() {
+    public String user() {
         return user;
     }
 
-    public String getPassword() {
+    public String password() {
         return password;
     }
 
-    public boolean isUse() {
+    public boolean use() {
         return use;
     }
 }

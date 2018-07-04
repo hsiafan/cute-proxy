@@ -59,7 +59,7 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
                 message.setResponseHeader(responseHeaders);
                 message.setResponseBody(responseHeaders.createBody());
                 if (frame.isEndStream()) {
-                    message.getResponseBody().finish();
+                    message.responseBody().finish();
                 }
             } else {
                 logger.error("message for stream id {} not found", targetId);
@@ -76,7 +76,7 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
             Http2FrameStream stream = frame.stream();
             Http2Message message = messageMap.get(targetId);
             if (message != null) {
-                Body body = message.getResponseBody();
+                Body body = message.responseBody();
                 body.append(frame.content().nioBuffer());
                 if (frame.isEndStream()) {
                     body.finish();
@@ -151,7 +151,7 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
                     reverseMap.put(targetId, fromStream);
                     messageMap.put(targetId, message);
                     if (frame.isEndStream()) {
-                        Body body = message.getRequestBody();
+                        Body body = message.requestBody();
                         body.finish();
                         messageListener.onMessage(message);
                     }
@@ -171,7 +171,7 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
             int targetId = targetStream.id();
             Http2Message message = messageMap.get(targetId);
             if (message != null) {
-                Body body = message.getRequestBody();
+                Body body = message.requestBody();
                 body.append(frame.content().nioBuffer());
                 if (frame.isEndStream()) {
                     body.finish();

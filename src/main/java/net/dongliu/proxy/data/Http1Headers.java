@@ -5,7 +5,7 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Commons for request headers and response headers
+ * Commons for http1 request headers and response headers
  *
  * @author Liu Dong
  */

@@ -1,11 +1,8 @@
 package net.dongliu.proxy.ui.component;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringBinding;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -43,7 +40,7 @@ public class CatalogPane extends BorderPane {
     private Property<TreeItem<Item>> currentTreeItem = new SimpleObjectProperty<>();
 
     public CatalogPane() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/catalog_view.fxml"));
+        var fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/catalog_view.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         fxmlLoader.load();
@@ -62,15 +59,16 @@ public class CatalogPane extends BorderPane {
                 }
             }
         });
-        messageList.getSelectionModel().selectedItemProperty().addListener((ov, o, n) -> currentMessage.setValue(n));
+        messageList.getSelectionModel().selectedItemProperty()
+                .addListener((ov, o, n) -> currentMessage.setValue(n));
 
-        TreeItem<Item> root = new TreeItem<>(new TreeNode(""));
+        var root = new TreeItem<Item>(new TreeNode(""));
         root.setExpanded(true);
         messageTree.setRoot(root);
         messageTree.setShowRoot(false);
         messageTree.setCellFactory(new TreeCellFactory());
         messageTree.setOnMouseClicked(new TreeViewMouseHandler());
-        ReadOnlyObjectProperty<TreeItem<Item>> selectTreeNode = messageTree.getSelectionModel().selectedItemProperty();
+        var selectTreeNode = messageTree.getSelectionModel().selectedItemProperty();
         selectTreeNode.addListener((ov, o, n) -> {
             if (n == null || n.getValue() instanceof TreeNode) {
                 currentMessage.setValue(null);
@@ -80,8 +78,8 @@ public class CatalogPane extends BorderPane {
             }
         });
 
-        ReadOnlyObjectProperty<Toggle> toggleProperty = viewTypeGroup.selectedToggleProperty();
-        StringBinding typeProperty = createStringBinding(() -> (String) toggleProperty.get().getUserData(), toggleProperty);
+        var toggleProperty = viewTypeGroup.selectedToggleProperty();
+        var typeProperty = createStringBinding(() -> (String) toggleProperty.get().getUserData(), toggleProperty);
 
         currentTreeItem.bind(Bindings.createObjectBinding(() -> {
             if (!"tree".equals(typeProperty.get())) {
@@ -109,8 +107,8 @@ public class CatalogPane extends BorderPane {
 
     public void addTreeItemMessage(Message message) {
         messageList.getItems().add(message);
-        TreeItem<Item> root = messageTree.getRoot();
-        String host = Networks.genericMultiCDNS(message.getHost());
+        var root = messageTree.getRoot();
+        String host = Networks.genericMultiCDNS(message.host());
         insertNewMessage(message, root, host);
     }
 
@@ -118,7 +116,7 @@ public class CatalogPane extends BorderPane {
         TreeItem<Item> cItem = null;
         int cResult = TreeNode.MISS;
         int nodeEndPos = 0;
-        for (TreeItem<Item> item : root.getChildren()) {
+        for (var item : root.getChildren()) {
             Item value = item.getValue();
             if (!(value instanceof TreeNode)) {
                 break;
@@ -190,7 +188,7 @@ public class CatalogPane extends BorderPane {
     }
 
     public Collection<Message> getMessages() {
-        ObservableList<Message> items = messageList.getItems();
+        var items = messageList.getItems();
         return new ArrayList<>(items);
     }
 
@@ -222,7 +220,7 @@ public class CatalogPane extends BorderPane {
                 return;
             }
 
-            TreeItem<Item> treeItem = messageTree.getSelectionModel().getSelectedItem();
+            var treeItem = messageTree.getSelectionModel().getSelectedItem();
             if (treeItem == null) {
                 return;
             }
@@ -233,7 +231,7 @@ public class CatalogPane extends BorderPane {
             if (item instanceof Message) {
                 Message message = (Message) item;
                 MenuItem copyMenu = new MenuItem("Copy URL");
-                copyMenu.setOnAction(e -> UIUtils.copyToClipBoard(message.getUrl()));
+                copyMenu.setOnAction(e -> UIUtils.copyToClipBoard(message.url()));
                 contextMenu.getItems().add(copyMenu);
             }
 
@@ -247,7 +245,7 @@ public class CatalogPane extends BorderPane {
     }
 
     public void deleteTreeItem(TreeItem<Item> treeItem) {
-        TreeItem<Item> parent = treeItem.getParent();
+        var parent = treeItem.getParent();
         parent.getChildren().remove(treeItem);
 
         // also remove from list view
@@ -262,7 +260,7 @@ public class CatalogPane extends BorderPane {
             messageList.add((Message) value);
             return;
         }
-        for (TreeItem<Item> ni : item.getChildren()) {
+        for (var ni : item.getChildren()) {
             findAllLeafs(ni, messageList);
         }
     }

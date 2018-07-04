@@ -1,12 +1,11 @@
 package net.dongliu.proxy.ui.task;
 
-import net.dongliu.proxy.data.Message;
 import javafx.concurrent.Task;
+import net.dongliu.proxy.data.Message;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.Collection;
 
 /**
@@ -31,8 +30,8 @@ public class SaveTrafficDataTask extends Task<Void> {
 
         updateMessage("append data...");
         int written = 0;
-        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(path));
-             ObjectOutputStream oos = new ObjectOutputStream(out)) {
+        try (var out = new BufferedOutputStream(new FileOutputStream(path));
+             var oos = new ObjectOutputStream(out)) {
             oos.writeInt(0xbaaebaae); // magic num
             oos.writeByte(1); // major version
             oos.writeByte(0); // minor version

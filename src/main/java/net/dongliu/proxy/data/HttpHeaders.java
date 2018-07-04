@@ -5,19 +5,23 @@ import net.dongliu.proxy.store.Body;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Http headers.
+ */
 public abstract class HttpHeaders {
     private final List<Header> headers;
 
     protected HttpHeaders(List<Header> headers) {
-        this.headers = headers;
+        this.headers = requireNonNull(headers);
     }
 
     public Optional<String> getHeader(String name) {
         return headers.stream()
-                .filter(h -> h.getName().equalsIgnoreCase(name))
-                .map(Header::getValue)
+                .filter(h -> h.name().equalsIgnoreCase(name))
+                .map(Header::value)
                 .findFirst();
     }
 
@@ -26,36 +30,36 @@ public abstract class HttpHeaders {
      *
      * @return null if not found
      */
-    public List<String> getHeaders(String name) {
+    public List<String> headers(String name) {
         return headers.stream()
-                .filter(h -> h.getName().equalsIgnoreCase(name))
-                .map(Header::getValue)
+                .filter(h -> h.name().equalsIgnoreCase(name))
+                .map(Header::value)
                 .collect(toList());
     }
 
     /**
      * Get content type from http header
      */
-    public Optional<ContentType> getContentType() {
-        return getHeader("Content-Type").map(ContentType::parse);
+    public Optional<ContentType> contentType() {
+        return getHeader("Content-type").map(ContentType::parse);
     }
 
-    public Optional<String> getContentEncoding() {
+    public Optional<String> contentEncoding() {
         return getHeader("Content-Encoding");
     }
 
-    public List<Header> getHeaders() {
+    public List<Header> headers() {
         return headers;
     }
 
     public Body createBody() {
-        return Body.create(getContentType().orElse(ContentType.binary), getContentEncoding().orElse(""));
+        return Body.create(contentType().orElse(ContentType.binary), contentEncoding().orElse(""));
     }
 
     /**
      * Convert to raw lines string
      */
-    public abstract List<String> toRawLines();
+    public abstract List<String> rawLines();
 
-    public abstract List<KeyValue> getCookieValues();
+    public abstract List<NameValue> cookieValues();
 }

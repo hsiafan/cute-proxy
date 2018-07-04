@@ -40,9 +40,9 @@ public class HttpHeadersPane extends SplitPane {
                 cookieText.clear();
                 return;
             }
-            headerText.setText(String.join("\n", headers.get().toRawLines()));
-            String s = headers.get().getCookieValues().stream()
-                    .map(c -> c.getName() + "=" + c.getValue())
+            headerText.setText(String.join("\n", headers.get().rawLines()));
+            String s = headers.get().cookieValues().stream()
+                    .map(c -> c.name() + "=" + c.value())
                     .collect(joining("\n"));
             cookieText.setText(s);
         });

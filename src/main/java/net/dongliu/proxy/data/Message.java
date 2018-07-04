@@ -4,6 +4,8 @@ import net.dongliu.proxy.ui.component.Item;
 
 import java.io.Serializable;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Message parent class
  *
@@ -15,8 +17,8 @@ public abstract class Message extends Item implements Serializable {
     private String url;
 
     protected Message(String host, String url) {
-        this.host = host;
-        this.url = url;
+        this.host = requireNonNull(host);
+        this.url = requireNonNull(url);
     }
 
     /**
@@ -24,11 +26,11 @@ public abstract class Message extends Item implements Serializable {
      */
     public abstract String displayText();
 
-    public String getHost() {
+    public String host() {
         return host;
     }
 
-    public String getUrl() {
+    public String url() {
         return url;
     }
 }

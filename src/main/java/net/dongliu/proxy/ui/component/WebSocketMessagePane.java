@@ -40,12 +40,12 @@ public class WebSocketMessagePane extends BorderPane {
                 return;
             }
             description.setText("WebSocket " + (n.isRequest() ? "Request" : "Response"));
-            if (n.getType() == 2) {
+            if (n.type() == 2) {
                 this.setCenter(new Text("Binary message"));
                 return;
             }
 
-            httpBodyPane.setBody(n.getBody());
+            httpBodyPane.setBody(n.body());
         });
     }
 

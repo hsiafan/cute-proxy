@@ -1,12 +1,11 @@
 package net.dongliu.proxy.ui.task;
 
-import net.dongliu.proxy.data.Message;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import net.dongliu.proxy.data.Message;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.util.function.Consumer;
 
@@ -26,8 +25,8 @@ public class LoadTask extends Task<Void> {
     protected Void call() throws Exception {
         updateMessage("loading...");
 
-        try (InputStream in = new BufferedInputStream(new FileInputStream(path));
-             ObjectInputStream ois = new ObjectInputStream(in)) {
+        try (var in = new BufferedInputStream(new FileInputStream(path));
+             var ois = new ObjectInputStream(in)) {
             int magicNum = ois.readInt();
             int majorVersion = ois.readByte();
             int minorVersoin = ois.readByte();

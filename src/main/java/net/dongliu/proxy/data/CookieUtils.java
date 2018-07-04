@@ -3,39 +3,40 @@ package net.dongliu.proxy.data;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
+
+import static net.dongliu.commons.Strings.nullToEmpty;
 
 public class CookieUtils {
 
 
     public static Cookie parseCookieHeader(String headerValue) {
         String[] items = headerValue.split("; ");
-        Map.Entry<String, String> nameValue = parseCookieNameValue(items[0]);
+        var nameValue = parseCookieNameValue(items[0]);
 
         String domain = null;
         String path = null;
         Instant expiry = null;
         boolean secure = false;
         for (int i = 1; i < items.length - 1; i++) {
-            Map.Entry<String, String> attribute = parseCookieAttribute(items[i]);
-            switch (attribute.getKey().toLowerCase()) {
+            var attribute = parseCookieAttribute(items[i]);
+            switch (attribute.name().toLowerCase()) {
                 case "domain":
-                    domain = attribute.getValue();
+                    domain = attribute.value();
                     break;
                 case "path":
-                    path = attribute.getValue();
+                    path = attribute.value();
                     break;
                 case "expires":
                     try {
-                        expiry = DateTimeFormatter.RFC_1123_DATE_TIME.parse(attribute.getValue(), Instant::from);
+                        expiry = DateTimeFormatter.RFC_1123_DATE_TIME.parse(attribute.value(), Instant::from);
                     } catch (DateTimeParseException ignore) {
                         //TODO: we should ignore this cookie?
                     }
                     break;
                 case "max-age":
                     try {
-                        int seconds = Integer.parseInt(attribute.getValue());
+                        int seconds = Integer.parseInt(attribute.value());
                         if (seconds >= 0) {
                             expiry = Instant.now().plusSeconds(seconds);
                         }
@@ -53,11 +54,11 @@ public class CookieUtils {
             }
         }
 
-        return new Cookie(Objects.requireNonNullElse(domain, ""), Objects.requireNonNullElse(path, ""),
-                nameValue.getKey(), nameValue.getValue(), expiry, secure);
+        return new Cookie(nullToEmpty(domain), nullToEmpty(path),
+                nameValue.name(), nameValue.value(), Optional.ofNullable(expiry), secure);
     }
 
-    private static Map.Entry<String, String> parseCookieNameValue(String str) {
+    private static NameValue parseCookieNameValue(String str) {
         // Browsers always split the name and value on the first = symbol in the string
         int idx = str.indexOf("=");
         if (idx < 0) {
@@ -68,7 +69,7 @@ public class CookieUtils {
         }
     }
 
-    private static Map.Entry<String, String> parseCookieAttribute(String str) {
+    private static NameValue parseCookieAttribute(String str) {
         int idx = str.indexOf("=");
         if (idx < 0) {
             return new Header(str, "");

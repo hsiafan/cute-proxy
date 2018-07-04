@@ -87,7 +87,7 @@ public class ServerSSLContextManager {
         PrivateKeyAndCertChain keyAndCertChain = keyStoreGenerator.generateCertChain(host, Settings.certValidityDays);
         logger.debug("Create certificate for {}, cost {} ms", host, System.currentTimeMillis() - start);
         SslContextBuilder builder = SslContextBuilder
-                .forServer(keyAndCertChain.getPrivateKey(), keyAndCertChain.getCertificateChain());
+                .forServer(keyAndCertChain.privateKey(), keyAndCertChain.certificateChain());
         if (useH2) {
 //                .ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE)
             builder.applicationProtocolConfig(new ApplicationProtocolConfig(

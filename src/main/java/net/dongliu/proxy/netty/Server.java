@@ -56,16 +56,16 @@ public class Server {
                 new DefaultThreadFactory("netty-worker"));
         bootstrap.group(master, worker)
                 .channel(NioServerSocketChannel.class)
-                .localAddress(new InetSocketAddress(setting.getPort()))
+                .localAddress(new InetSocketAddress(setting.port()))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) {
-                        int timeoutSeconds = setting.getTimeout();
-                        IdleStateHandler idleStateHandler = new IdleStateHandler(timeoutSeconds, timeoutSeconds,
+                        int timeoutSeconds = setting.timeout();
+                        var idleStateHandler = new IdleStateHandler(timeoutSeconds, timeoutSeconds,
                                 timeoutSeconds, TimeUnit.SECONDS);
                         ch.pipeline().addLast(idleStateHandler);
                         ch.pipeline().addLast(new CloseTimeoutChannelHandler());
-                        ProtocolDetector protocolDetector = new ProtocolDetector(
+                        var protocolDetector = new ProtocolDetector(
                                 new Socks5ProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
                                 new Socks4ProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
                                 new HttpTunnelProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),

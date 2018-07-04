@@ -5,7 +5,7 @@ package net.dongliu.proxy.data;
  *
  * @author Liu Dong
  */
-public interface KeyValue {
+public interface NameValue {
 
     String name();
 

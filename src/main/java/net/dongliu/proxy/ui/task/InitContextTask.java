@@ -49,9 +49,9 @@ public class InitContextTask extends Task<Void> {
                 proxySetting = (ProxySetting) oin.readObject();
             }
         } else {
-            serverSetting = ServerSetting.getDefault();
-            keyStoreSetting = KeyStoreSetting.getDefault();
-            proxySetting = ProxySetting.getDefault();
+            serverSetting = ServerSetting.newDefaultServerSetting();
+            keyStoreSetting = KeyStoreSetting.newDefaultKeyStoreSetting();
+            proxySetting = ProxySetting.newDefaultProxySetting();
         }
         updateProgress(3, 10);
 
@@ -59,7 +59,7 @@ public class InitContextTask extends Task<Void> {
         Path keyStorePath = Paths.get(keyStoreSetting.usedKeyStore());
         char[] keyStorePassword = keyStoreSetting.usedPassword().toCharArray();
         if (!Files.exists(keyStorePath)) {
-            if (!keyStoreSetting.isUseCustom()) {
+            if (!keyStoreSetting.useCustom()) {
                 logger.info("Generate new key store file");
                 updateMessage("Generating new key store...");
                 // generate one new key store
@@ -72,10 +72,10 @@ public class InitContextTask extends Task<Void> {
             }
 
         }
-        context.setServerSetting(serverSetting);
-        context.setKeyStoreSetting(keyStoreSetting);
+        context.serverSetting(serverSetting);
+        context.keyStoreSetting(keyStoreSetting);
         updateProgress(8, 10);
-        context.setProxySetting(proxySetting);
+        context.proxySetting(proxySetting);
         updateProgress(10, 10);
         return null;
     }

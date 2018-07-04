@@ -28,8 +28,12 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.spec.RSAPrivateCrtKeySpec;
-import java.util.*;
+import java.util.Base64;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Random;
 
+import static java.util.Objects.requireNonNull;
 import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_friendlyName;
 import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_localKeyId;
 
@@ -59,18 +63,18 @@ public class KeyStoreGenerator {
             rootKeyStore.load(input, rootKeyStorePassword);
         }
 
-        Enumeration<String> aliases = rootKeyStore.aliases();
+        var aliases = rootKeyStore.aliases();
         String alias = aliases.nextElement();
         logger.debug("Loading CA certificate/private by alias {}", alias);
 
         Key key = rootKeyStore.getKey(alias, rootKeyStorePassword);
-        Objects.requireNonNull(key, "Specified key of the KeyStore not found!");
+        requireNonNull(key, "Specified key of the KeyStore not found!");
         RSAPrivateCrtKey privateCrtKey = (RSAPrivateCrtKey) key;
         privateKeyParameters = getPrivateKeyParameters(privateCrtKey);
         // and get the certificate
 
         rootCert = (X509Certificate) rootKeyStore.getCertificate(alias);
-        Objects.requireNonNull(rootCert, "Specified certificate of the KeyStore not found!");
+        requireNonNull(rootCert, "Specified certificate of the KeyStore not found!");
         logger.debug("Successfully loaded CA key and certificate. CA DN is {}", rootCert.getSubjectDN().getName());
         rootCert.verify(rootCert.getPublicKey());
         logger.debug("Successfully verified CA certificate with its own public key.");
@@ -120,8 +124,8 @@ public class KeyStoreGenerator {
 
         KeyStore store = KeyStore.getInstance("PKCS12");
         store.load(null, null);
-        store.setKeyEntry(Settings.certAliasName, keyAndCertChain.getPrivateKey(), keyStorePassword,
-                keyAndCertChain.getCertificateChain());
+        store.setKeyEntry(Settings.certAliasName, keyAndCertChain.privateKey(), keyStorePassword,
+                keyAndCertChain.certificateChain());
         return store;
     }
 
@@ -151,10 +155,10 @@ public class KeyStoreGenerator {
 
         String appDName = "CN=ClearTheSky, OU=TianCao, O=TianCao, L=Beijing, ST=Beijing, C=CN";
         X500Name subject = new X500Name(appDName);
-        ASN1ObjectIdentifier sigOID = PKCSObjectIdentifiers.sha256WithRSAEncryption;
-        AlgorithmIdentifier sigAlgId = new AlgorithmIdentifier(sigOID, DERNull.INSTANCE);
+        var sigOID = PKCSObjectIdentifiers.sha256WithRSAEncryption;
+        var sigAlgId = new AlgorithmIdentifier(sigOID, DERNull.INSTANCE);
 
-        V3TBSCertificateGenerator generator = new V3TBSCertificateGenerator();
+        var generator = new V3TBSCertificateGenerator();
         generator.setSerialNumber(new ASN1Integer(random.nextLong() + System.currentTimeMillis()));
         generator.setIssuer(getSubject(rootCert));
         generator.setSubject(subject);
@@ -164,7 +168,7 @@ public class KeyStoreGenerator {
         generator.setEndDate(new Time(expireDate));
 
         // Set SubjectAlternativeName
-        ExtensionsGenerator extensionsGenerator = new ExtensionsGenerator();
+        var extensionsGenerator = new ExtensionsGenerator();
         extensionsGenerator.addExtension(Extension.subjectAlternativeName, false, () -> {
             ASN1EncodableVector nameVector = new ASN1EncodableVector();
             int hostType = Networks.getHostType(host);
@@ -178,16 +182,16 @@ public class KeyStoreGenerator {
         Extensions x509Extensions = extensionsGenerator.generate();
         generator.setExtensions(x509Extensions);
 
-        TBSCertificate tbsCertificateStructure = generator.generateTBSCertificate();
+        var tbsCertificateStructure = generator.generateTBSCertificate();
         byte[] data = toBinaryData(tbsCertificateStructure);
         byte[] signatureData = signData(sigOID, data, privateKeyParameters, secureRandom);
 
-        ASN1EncodableVector asn1EncodableVector = new ASN1EncodableVector();
+        var asn1EncodableVector = new ASN1EncodableVector();
         asn1EncodableVector.add(tbsCertificateStructure);
         asn1EncodableVector.add(sigAlgId);
         asn1EncodableVector.add(new DERBitString(signatureData));
 
-        DERSequence derSequence = new DERSequence(asn1EncodableVector);
+        var derSequence = new DERSequence(asn1EncodableVector);
         Certificate certificate = Certificate.getInstance(derSequence);
         X509CertificateObject clientCertificate = new X509CertificateObject(certificate);
         logger.debug("Verifying certificate for correct signature with CA public key");
@@ -211,8 +215,8 @@ public class KeyStoreGenerator {
 
     private static byte[] toBinaryData(TBSCertificate tbsCertificateStructure) throws IOException {
         byte[] data;
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
-            DEROutputStream derOutputStream = new DEROutputStream(bos);
+        try (var bos = new ByteArrayOutputStream()) {
+            var derOutputStream = new DEROutputStream(bos);
             try {
                 derOutputStream.writeObject(tbsCertificateStructure);
                 data = bos.toByteArray();
@@ -224,14 +228,14 @@ public class KeyStoreGenerator {
     }
 
     private static X500Name getSubject(X509Certificate certificate) throws IOException, CertificateEncodingException {
-        TBSCertificateStructure tbsCert = TBSCertificateStructure.getInstance(
+        var tbsCert = TBSCertificateStructure.getInstance(
                 ASN1Primitive.fromByteArray(certificate.getTBSCertificate()));
         return tbsCert.getSubject();
     }
 
     private static SubjectPublicKeyInfo getPublicKeyInfo(PublicKey publicKey) throws IOException {
-        try (InputStream bis = new ByteArrayInputStream(publicKey.getEncoded());
-             ASN1InputStream asn1InputStream = new ASN1InputStream(bis)) {
+        try (var bis = new ByteArrayInputStream(publicKey.getEncoded());
+             var asn1InputStream = new ASN1InputStream(bis)) {
             return SubjectPublicKeyInfo.getInstance(asn1InputStream.readObject());
         }
     }

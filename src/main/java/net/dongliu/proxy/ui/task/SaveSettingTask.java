@@ -1,14 +1,13 @@
 package net.dongliu.proxy.ui.task;
 
+import javafx.concurrent.Task;
 import net.dongliu.proxy.Context;
 import net.dongliu.proxy.setting.KeyStoreSetting;
-import net.dongliu.proxy.setting.ServerSetting;
 import net.dongliu.proxy.setting.ProxySetting;
-import javafx.concurrent.Task;
+import net.dongliu.proxy.setting.ServerSetting;
 
 import java.io.BufferedOutputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -37,17 +36,17 @@ public class SaveSettingTask extends Task<Void> {
     protected Void call() throws Exception {
         updateProgress(0, 10);
         // if need to load new key store
-        context.setServerSetting(serverSetting);
+        context.serverSetting(serverSetting);
         updateProgress(1, 10);
-        context.setKeyStoreSetting(keyStoreSetting);
+        context.keyStoreSetting(keyStoreSetting);
         updateProgress(5, 10);
-        context.setProxySetting(proxySetting);
+        context.proxySetting(proxySetting);
         updateProgress(7, 10);
         updateMessage("Save serverSetting to file");
         Path configPath = ServerSetting.configPath();
-        try (OutputStream os = Files.newOutputStream(configPath);
-             BufferedOutputStream bos = new BufferedOutputStream(os);
-             ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+        try (var os = Files.newOutputStream(configPath);
+             var bos = new BufferedOutputStream(os);
+             var oos = new ObjectOutputStream(bos)) {
             oos.writeObject(serverSetting);
             oos.writeObject(keyStoreSetting);
             oos.writeObject(proxySetting);

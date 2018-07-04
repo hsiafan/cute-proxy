@@ -32,10 +32,10 @@ public class Http1RequestHeaders extends Http1Headers implements Serializable {
     }
 
     @Override
-    public List<String> toRawLines() {
-        List<String> rawLines = new ArrayList<>(getHeaders().size() + 1);
-        rawLines.add(requestLine.raw());
-        getHeaders().stream().map(Header::raw).forEach(rawLines::add);
+    public List<String> rawLines() {
+        List<String> rawLines = new ArrayList<>(headers().size() + 1);
+        rawLines.add(requestLine.rawRequestLine());
+        headers().stream().map(Header::rawHeader).forEach(rawLines::add);
         return rawLines;
     }
 
@@ -43,13 +43,13 @@ public class Http1RequestHeaders extends Http1Headers implements Serializable {
      * If this request/response has body.
      */
     public boolean hasBody() {
-        return !"TRACE".equalsIgnoreCase(requestLine.getMethod())
-                && !"GET".equalsIgnoreCase(requestLine.getMethod())
-                && !"OPTIONS".equalsIgnoreCase(requestLine.getMethod());
+        return !"TRACE".equalsIgnoreCase(requestLine.method())
+                && !"GET".equalsIgnoreCase(requestLine.method())
+                && !"OPTIONS".equalsIgnoreCase(requestLine.method());
     }
 
     @Override
-    public List<KeyValue> getCookieValues() {
+    public List<NameValue> cookieValues() {
         return getHeader("Cookie").stream().flatMap(v -> Stream.of(v.split(";")))
                 .map(String::trim)
                 .map(Parameter::parse)

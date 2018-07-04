@@ -1,30 +1,31 @@
 package net.dongliu.proxy.data;
 
 import java.io.Serializable;
-import java.util.Objects;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Header with name and value
  *
  * @author Liu Dong
  */
-public class Header implements KeyValue, Serializable {
+public class Header implements NameValue, Serializable {
     private static final long serialVersionUID = 1616771076198243392L;
     private final String name;
     private final String value;
-    private transient String raw;
+    private transient String rawHeader;
 
 
     public Header(String name, String value) {
-        this.name = name;
-        this.value = value;
+        this.name = requireNonNull(name);
+        this.value = requireNonNull(value);
     }
 
     /**
      * Parse header from header string
      */
     public static Header parse(String str) {
-        Objects.requireNonNull(str);
+        requireNonNull(str);
         Header header;
         int idx = str.indexOf(':');
         if (idx >= 0) {
@@ -32,29 +33,29 @@ public class Header implements KeyValue, Serializable {
         } else {
             header = new Header(str, "");
         }
-        header.raw = str;
+        header.rawHeader = str;
         return header;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return name;
     }
 
     @Override
-    public String getValue() {
+    public String value() {
         return value;
     }
 
-    public String raw() {
-        if (raw == null) {
-            raw = name + ": " + value;
+    public String rawHeader() {
+        if (rawHeader == null) {
+            rawHeader = name + ": " + value;
         }
-        return raw;
+        return rawHeader;
     }
 
     @Override
     public String toString() {
-        return raw();
+        return rawHeader();
     }
 }

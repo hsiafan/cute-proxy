@@ -7,13 +7,14 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.websocketx.*;
 import net.dongliu.proxy.MessageListener;
+import net.dongliu.proxy.data.WebSocketMessage;
 import net.dongliu.proxy.store.Body;
 import net.dongliu.proxy.store.BodyType;
-import net.dongliu.proxy.data.WebSocketMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Websocket frame interceptor. This interceptor is set on connection to target server.
@@ -85,9 +86,9 @@ public class WebSocketInterceptor extends ChannelDuplexHandler {
             } else {
                 ContinuationWebSocketFrame frame = (ContinuationWebSocketFrame) msg;
                 ByteBuf content = frame.content();
-                message.getBody().append(content.nioBuffer());
+                message.body().append(content.nioBuffer());
                 if (frame.isFinalFragment()) {
-                    message.getBody().finish();
+                    message.body().finish();
                     if (request) {
                         requestMessage = message;
                     } else {
@@ -104,10 +105,10 @@ public class WebSocketInterceptor extends ChannelDuplexHandler {
     private void newWebSocketMessage(ChannelHandlerContext ctx, WebSocketFrame frame, int type, boolean request) {
         WebSocketMessage message = new WebSocketMessage(host, url, type, request);
         BodyType bodyType = type == WebSocketMessage.TYPE_TEXT ? BodyType.text : BodyType.binary;
-        Body body = new Body(bodyType, null, "");
+        Body body = new Body(bodyType, Optional.empty(), "");
         ByteBuf content = frame.content();
         body.append(content.nioBuffer());
-        message.setBody(body);
+        message.body(body);
         messageListener.onMessage(message);
         if (frame.isFinalFragment()) {
             body.finish();

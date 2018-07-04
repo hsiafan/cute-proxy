@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * @author Liu Dong
@@ -71,8 +70,8 @@ public class UIUtils {
     }
 
     private static Image getIconImage(InputStream in) throws IOException {
-        List<BufferedImage> images = ICODecoder.read(in);
-        BufferedImage image = Collections.max(images, Comparator.comparingInt(BufferedImage::getWidth));
+        var images = ICODecoder.read(in);
+        var image = Collections.max(images, Comparator.comparingInt(BufferedImage::getWidth));
         return SwingFXUtils.toFXImage(image, null);
     }
 
@@ -100,7 +99,7 @@ public class UIUtils {
      * Run a task with process dialog
      */
     public static <T> void runTaskWithProcessDialog(Task<T> task, String failedMessage) {
-        ProgressDialog progressDialog = new ProgressDialog();
+        var progressDialog = new ProgressDialog();
         progressDialog.bindTask(task);
 
         task.setOnSucceeded(e -> Platform.runLater(progressDialog::close));

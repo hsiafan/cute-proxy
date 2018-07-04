@@ -6,7 +6,7 @@ package net.dongliu.proxy.data;
  *
  * @author Liu Dong
  */
-public class Parameter implements KeyValue {
+public class Parameter implements NameValue {
     private final String name;
     private final String value;
 
@@ -29,12 +29,12 @@ public class Parameter implements KeyValue {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return name;
     }
 
     @Override
-    public String getValue() {
+    public String value() {
         return value;
     }
 }

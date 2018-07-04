@@ -75,8 +75,8 @@ public class RootKeyStoreGenerator {
 
 
         byte[] encoded = publicKey.getEncoded();
-        SubjectPublicKeyInfo subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(encoded));
-        X509v3CertificateBuilder builder = new X509v3CertificateBuilder(issuerName,
+        var subjectPublicKeyInfo = SubjectPublicKeyInfo.getInstance(ASN1Sequence.getInstance(encoded));
+        var builder = new X509v3CertificateBuilder(issuerName,
                 BigInteger.valueOf(secureRandom.nextLong() + System.currentTimeMillis()),
                 startDate, endDate,
                 subjectName,
@@ -89,7 +89,7 @@ public class RootKeyStoreGenerator {
                 | KeyUsage.dataEncipherment | KeyUsage.cRLSign);
         builder.addExtension(Extension.keyUsage, false, usage);
 
-        ASN1EncodableVector purposes = new ASN1EncodableVector();
+        var purposes = new ASN1EncodableVector();
         purposes.add(KeyPurposeId.id_kp_serverAuth);
         purposes.add(KeyPurposeId.id_kp_clientAuth);
         purposes.add(KeyPurposeId.anyExtendedKeyUsage);
@@ -110,9 +110,9 @@ public class RootKeyStoreGenerator {
     }
 
     private static SubjectKeyIdentifier createSubjectKeyIdentifier(Key key) throws IOException {
-        try (ASN1InputStream is = new ASN1InputStream(new ByteArrayInputStream(key.getEncoded()))) {
+        try (var is = new ASN1InputStream(new ByteArrayInputStream(key.getEncoded()))) {
             ASN1Sequence seq = (ASN1Sequence) is.readObject();
-            SubjectPublicKeyInfo info = SubjectPublicKeyInfo.getInstance(seq);
+            var info = SubjectPublicKeyInfo.getInstance(seq);
             return new BcX509ExtensionUtils().createSubjectKeyIdentifier(info);
         }
     }

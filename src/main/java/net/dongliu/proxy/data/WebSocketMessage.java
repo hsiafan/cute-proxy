@@ -27,10 +27,10 @@ public class WebSocketMessage extends Message implements Serializable {
 
     @Override
     public String displayText() {
-        return getUrl();
+        return url();
     }
 
-    public int getType() {
+    public int type() {
         return type;
     }
 
@@ -38,16 +38,16 @@ public class WebSocketMessage extends Message implements Serializable {
         return request;
     }
 
-    public Body getBody() {
+    public Body body() {
         return body;
     }
 
-    public void setBody(Body body) {
+    public void body(Body body) {
         this.body = body;
     }
 
     @Override
     public String toString() {
-        return "WebSocketMessage{url=" + getUrl() + "}";
+        return "WebSocketMessage{url=" + url() + "}";
     }
 }

@@ -43,6 +43,7 @@ public class Socks5ProxyHandler extends TunnelProxyHandler<Socks5Message> {
         if (!(socksRequest instanceof Socks5CommandRequest)) {
             logger.error("unknown socks5 command: {}", socksRequest.getClass().getName());
             NettyUtils.closeOnFlush(ctx.channel());
+            return;
         }
         Socks5CommandRequest command = (Socks5CommandRequest) socksRequest;
         if (command.type() != Socks5CommandType.CONNECT) {

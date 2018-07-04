@@ -21,12 +21,12 @@ public class ProxyHandlerSupplier implements Supplier<ProxyHandler> {
         this.proxySetting = proxySetting;
         // Java InetSocketAddress always do dns resolver.
         // we just create InetSocketAddress now so dns resolve will not block netty event loop.
-        this.address = new InetSocketAddress(proxySetting.getHost(), proxySetting.getPort());
+        this.address = new InetSocketAddress(proxySetting.host(), proxySetting.port());
     }
 
     @Override
     public ProxyHandler get() {
-        if (!proxySetting.isUse()) {
+        if (!proxySetting.use()) {
             return null;
         }
         ProxyHandler proxyHandler = newProxyHandler();
@@ -35,28 +35,28 @@ public class ProxyHandlerSupplier implements Supplier<ProxyHandler> {
     }
 
     public ProxyHandler newProxyHandler() {
-        switch (proxySetting.getType()) {
+        switch (proxySetting.type()) {
             case ProxySetting.TYPE_HTTP:
-                if (proxySetting.getUser().isEmpty()) {
+                if (proxySetting.user().isEmpty()) {
                     return new HttpProxyHandler(address);
                 } else {
-                    return new HttpProxyHandler(address, proxySetting.getUser(), proxySetting.getPassword());
+                    return new HttpProxyHandler(address, proxySetting.user(), proxySetting.password());
                 }
 
             case ProxySetting.TYPE_SOCKS5:
-                if (proxySetting.getUser().isEmpty()) {
+                if (proxySetting.user().isEmpty()) {
                     return new Socks5ProxyHandler(address);
                 } else {
-                    return new Socks5ProxyHandler(address, proxySetting.getUser(), proxySetting.getPassword());
+                    return new Socks5ProxyHandler(address, proxySetting.user(), proxySetting.password());
                 }
             case ProxySetting.TYPE_SOCKS4:
-                if (proxySetting.getUser().isEmpty()) {
+                if (proxySetting.user().isEmpty()) {
                     return new Socks4ProxyHandler(address);
                 } else {
-                    return new Socks4ProxyHandler(address, proxySetting.getUser());
+                    return new Socks4ProxyHandler(address, proxySetting.user());
                 }
             default:
-                throw new RuntimeException("unknown proxy type: " + proxySetting.getType());
+                throw new RuntimeException("unknown proxy type: " + proxySetting.type());
         }
     }
 }

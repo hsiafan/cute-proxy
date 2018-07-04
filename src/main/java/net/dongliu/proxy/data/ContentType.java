@@ -6,7 +6,10 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
+import java.util.Optional;
 import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Http content type
@@ -18,15 +21,26 @@ public class ContentType {
 
     private final String rawMimeType;
     private final MimeType mimeType;
-    // may be null
-    private final Charset charset;
+    private final Optional<Charset> charset;
 
     public static ContentType binary = ContentType.parse("application/octet-stream");
 
-    public ContentType(String rawMimeType, Charset charset) {
-        this.rawMimeType = rawMimeType;
+    /**
+     * Construct a ContentType with charset.
+     */
+    public ContentType(String rawMimeType, Optional<Charset> charset) {
+        this.rawMimeType = requireNonNull(rawMimeType);
         this.mimeType = MimeType.parse(rawMimeType);
-        this.charset = charset;
+        this.charset = requireNonNull(charset);
+    }
+
+    /**
+     * Construct a ContentType with no charset.
+     */
+    public ContentType(String rawMimeType) {
+        this.rawMimeType = requireNonNull(rawMimeType);
+        this.mimeType = MimeType.parse(rawMimeType);
+        this.charset = Optional.empty();
     }
 
     public static ContentType parse(String str) {
@@ -46,23 +60,23 @@ public class ContentType {
                 }
             }
         }
-        return new ContentType(type, toCharsetSafe(encoding));
+        return new ContentType(type, parseCharset(encoding));
     }
 
-    private static Charset toCharsetSafe(String encoding) {
+    private static Optional<Charset> parseCharset(String encoding) {
         if (encoding == null) {
-            return null;
+            return Optional.empty();
         }
         try {
-            return Charset.forName(encoding);
+            return Optional.of(Charset.forName(encoding));
         } catch (IllegalCharsetNameException e) {
             logger.warn("unknown charset: {}", encoding);
-            return null;
+            return Optional.empty();
         }
     }
 
-    private Set<String> textTypes = Set.of("text");
-    private Set<String> textSubTypes = Set.of("json", "x-www-form-urlencoded", "xml", "x-javascript",
+    private static Set<String> textTypes = Set.of("text");
+    private static Set<String> textSubTypes = Set.of("json", "x-www-form-urlencoded", "xml", "x-javascript",
             "javascript", "html");
 
     public boolean isText() {
@@ -74,27 +88,16 @@ public class ContentType {
         return mimeType.getType().equals("image");
     }
 
-    public String getRawMimeType() {
+    public String rawMimeType() {
         return rawMimeType;
     }
 
-    public MimeType getMimeType() {
+    public MimeType mimeType() {
         return mimeType;
     }
 
-    public Charset getCharset() {
+    public Optional<Charset> charset() {
         return charset;
     }
 
-    public Set<String> getTextTypes() {
-        return textTypes;
-    }
-
-    public Set<String> getTextSubTypes() {
-        return textSubTypes;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(Charset.forName("utf-8"));
-    }
 }

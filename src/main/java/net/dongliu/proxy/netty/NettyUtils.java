@@ -3,8 +3,6 @@ package net.dongliu.proxy.netty;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFutureListener;
-import io.netty.util.concurrent.DefaultEventExecutor;
-import io.netty.util.concurrent.EventExecutor;
 
 public class NettyUtils {
 
@@ -16,6 +14,4 @@ public class NettyUtils {
             channel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
         }
     }
-
-    public static final EventExecutor saveExecutor = new DefaultEventExecutor();
 }

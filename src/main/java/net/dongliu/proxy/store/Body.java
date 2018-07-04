@@ -11,13 +11,12 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
-import static java.util.Objects.requireNonNullElse;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -34,57 +33,72 @@ public class Body implements Serializable {
     private volatile boolean finished;
 
     private volatile BodyType type;
-    private volatile Charset charset;
+    private volatile Optional<Charset> charset;
     private String contentEncoding;
 
     private List<Chunk> chunkList;
 
-    public Body(BodyType type, Charset charset, String contentEncoding) {
+    public Body(BodyType type, Optional<Charset> charset, String contentEncoding) {
         this.type = requireNonNull(type);
-        this.charset = requireNonNullElse(charset, UTF_8);
+        this.charset = requireNonNull(charset);
         this.contentEncoding = requireNonNull(contentEncoding);
         this.chunkList = new ArrayList<>();
     }
 
 
     public static Body create(ContentType contentType, String contentEncoding) {
-        BodyType bodyType;
-        bodyType = getHttpBodyType(requireNonNull(contentType));
-        return new Body(bodyType, contentType.getCharset(), requireNonNull(contentEncoding));
+        var bodyType = getHttpBodyType(requireNonNull(contentType));
+        return new Body(bodyType, contentType.charset(), requireNonNull(contentEncoding));
     }
 
     private static BodyType getHttpBodyType(ContentType contentType) {
         BodyType bodyType;
-        String subType = contentType.getMimeType().getSubType();
+        String subType = contentType.mimeType().getSubType();
         if (contentType.isImage()) {
-            if ("png".equals(subType)) {
-                bodyType = BodyType.png;
-            } else if ("jpeg".equals(subType)) {
-                bodyType = BodyType.jpeg;
-            } else if ("gif".equals(subType)) {
-                bodyType = BodyType.gif;
-            } else if ("bmp".equals(subType)) {
-                bodyType = BodyType.bmp;
-            } else if ("x-icon".equals(subType)) {
-                bodyType = BodyType.icon;
-            } else {
-                bodyType = BodyType.otherImage;
+            switch (subType) {
+                case "png":
+                    bodyType = BodyType.png;
+                    break;
+                case "jpeg":
+                    bodyType = BodyType.jpeg;
+                    break;
+                case "gif":
+                    bodyType = BodyType.gif;
+                    break;
+                case "bmp":
+                    bodyType = BodyType.bmp;
+                    break;
+                case "x-icon":
+                    bodyType = BodyType.icon;
+                    break;
+                default:
+                    bodyType = BodyType.otherImage;
+                    break;
             }
         } else if (contentType.isText()) {
-            if ("json".equals(subType)) {
-                bodyType = BodyType.json;
-            } else if ("html".equals(subType)) {
-                bodyType = BodyType.html;
-            } else if ("xml".equals(subType)) {
-                bodyType = BodyType.xml;
-            } else if ("x-www-form-urlencoded".equals(subType)) {
-                bodyType = BodyType.www_form;
-            } else if ("css".equals(subType)) {
-                bodyType = BodyType.css;
-            } else if ("javascript".equals(subType) || "x-javascript".equals(subType)) {
-                bodyType = BodyType.javascript;
-            } else {
-                bodyType = BodyType.text;
+            switch (subType) {
+                case "json":
+                    bodyType = BodyType.json;
+                    break;
+                case "html":
+                    bodyType = BodyType.html;
+                    break;
+                case "xml":
+                    bodyType = BodyType.xml;
+                    break;
+                case "x-www-form-urlencoded":
+                    bodyType = BodyType.www_form;
+                    break;
+                case "css":
+                    bodyType = BodyType.css;
+                    break;
+                case "javascript":
+                case "x-javascript":
+                    bodyType = BodyType.javascript;
+                    break;
+                default:
+                    bodyType = BodyType.text;
+                    break;
             }
         } else {
             bodyType = BodyType.binary;
@@ -112,7 +126,7 @@ public class Body implements Serializable {
         this.finished = true;
     }
 
-    public boolean isFinished() {
+    public boolean finished() {
         return finished;
     }
 
@@ -127,7 +141,7 @@ public class Body implements Serializable {
         if (!finished) {
             throw new IllegalStateException("Http body not finished yet");
         }
-        List<ByteBuffer> bufferList = chunkList.stream().map(Chunk::read).collect(toList());
+        var bufferList = chunkList.stream().map(Chunk::read).collect(toList());
         return new BufferListInputStream(bufferList);
     }
 
@@ -140,19 +154,28 @@ public class Body implements Serializable {
             return input;
         }
 
+        String ce = contentEncoding.toLowerCase();
         try {
-            if (contentEncoding == null || contentEncoding.isEmpty() || contentEncoding.equalsIgnoreCase("identity")) {
-                // do nothing
-            } else if ("gzip".equalsIgnoreCase(contentEncoding)) {
-                input = new GZIPInputStream(input);
-            } else if ("deflate".equalsIgnoreCase(contentEncoding)) {
-                input = new InflaterInputStream(getInputStream(), new Inflater(true));
-            } else if ("br".equalsIgnoreCase(contentEncoding)) {
-                input = new BrotliInputStream(input);
-            } else if ("lzma".equalsIgnoreCase(contentEncoding)) {
-                input = new LZMAInputStream(input, -1);
-            } else {
-                logger.warn("unsupported content-encoding: {}", contentEncoding);
+            switch (ce) {
+                case "":
+                case "identity":
+                    // do nothing
+                    break;
+                case "gzip":
+                    input = new GZIPInputStream(input);
+                    break;
+                case "deflate":
+                    input = new InflaterInputStream(getInputStream(), new Inflater(true));
+                    break;
+                case "br":
+                    input = new BrotliInputStream(input);
+                    break;
+                case "lzma":
+                    input = new LZMAInputStream(input, -1);
+                    break;
+                default:
+                    logger.warn("unsupported content-encoding: {}", contentEncoding);
+                    break;
             }
         } catch (Throwable t) {
             logger.error("Decode stream failed, encoding: {}", contentEncoding, t);
@@ -164,7 +187,13 @@ public class Body implements Serializable {
     private void writeObject(ObjectOutputStream out) throws IOException {
         out.writeBoolean(finished);
         out.writeObject(type);
-        out.writeUTF(charset.name());
+        if (charset.isPresent()) {
+            out.writeBoolean(true);
+            out.writeUTF(charset.get().name());
+        } else {
+            out.writeBoolean(false);
+        }
+
         out.writeUTF(contentEncoding);
 
         if (finished) {
@@ -178,7 +207,12 @@ public class Body implements Serializable {
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         finished = in.readBoolean();
         type = (BodyType) in.readObject();
-        charset = Charset.forName(in.readUTF());
+        boolean charsetPresent = in.readBoolean();
+        if (!charsetPresent) {
+            charset = Optional.empty();
+        } else {
+            charset = Optional.of(Charset.forName(in.readUTF()));
+        }
         contentEncoding = in.readUTF();
 
         if (finished) {
@@ -204,30 +238,29 @@ public class Body implements Serializable {
         }
     }
 
-    @Override
-    public String toString() {
-        return "Body{size=" + size() + "}";
-    }
-
-    public BodyType getType() {
+    public BodyType type() {
         return type;
     }
 
-    public Charset getCharset() {
+    public Optional<Charset> charset() {
         return charset;
     }
 
 
-    public String getContentEncoding() {
+    public String contentEncoding() {
         return contentEncoding;
     }
 
-    public void setCharset(Charset charset) {
-        this.charset = charset;
+    public void charset(Charset charset) {
+        this.charset = Optional.of(charset);
     }
 
-    public void setType(BodyType type) {
+    public void type(BodyType type) {
         this.type = type;
     }
 
+    @Override
+    public String toString() {
+        return "Body{size=" + size() + "}";
+    }
 }

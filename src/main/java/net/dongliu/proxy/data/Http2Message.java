@@ -26,31 +26,31 @@ public class Http2Message extends HttpMessage implements Serializable {
     }
 
     private static String getUrl(NetAddress address, Http2RequestHeaders requestHeader) {
-        String scheme = requestHeader.getScheme();
+        String scheme = requestHeader.scheme();
         int port = address.getPort();
         StringBuilder sb = new StringBuilder(scheme).append("://");
         sb.append(requestHeader.getHeader("Host").orElse(address.getHost()));
         if (scheme.equals("https") && port != 443 || scheme.equals("http") && port != 80) {
             sb.append(":").append(port);
         }
-        sb.append(requestHeader.getPath());
+        sb.append(requestHeader.path());
         return sb.toString();
     }
 
     @Override
     public String displayText() {
-        return getUrl();
+        return url();
     }
 
-    public Http2RequestHeaders getRequestHeader() {
+    public Http2RequestHeaders requestHeader() {
         return requestHeader;
     }
 
-    public Body getRequestBody() {
+    public Body requestBody() {
         return requestBody;
     }
 
-    public Http2ResponseHeaders getResponseHeader() {
+    public Http2ResponseHeaders ResponseHeader() {
         return responseHeader;
     }
 
@@ -58,7 +58,7 @@ public class Http2Message extends HttpMessage implements Serializable {
         this.responseHeader = requireNonNull(responseHeader);
     }
 
-    public Body getResponseBody() {
+    public Body responseBody() {
         return responseBody;
     }
 
@@ -68,6 +68,6 @@ public class Http2Message extends HttpMessage implements Serializable {
 
     @Override
     public String toString() {
-        return "Http2Message{url=" + getUrl() + "}";
+        return "Http2Message{url=" + url() + "}";
     }
 }

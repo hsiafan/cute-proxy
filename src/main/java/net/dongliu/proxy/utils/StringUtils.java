@@ -1,6 +1,6 @@
 package net.dongliu.proxy.utils;
 
-public class Strings {
+public class StringUtils {
 
     public static String before(String str, String sep) {
         int idx = str.indexOf(sep);

@@ -8,13 +8,13 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
+import net.dongliu.commons.collection.Lists;
 import net.dongliu.proxy.setting.ServerSetting;
-import net.dongliu.proxy.utils.Networks;
 import net.dongliu.proxy.utils.NetworkInfo;
-import net.dongliu.proxy.utils.Strings;
+import net.dongliu.proxy.utils.Networks;
+import net.dongliu.proxy.utils.StringUtils;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Show proxy configure.
@@ -51,10 +51,10 @@ public class MainSettingDialog extends MyDialog<ServerSetting> {
 
     @FXML
     private void initialize() {
-        List<NetworkInfo> networkInfos = Networks.getNetworkInfoList();
+        var networkInfos = Networks.getNetworkInfoList();
         hostBox.getItems().add(new NetworkInfo("all network interface", ""));
         hostBox.getItems().addAll(networkInfos);
-        hostBox.setConverter(new StringConverter<NetworkInfo>() {
+        hostBox.setConverter(new StringConverter<>() {
             @Override
             public String toString(NetworkInfo networkInfo) {
                 if (networkInfo == null) {
@@ -74,23 +74,22 @@ public class MainSettingDialog extends MyDialog<ServerSetting> {
     }
 
     public void setModel(ServerSetting serverSetting) {
-        NetworkInfo networkInfo = hostBox.getItems().stream().filter(n -> n.getIp().equals(serverSetting.getHost()))
-                .findFirst().orElse(null);
+        var networkInfo = Lists.findOrNull(hostBox.getItems(), n -> n.getIp().equals(serverSetting.host()));
         if (networkInfo == null) {
             // network interface not found, use default listened-all one
-            networkInfo = hostBox.getItems().stream().filter(n -> n.getIp().equals("")).findFirst().get();
+            networkInfo = Lists.find(hostBox.getItems(), n -> n.getIp().equals("")).get();
         }
         hostBox.getSelectionModel().select(networkInfo);
-        int port = serverSetting.getPort();
+        int port = serverSetting.port();
         portFiled.setText(port == 0 ? "" : String.valueOf(port));
-        timeoutField.setText(String.valueOf(serverSetting.getTimeout()));
+        timeoutField.setText(String.valueOf(serverSetting.timeout()));
     }
 
     public ServerSetting getModel() {
-        NetworkInfo networkInfo = hostBox.getSelectionModel().getSelectedItem();
+        var networkInfo = hostBox.getSelectionModel().getSelectedItem();
         return new ServerSetting(networkInfo.getIp(),
-                Strings.toInt(portFiled.getText()),
-                Strings.toInt(timeoutField.getText()));
+                StringUtils.toInt(portFiled.getText()),
+                StringUtils.toInt(timeoutField.getText()));
     }
 
 }

@@ -32,7 +32,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.*;
 import net.dongliu.proxy.setting.ProxySetting;
-import net.dongliu.proxy.utils.Strings;
+import net.dongliu.proxy.utils.StringUtils;
 
 import java.io.IOException;
 
@@ -91,12 +91,12 @@ public class ProxySettingDialog extends MyDialog<ProxySetting> {
     }
 
     public void setModel(ProxySetting proxySetting) {
-        useProxy.setSelected(proxySetting.isUse());
-        hostField.setText(proxySetting.getHost());
-        portFiled.setText(String.valueOf(proxySetting.getPort()));
-        userField.setText(proxySetting.getUser());
-        passwordField.setText(proxySetting.getPassword());
-        String type = proxySetting.getType();
+        useProxy.setSelected(proxySetting.use());
+        hostField.setText(proxySetting.host());
+        portFiled.setText(String.valueOf(proxySetting.port()));
+        userField.setText(proxySetting.user());
+        passwordField.setText(proxySetting.password());
+        String type = proxySetting.type();
         ObservableList<Toggle> toggles = proxyTypeGroup.getToggles();
         for (Toggle toggle : toggles) {
             if (toggle.getUserData().equals(type)) {
@@ -108,7 +108,7 @@ public class ProxySettingDialog extends MyDialog<ProxySetting> {
     public ProxySetting getModel() {
         boolean use = useProxy.isSelected();
         String host = hostField.getText();
-        int port = Strings.toInt(portFiled.getText());
+        int port = StringUtils.toInt(portFiled.getText());
         String user = userField.getText();
         String password = passwordField.getText();
         RadioButton radioButton = (RadioButton) proxyTypeGroup.getSelectedToggle();

@@ -19,12 +19,14 @@ import net.dongliu.proxy.store.Body;
 import net.dongliu.proxy.store.BodyType;
 import net.dongliu.proxy.ui.UIUtils;
 import net.dongliu.proxy.ui.beautifier.*;
-import net.dongliu.proxy.utils.Strings;
+import net.dongliu.proxy.utils.StringUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * For http/web-socket body
@@ -59,7 +61,7 @@ public class HttpBodyPane extends BorderPane {
             }
         });
 
-        charsetBox.getItems().addAll(StandardCharsets.UTF_8, StandardCharsets.UTF_16, StandardCharsets.US_ASCII,
+        charsetBox.getItems().addAll(UTF_8, StandardCharsets.UTF_16, StandardCharsets.US_ASCII,
                 StandardCharsets.ISO_8859_1, Charset.forName("GB18030"), Charset.forName("GBK"),
                 Charset.forName("GB2312"), Charset.forName("BIG5")
         );
@@ -86,16 +88,16 @@ public class HttpBodyPane extends BorderPane {
             return;
         }
 
-        BodyType storeType = body.getType();
+        BodyType storeType = body.type();
 
-        charsetBox.setValue(body.getCharset());
+        charsetBox.setValue(body.charset().orElse(UTF_8));
         charsetBox.setManaged(storeType.isText());
         charsetBox.setVisible(storeType.isText());
-        sizeLabel.setText(Strings.humanReadableSize(body.size()));
+        sizeLabel.setText(StringUtils.humanReadableSize(body.size()));
 
         bodyTypeBox.setValue(storeType);
 
-        if (!body.isFinished()) {
+        if (!body.finished()) {
             this.setCenter(new Text("Still reading..."));
             return;
         }
@@ -116,7 +118,7 @@ public class HttpBodyPane extends BorderPane {
         if (storeType.isText()) {
             String text;
             try (InputStream input = body.getDecodedInputStream();
-                 Reader reader = new InputStreamReader(input, body.getCharset())) {
+                 Reader reader = new InputStreamReader(input, body.charset().orElse(UTF_8))) {
                 text = Readers.readAll(reader);
             }
 
@@ -124,7 +126,7 @@ public class HttpBodyPane extends BorderPane {
             if (beautify.get()) {
                 Beautifier beautifier = beautifiers.get(storeType);
                 if (beautifier != null) {
-                    text = beautifier.beautify(text, body.getCharset());
+                    text = beautifier.beautify(text, body.charset().orElse(UTF_8));
                 }
             }
 
@@ -152,9 +154,9 @@ public class HttpBodyPane extends BorderPane {
             return;
         }
 
-//        String fileName = suggestFileName(body.getUrl(), body.getType());
+//        String fileName = suggestFileName(body.url(), body.type());
         //TODO: get url here
-        String fileName = addExtension("", body.getType());
+        String fileName = addExtension("", body.type());
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setInitialFileName(fileName);
@@ -171,11 +173,11 @@ public class HttpBodyPane extends BorderPane {
 
 
     private static String suggestFileName(String url, BodyType type) {
-        url = Strings.before(url, "?");
-        String fileName = Strings.afterLast(url, "/");
+        url = StringUtils.before(url, "?");
+        String fileName = StringUtils.afterLast(url, "/");
         if (fileName.isEmpty()) {
-            fileName = Strings.beforeLast(url, "/");
-            fileName = Strings.afterLast(fileName, "/");
+            fileName = StringUtils.beforeLast(url, "/");
+            fileName = StringUtils.afterLast(fileName, "/");
             fileName = fileName.replace(".", "_");
         }
         if (!fileName.contains(".")) {
@@ -215,8 +217,8 @@ public class HttpBodyPane extends BorderPane {
         if (body == null) {
             return;
         }
-        body.setType(bodyTypeBox.getSelectionModel().getSelectedItem());
-        if (body.isFinished() && body.size() != 0) {
+        body.type(bodyTypeBox.getSelectionModel().getSelectedItem());
+        if (body.finished() && body.size() != 0) {
             refreshBody(body);
         }
     }
@@ -227,8 +229,8 @@ public class HttpBodyPane extends BorderPane {
         if (body == null) {
             return;
         }
-        body.setCharset(charsetBox.getSelectionModel().getSelectedItem());
-        if (body.isFinished() && body.size() != 0 && body.getType().isText()) {
+        body.charset(charsetBox.getSelectionModel().getSelectedItem());
+        if (body.finished() && body.size() != 0 && body.type().isText()) {
             refreshBody(body);
         }
     }

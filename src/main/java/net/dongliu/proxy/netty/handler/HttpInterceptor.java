@@ -74,10 +74,10 @@ public class HttpInterceptor extends ChannelDuplexHandler {
             Http1Message message = this.httpMessage;
             ByteBuf content = ((HttpContent) msg).content();
             if (content.readableBytes() > 0) {
-                message.getRequestBody().append(content.nioBuffer());
+                message.requestBody().append(content.nioBuffer());
             }
             if (msg instanceof LastHttpContent) {
-                message.getRequestBody().finish();
+                message.requestBody().finish();
 
             }
         }
@@ -105,25 +105,25 @@ public class HttpInterceptor extends ChannelDuplexHandler {
         if (msg instanceof HttpResponse) {
             HttpResponse response = (HttpResponse) msg;
             Http1ResponseHeaders responseHeader = convertHeader(response);
-            message.setResponseHeader(responseHeader);
+            message.responseHeader(responseHeader);
             Body body = responseHeader.createBody();
-            message.setResponseBody(body);
+            message.responseBody(body);
         }
 
         if (msg instanceof HttpContent) {
             ByteBuf content = ((HttpContent) msg).content();
             if (content.readableBytes() > 0) {
-                message.getResponseBody().append(content.nioBuffer());
+                message.responseBody().append(content.nioBuffer());
             }
             if (msg instanceof LastHttpContent) {
-                message.getResponseBody().finish();
+                message.responseBody().finish();
                 this.httpMessage = null;
 
                 // connection upgrade
                 //TODO: should check response header?
                 if (upgradeWebSocket) {
                     ctx.fireChannelRead(msg);
-                    String url = message.getUrl().replaceAll("^http", "ws");
+                    String url = message.url().replaceAll("^http", "ws");
                     ctx.pipeline().replace("http-interceptor", "ws-interceptor",
                             new WebSocketInterceptor(address.getHost(), url, messageListener));
                     ctx.pipeline().remove(HttpClientCodec.class);

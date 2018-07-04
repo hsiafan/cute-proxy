@@ -63,9 +63,9 @@ public class KeyStoreSettingDialog extends MyDialog<KeyStoreSetting> {
     }
 
     public void setModel(KeyStoreSetting setting) {
-        useCustomCheckBox.setSelected(setting.isUseCustom());
-        keyStoreField.setText(setting.getKeyStore());
-        keyStorePasswordField.setText(setting.getKeyStorePassword());
+        useCustomCheckBox.setSelected(setting.useCustom());
+        keyStoreField.setText(setting.keyStore());
+        keyStorePasswordField.setText(setting.keyStorePassword());
     }
 
 

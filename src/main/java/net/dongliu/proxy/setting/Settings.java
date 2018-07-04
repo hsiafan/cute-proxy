@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
+ * Hold default settings.
+ *
  * @author Liu Dong
  */
 public class Settings {
