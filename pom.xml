@@ -380,6 +380,8 @@
                                 <argument>-nosign</argument>
                                 <argument>-Bicon=${icon.path}</argument>
                                 <argument>-BappVersion=${project.version}</argument>
+                                <argument>-BjlinkOptions=strip-debug &#xD;&#xA; compress=1</argument>
+                                <argument>-Bverbose=true</argument>
                             </arguments>
                         </configuration>
                     </execution>
