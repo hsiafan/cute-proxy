@@ -217,7 +217,7 @@ public class MainController {
     @FXML
     private void open(ActionEvent e) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Monkey Proxy data", "*.mpd"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("MonkeyProxy data", "*.mpd"));
         File file = fileChooser.showOpenDialog(this.root.getScene().getWindow());
         if (file == null) {
             return;
@@ -232,7 +232,7 @@ public class MainController {
     @FXML
     private void save(ActionEvent e) throws IOException {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Monkey Proxy data", "*.mpd"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("MonkeyProxy data", "*.mpd"));
         fileChooser.setInitialFileName("captured.mpd");
         File file = fileChooser.showSaveDialog(this.root.getScene().getWindow());
         if (file == null) {

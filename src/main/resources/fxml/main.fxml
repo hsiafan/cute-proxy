@@ -9,7 +9,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import net.dongliu.proxy.ui.component.*?>
 <?import java.net.URL?>
-<VBox xmlns:fx="http://javafx.com/fxml" fx:id="root" fx:controller="net.dongliu.proxy.ui.MainController">
+<VBox xmlns:fx="http://javafx.com/fxml" fx:id="root" fx:controller="net.dongliu.proxy.ui.MainController"
+      stylesheets="/styles/main.css">
     <MenuBar useSystemMenuBar="true">
         <Menu text="File">
             <MenuItem text="Start Proxy" onAction="#startProxy" fx:id="startProxyMenu"/>
@@ -96,7 +97,7 @@
         </StackPane>
     </SplitPane>
 
-    <stylesheets>
-        <URL value="@/styles/main.css"/>
-    </stylesheets>
+    <!--<stylesheets>-->
+        <!--<URL value="@/styles/main.css"/>-->
+    <!--</stylesheets>-->
 </VBox>

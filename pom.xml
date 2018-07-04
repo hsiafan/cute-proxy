@@ -337,7 +337,6 @@
                             <executable>javapackager</executable>
                             <arguments>
                                 <argument>-createjar</argument>
-                                <argument>-nocss2bin</argument>
                                 <argument>-appclass</argument>
                                 <argument>net.dongliu.proxy.Main</argument>
                                 <argument>-classpath</argument>
