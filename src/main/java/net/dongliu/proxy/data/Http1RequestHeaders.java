@@ -27,11 +27,6 @@ public class Http1RequestHeaders extends Http1Headers implements Serializable {
     }
 
     @Override
-    public String toString() {
-        return "Http1RequestHeaders(requestLine=" + requestLine + ", headers=" + super.toString() + ")";
-    }
-
-    @Override
     public List<String> rawLines() {
         List<String> rawLines = new ArrayList<>(headers().size() + 1);
         rawLines.add(requestLine.rawRequestLine());
@@ -58,5 +53,10 @@ public class Http1RequestHeaders extends Http1Headers implements Serializable {
 
     public RequestLine getRequestLine() {
         return requestLine;
+    }
+
+    @Override
+    public String toString() {
+        return "Http1RequestHeaders(requestLine=" + requestLine + ", headers=" + super.toString() + ")";
     }
 }

@@ -5,9 +5,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.Toggle;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import net.dongliu.proxy.data.HttpMessage;
 
 import java.io.IOException;
@@ -19,15 +16,9 @@ import java.io.IOException;
  */
 public class HttpRoundTripMessagePane extends SplitPane {
     @FXML
-    private HttpHeadersPane requestHeaderPane;
+    private HttpMessagePane requestBodyPane;
     @FXML
-    private HttpHeadersPane responseHeaderPane;
-    @FXML
-    private ToggleGroup bodyToggleGroup;
-    @FXML
-    private ToggleButton beautifyButton;
-    @FXML
-    private HttpBodyPane bodyPane;
+    private HttpMessagePane responseBodyPane;
 
     private ObjectProperty<HttpMessage> roundTripMessage = new SimpleObjectProperty<>();
 
@@ -41,21 +32,11 @@ public class HttpRoundTripMessagePane extends SplitPane {
     @FXML
     private void initialize() {
         roundTripMessage.addListener((o, old, newValue) -> {
-            requestHeaderPane.setHeaders(newValue.requestHeader());
-            responseHeaderPane.setHeaders(newValue.ResponseHeader());
-            showHttpBody(bodyToggleGroup.getSelectedToggle());
+            requestBodyPane.setHeaders(newValue.requestHeader());
+            responseBodyPane.setHeaders(newValue.ResponseHeader());
+            requestBodyPane.setBody(newValue.requestBody());
+            responseBodyPane.setBody(newValue.responseBody());
         });
-        bodyToggleGroup.selectedToggleProperty().addListener((ob, old, value) -> showHttpBody(value));
-        beautifyButton.selectedProperty().bindBidirectional(bodyPane.beautifyProperty());
-    }
-
-    private void showHttpBody(Toggle value) {
-        Object userData = value.getUserData();
-        if (userData.equals("request")) {
-            bodyPane.setBody(roundTripMessage.get().requestBody());
-        } else if (userData.equals("response")) {
-            bodyPane.setBody(roundTripMessage.get().responseBody());
-        }
     }
 
     public void setRoundTripMessage(HttpMessage httpMessage) {

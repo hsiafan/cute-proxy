@@ -18,7 +18,7 @@ import java.io.IOException;
 public class WebSocketMessagePane extends BorderPane {
     private static final Logger logger = LoggerFactory.getLogger(WebSocketMessagePane.class);
     @FXML
-    private HttpBodyPane httpBodyPane;
+    private HttpMessagePane httpMessagePane;
     @FXML
     private Text description;
 
@@ -45,7 +45,7 @@ public class WebSocketMessagePane extends BorderPane {
                 return;
             }
 
-            httpBodyPane.setBody(n.body());
+            httpMessagePane.setBody(n.body());
         });
     }
 

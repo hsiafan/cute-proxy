@@ -1,20 +1,17 @@
 package net.dongliu.proxy.ui.component;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import net.dongliu.commons.io.Readers;
+import net.dongliu.proxy.data.HttpHeaders;
 import net.dongliu.proxy.store.Body;
 import net.dongliu.proxy.store.BodyType;
 import net.dongliu.proxy.ui.UIUtils;
@@ -27,25 +24,34 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.stream.Collectors.joining;
 
 /**
  * For http/web-socket body
  *
  * @author Liu Dong
  */
-public class HttpBodyPane extends BorderPane {
+public class HttpMessagePane extends TabPane {
+    @FXML
+    private TextArea cookieText;
+    @FXML
+    private TextArea headerText;
     @FXML
     private Label sizeLabel;
     @FXML
     private ComboBox<BodyType> bodyTypeBox;
     @FXML
     private ComboBox<Charset> charsetBox;
+    @FXML
+    private ToggleButton beautifyButton;
+    @FXML
+    private BorderPane bodyPane;
 
+    private ObjectProperty<HttpHeaders> headers = new SimpleObjectProperty<>();
     private ObjectProperty<Body> body = new SimpleObjectProperty<>();
-    private BooleanProperty beautify = new SimpleBooleanProperty();
 
-    public HttpBodyPane() throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_body.fxml"));
+    public HttpMessagePane() throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/http_message.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
         fxmlLoader.load();
@@ -53,6 +59,18 @@ public class HttpBodyPane extends BorderPane {
 
     @FXML
     private void initialize() {
+        headers.addListener((o, old, message) -> {
+            if (message == null) {
+                headerText.clear();
+                cookieText.clear();
+                return;
+            }
+            headerText.setText(String.join("\n", headers.get().rawLines()));
+            String s = headers.get().cookieValues().stream()
+                    .map(c -> c.name() + "=" + c.value())
+                    .collect(joining("\n"));
+            cookieText.setText(s);
+        });
         body.addListener((o, old, newValue) -> {
             try {
                 refreshBody(newValue);
@@ -66,7 +84,7 @@ public class HttpBodyPane extends BorderPane {
                 Charset.forName("GB2312"), Charset.forName("BIG5")
         );
         bodyTypeBox.getItems().addAll(BodyType.values());
-        beautify.addListener((ob, old, value) -> {
+        beautifyButton.selectedProperty().addListener((ob, old, value) -> {
             try {
                 refreshBody(body.get());
             } catch (IOException e) {
@@ -84,7 +102,7 @@ public class HttpBodyPane extends BorderPane {
 
     private void refreshBody(Body body) throws IOException {
         if (body == null) {
-            this.setCenter(new Text());
+            bodyPane.setCenter(new Text());
             return;
         }
 
@@ -98,19 +116,19 @@ public class HttpBodyPane extends BorderPane {
         bodyTypeBox.setValue(storeType);
 
         if (!body.finished()) {
-            this.setCenter(new Text("Still reading..."));
+            bodyPane.setCenter(new Text("Still reading..."));
             return;
         }
 
         if (body.size() == 0) {
-            this.setCenter(new Text());
+            bodyPane.setCenter(new Text());
             return;
         }
 
         // handle images
         if (storeType.isImage()) {
             Node imagePane = UIUtils.getImagePane(body.getDecodedInputStream(), storeType);
-            this.setCenter(imagePane);
+            bodyPane.setCenter(imagePane);
             return;
         }
 
@@ -123,7 +141,7 @@ public class HttpBodyPane extends BorderPane {
             }
 
             // beautify
-            if (beautify.get()) {
+            if (beautifyButton.selectedProperty().get()) {
                 Beautifier beautifier = beautifiers.get(storeType);
                 if (beautifier != null) {
                     text = beautifier.beautify(text, body.charset().orElse(UTF_8));
@@ -133,7 +151,7 @@ public class HttpBodyPane extends BorderPane {
             TextArea textArea = new TextArea();
             textArea.setText(text);
             textArea.setEditable(false);
-            this.setCenter(textArea);
+            bodyPane.setCenter(textArea);
             return;
         }
 
@@ -143,7 +161,7 @@ public class HttpBodyPane extends BorderPane {
         if (size > 0) {
             t.setText("Binary Body");
         }
-        this.setCenter(t);
+        bodyPane.setCenter(t);
     }
 
     @FXML
@@ -243,7 +261,7 @@ public class HttpBodyPane extends BorderPane {
         this.body.set(body);
     }
 
-    public BooleanProperty beautifyProperty() {
-        return beautify;
+    public void setHeaders(HttpHeaders httpHeaders) {
+        this.headers.set(httpHeaders);
     }
 }
