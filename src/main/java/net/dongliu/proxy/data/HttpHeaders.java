@@ -2,6 +2,7 @@ package net.dongliu.proxy.data;
 
 import net.dongliu.proxy.store.Body;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +12,8 @@ import static java.util.stream.Collectors.toList;
 /**
  * Http headers.
  */
-public abstract class HttpHeaders {
+public abstract class HttpHeaders implements Serializable {
+    private static final long serialVersionUID = 9092421542605849007L;
     private final List<Header> headers;
 
     protected HttpHeaders(List<Header> headers) {
