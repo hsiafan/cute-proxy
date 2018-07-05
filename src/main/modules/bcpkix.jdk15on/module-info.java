@@ -1,4 +1,4 @@
-module bcpkix.jdk15on {
+open module bcpkix.jdk15on {
     requires java.naming;
 
     requires transitive bcprov.jdk15on;

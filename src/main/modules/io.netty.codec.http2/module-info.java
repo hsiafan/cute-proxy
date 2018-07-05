@@ -1,4 +1,4 @@
-module io.netty.codec.http2 {
+open module io.netty.codec.http2 {
     requires transitive io.netty.buffer;
     requires transitive io.netty.codec;
     requires transitive io.netty.codec.http;

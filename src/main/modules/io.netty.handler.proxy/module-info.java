@@ -1,4 +1,4 @@
-module io.netty.handler.proxy {
+open module io.netty.handler.proxy {
     requires io.netty.buffer;
     requires io.netty.codec;
     requires io.netty.codec.socks;

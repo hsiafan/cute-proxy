@@ -82,6 +82,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
     }
 
     private static void sendWebResponse(ChannelHandlerContext ctx, WebResponse r, boolean keepAlive) {
+        System.out.println("ccccc");
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, r.getStatus(),
                 Unpooled.wrappedBuffer(r.getData()));
         response.headers().set(CONTENT_TYPE, r.getContentType());

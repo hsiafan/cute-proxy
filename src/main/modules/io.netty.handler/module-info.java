@@ -1,4 +1,4 @@
-module io.netty.handler {
+open module io.netty.handler {
     requires transitive io.netty.buffer;
     requires transitive io.netty.common;
     requires transitive io.netty.transport;

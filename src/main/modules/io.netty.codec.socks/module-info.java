@@ -1,4 +1,4 @@
-module io.netty.codec.socks {
+open module io.netty.codec.socks {
     requires io.netty.common;
 
     requires transitive io.netty.buffer;

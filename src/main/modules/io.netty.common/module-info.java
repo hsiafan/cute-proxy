@@ -1,4 +1,4 @@
-module io.netty.common {
+open module io.netty.common {
     requires static commons.logging;
     requires static java.logging;
     requires static log4j;

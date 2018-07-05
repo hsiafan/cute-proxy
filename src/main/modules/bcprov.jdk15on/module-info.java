@@ -1,4 +1,4 @@
-module bcprov.jdk15on {
+open module bcprov.jdk15on {
     requires java.naming;
     requires java.sql;
 
