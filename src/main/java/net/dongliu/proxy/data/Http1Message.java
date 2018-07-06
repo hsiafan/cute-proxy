@@ -31,7 +31,7 @@ public class Http1Message extends HttpMessage implements Serializable {
         if (!(scheme.equals("https") && address.getPort() == 443 || scheme.equals("http") && address.getPort() == 80)) {
             sb.append(":").append(address.getPort());
         }
-        sb.append(requestHeader.getRequestLine().path());
+        sb.append(requestHeader.requestLine().path());
         return sb.toString();
     }
 

@@ -51,7 +51,7 @@ public class Http1RequestHeaders extends Http1Headers implements Serializable {
                 .collect(toList());
     }
 
-    public RequestLine getRequestLine() {
+    public RequestLine requestLine() {
         return requestLine;
     }
 

@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import net.dongliu.commons.io.Readers;
@@ -17,14 +18,15 @@ import net.dongliu.proxy.store.BodyType;
 import net.dongliu.proxy.ui.UIUtils;
 import net.dongliu.proxy.ui.beautifier.*;
 import net.dongliu.proxy.utils.StringUtils;
+import net.dongliu.proxy.utils.Texts;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.stream.Collectors.joining;
 
 /**
  * For http/web-socket body
@@ -59,17 +61,20 @@ public class HttpMessagePane extends TabPane {
 
     @FXML
     private void initialize() {
+        // fxml cannot set font family?
+//        headerText.setFont(Font.font("Monospaced", -1));
+//        cookieText.setFont(Font.font("Monospaced", -1));
+
         headers.addListener((o, old, message) -> {
             if (message == null) {
                 headerText.clear();
                 cookieText.clear();
                 return;
             }
-            headerText.setText(String.join("\n", headers.get().rawLines()));
-            String s = headers.get().cookieValues().stream()
-                    .map(c -> c.name() + "=" + c.value())
-                    .collect(joining("\n"));
-            cookieText.setText(s);
+            List<String> rawHeaders = Texts.toAlignText(headers.get().headers(), ": ");
+            headerText.setText(String.join("\n", rawHeaders));
+            List<String> cookies = Texts.toAlignText(headers.get().cookieValues(), "=");
+            cookieText.setText(String.join("\n", cookies));
         });
         body.addListener((o, old, newValue) -> {
             try {
