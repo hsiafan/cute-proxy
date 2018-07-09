@@ -1,15 +1,17 @@
 package net.dongliu.proxy.data;
 
+import net.dongliu.commons.collection.Lists;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Liu Dong
  */
-public class Http1ResponseHeaders extends Http1Headers implements Serializable {
+public class Http1ResponseHeaders extends Http1Headers implements HttpResponseHeaders, Serializable {
     private static final long serialVersionUID = 299585070993883703L;
     private StatusLine statusLine;
 
@@ -51,10 +53,15 @@ public class Http1ResponseHeaders extends Http1Headers implements Serializable {
 
     @Override
     public List<NameValue> cookieValues() {
-        return headers("Set-Cookie").stream().map(CookieUtils::parseCookieHeader).collect(toList());
+        return Lists.convert(headers("Set-Cookie"), CookieUtils::parseCookieHeader);
     }
 
-    public StatusLine getStatusLine() {
+    public StatusLine statusLine() {
         return statusLine;
+    }
+
+    @Override
+    public int statusCode() {
+        return statusLine.code();
     }
 }

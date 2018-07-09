@@ -196,7 +196,7 @@ public class KeyStoreGenerator {
         X509CertificateObject clientCertificate = new X509CertificateObject(certificate);
         logger.debug("Verifying certificate for correct signature with CA public key");
         clientCertificate.verify(rootCert.getPublicKey());
-        clientCertificate.setBagAttribute(pkcs_9_at_friendlyName, new DERBMPString("Certificate for Monkey Proxy App"));
+        clientCertificate.setBagAttribute(pkcs_9_at_friendlyName, new DERBMPString("Certificate for MonkeyProxy App"));
         clientCertificate.setBagAttribute(pkcs_9_at_localKeyId,
                 jcaX509ExtensionUtils.createSubjectKeyIdentifier(publicKey));
 

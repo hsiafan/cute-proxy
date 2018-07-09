@@ -12,23 +12,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Callback;
-import net.dongliu.commons.io.Readers;
-import net.dongliu.proxy.data.*;
-import net.dongliu.proxy.store.Body;
+import net.dongliu.proxy.data.HttpMessage;
+import net.dongliu.proxy.data.Message;
 import net.dongliu.proxy.ui.UIUtils;
 import net.dongliu.proxy.utils.Networks;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static javafx.beans.binding.Bindings.createStringBinding;
-import static net.dongliu.proxy.utils.Headers.headerSet;
+import static net.dongliu.proxy.ui.RequestCopyUtils.copyRequestAsCurl;
 
 /**
  * @author Liu Dong
@@ -219,14 +214,6 @@ public class CatalogPane extends BorderPane {
     }
 
 
-    public static final Set<String> filterRequestHeaders = headerSet(
-            "Host",
-            "Content-Length",
-            "Transfer-Encoding",
-            "Accept-Encoding",
-            "Connection"
-    );
-
     private class TreeViewMouseHandler implements EventHandler<MouseEvent> {
         @Override
         @SuppressWarnings("unchecked")
@@ -264,40 +251,6 @@ public class CatalogPane extends BorderPane {
 
             contextMenu.show(CatalogPane.this, event.getScreenX(), event.getScreenY());
         }
-    }
-
-    private void copyRequestAsCurl(HttpMessage httpMessage) {
-        StringBuilder sb = new StringBuilder("curl '").append(httpMessage.url()).append("'");
-        HttpHeaders httpHeaders = httpMessage.requestHeader();
-        if (httpHeaders instanceof Http1RequestHeaders) {
-            String method = ((Http1RequestHeaders) httpHeaders).requestLine().method();
-            sb.append(" -X ").append(method);
-        }
-        List<Header> headers = httpHeaders.headers();
-        for (Header header : headers) {
-            if (filterRequestHeaders.contains(header.name())) {
-                continue;
-            }
-            sb.append(" \\\n\t ").append("-H'").append(header.rawHeader()).append("'");
-        }
-        Body body = httpMessage.requestBody();
-        if (body.size() > 0) {
-            if (body.type().isText()) {
-                String text;
-                try (var input = body.getDecodedInputStream();
-                     var reader = new InputStreamReader(input, body.charset().orElse(UTF_8))) {
-                    text = Readers.readAll(reader);
-                    sb.append(" \\\n\t -d'").append(text).append("'");
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-
-            } else {
-                sb.append(" \\\n\t -d'@").append("{your_body_file}").append("'");
-            }
-        }
-        String command = sb.toString();
-        UIUtils.copyToClipBoard(command);
     }
 
     public void deleteTreeItem(TreeItem<Item> treeItem) {

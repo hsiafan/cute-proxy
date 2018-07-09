@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.SplitPane?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
 <?import net.dongliu.proxy.ui.component.HttpMessagePane?>
 <?import net.dongliu.proxy.ui.component.HttpRoundTripMessagePane?>
-<fx:root type="HttpRoundTripMessagePane" xmlns:fx="http://javafx.com/fxml" dividerPositions="0.45">
-    <SplitPane orientation="VERTICAL">
-        <HttpMessagePane fx:id="requestBodyPane"/>
-        <HttpMessagePane fx:id="responseBodyPane"/>
-    </SplitPane>
+<fx:root type="HttpRoundTripMessagePane" xmlns:fx="http://javafx.com/fxml">
+    <top>
+        <HBox>
+            <padding>
+                <Insets top="4" bottom="2" left="4" right="4"/>
+            </padding>
+            <MenuButton text="Copy Request">
+                <tooltip>
+                    <Tooltip text="Copy Request"/>
+                </tooltip>
+                <items>
+                    <MenuItem text="Copy as Curl" onAction="#copyAsCurl"/>
+                    <MenuItem text="Copy as Python(requests)" onAction="#copyAsPython"/>
+                    <MenuItem text="Copy as Java(OkHttp)" onAction="#copyAsJava"/>
+                </items>
+            </MenuButton>
+        </HBox>
+    </top>
+    <center>
+        <SplitPane orientation="VERTICAL">
+            <HttpMessagePane fx:id="requestBodyPane"/>
+            <HttpMessagePane fx:id="responseBodyPane"/>
+        </SplitPane>
+    </center>
 
 </fx:root>

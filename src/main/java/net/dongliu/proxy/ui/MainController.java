@@ -190,7 +190,7 @@ public class MainController {
      */
     private void showMessage(Message message) {
         if (message instanceof HttpMessage) {
-            httpRoundTripMessagePane.setRoundTripMessage((HttpMessage) message);
+            httpRoundTripMessagePane.setHttpMessage((HttpMessage) message);
             webSocketMessagePane.setVisible(false);
             httpRoundTripMessagePane.setVisible(true);
 //            httpRoundTripMessagePane.setStyle("-fx-background-color:white;");

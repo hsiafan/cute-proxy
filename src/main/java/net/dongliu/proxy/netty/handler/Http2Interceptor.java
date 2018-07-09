@@ -55,7 +55,8 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
                         .filter(e -> e.getKey().charAt(0) != ':')
                         .map(e -> new Header(e.getKey().toString(), e.getValue().toString()))
                         .collect(toList());
-                Http2ResponseHeaders responseHeaders = new Http2ResponseHeaders(nettyHeader.status().toString(), headers);
+                var responseHeaders = new Http2ResponseHeaders(Integer.parseInt(nettyHeader.status().toString()),
+                        headers);
                 message.setResponseHeader(responseHeaders);
                 message.setResponseBody(responseHeaders.createBody());
                 if (frame.isEndStream()) {

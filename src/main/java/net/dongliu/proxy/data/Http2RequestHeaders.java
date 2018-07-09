@@ -10,7 +10,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * Http request headers
  */
-public class Http2RequestHeaders extends Http2Headers implements Serializable {
+public class Http2RequestHeaders extends Http2Headers implements HttpRequestHeaders, Serializable {
     private static final long serialVersionUID = -4334647855383940843L;
     private final String scheme;
     private final String method;
@@ -34,12 +34,19 @@ public class Http2RequestHeaders extends Http2Headers implements Serializable {
         return scheme;
     }
 
+    @Override
     public String method() {
         return method;
     }
 
+    @Override
     public String path() {
         return path;
+    }
+
+    @Override
+    public String version() {
+        return "2.0";
     }
 
     @Override

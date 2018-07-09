@@ -9,16 +9,16 @@ import static java.util.stream.Collectors.toList;
 /**
  * Http2 response headers
  */
-public class Http2ResponseHeaders extends Http2Headers implements Serializable {
+public class Http2ResponseHeaders extends Http2Headers implements HttpResponseHeaders, Serializable {
     private static final long serialVersionUID = -7574758006808314305L;
-    private final String status;
+    private final int status;
 
-    public Http2ResponseHeaders(String status, List<Header> headers) {
+    public Http2ResponseHeaders(int status, List<Header> headers) {
         super(headers);
         this.status = status;
     }
 
-    public String status() {
+    public int status() {
         return status;
     }
 
@@ -34,5 +34,10 @@ public class Http2ResponseHeaders extends Http2Headers implements Serializable {
     @Override
     public List<NameValue> cookieValues() {
         return headers("Set-Cookie").stream().map(CookieUtils::parseCookieHeader).collect(toList());
+    }
+
+    @Override
+    public int statusCode() {
+        return status;
     }
 }

@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @author Liu Dong
  */
-public class Http1RequestHeaders extends Http1Headers implements Serializable {
+public class Http1RequestHeaders extends Http1Headers implements HttpRequestHeaders, Serializable {
     private static final long serialVersionUID = 6625148408370480848L;
     private RequestLine requestLine;
 
@@ -58,5 +58,20 @@ public class Http1RequestHeaders extends Http1Headers implements Serializable {
     @Override
     public String toString() {
         return "Http1RequestHeaders(requestLine=" + requestLine + ", headers=" + super.toString() + ")";
+    }
+
+    @Override
+    public String method() {
+        return requestLine.method();
+    }
+
+    @Override
+    public String path() {
+        return requestLine.path();
+    }
+
+    @Override
+    public String version() {
+        return requestLine.version();
     }
 }

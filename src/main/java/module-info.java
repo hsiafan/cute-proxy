@@ -10,7 +10,7 @@ module net.dongliu.proxy {
     // modular jar
     requires net.dongliu.commons;
     requires org.slf4j;
-    requires ch.qos.logback.classic;
+    requires org.slf4j.simple;
 
     // dependency with stable module name
     requires io.netty.handler;
