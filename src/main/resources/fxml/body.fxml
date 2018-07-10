@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import net.dongliu.proxy.ui.component.BodyPane?>
+<?import net.dongliu.proxy.ui.component.SimpleButton?>
+<fx:root type="BodyPane" xmlns:fx="http://javafx.com/fxml">
+    <top>
+        <HBox spacing="4" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="4" bottom="2" left="4" right="4"/>
+            </padding>
+
+            <ComboBox onAction="#setMimeType" fx:id="bodyTypeBox"/>
+            <ComboBox onAction="#setCharset" fx:id="charsetBox"/>
+            <ToggleButton fx:id="beautifyButton" text="Beautify"/>
+            <SimpleButton onAction="#exportBody">
+                <tooltipText>Save Content To File</tooltipText>
+                <iconPath>/images/ic_file_download_black_18dp.png</iconPath>
+            </SimpleButton>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="sizeLabel"/>
+        </HBox>
+    </top>
+    <center></center>
+
+</fx:root>
