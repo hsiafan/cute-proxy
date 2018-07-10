@@ -157,10 +157,8 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
             }
             Channel channel = f.getNow();
             channel.pipeline().addLast("http-client-codec", new HttpClientCodec());
-            if (messageListener != null) {
-                HttpInterceptor interceptor = new HttpInterceptor(false, address, messageListener, ctx.pipeline());
-                channel.pipeline().addLast(interceptor);
-            }
+            HttpInterceptor interceptor = new HttpInterceptor(false, address, messageListener);
+            channel.pipeline().addLast(interceptor);
             channel.pipeline().addLast("http-tunnel-handler", new ReplayHandler(ctx.channel()));
         });
         return promise;

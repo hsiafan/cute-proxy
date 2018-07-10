@@ -132,9 +132,14 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
         ctx.pipeline().addLast("replay-handler", new ReplayHandler(outboundChannel));
 
         outboundChannel.pipeline().addLast(new HttpClientCodec());
-        HttpInterceptor interceptor = new HttpInterceptor(ssl, address, messageListener, ctx.pipeline());
-        outboundChannel.pipeline().addLast("http-interceptor", interceptor);
+        var httpUpgradeHandler = new HttpUpgradeHandler(ssl, address, messageListener, ctx.pipeline());
+        outboundChannel.pipeline().addLast("http-upgrade-handler", httpUpgradeHandler);
+        var httpInterceptor = new HttpInterceptor(ssl, address, messageListener);
+        outboundChannel.pipeline().addLast("http-interceptor", httpInterceptor);
         outboundChannel.pipeline().addLast("replay-handler", new ReplayHandler(ctx.channel()));
+        if (!ssl) {
+            // detect h2c
+        }
     }
 
     @Override

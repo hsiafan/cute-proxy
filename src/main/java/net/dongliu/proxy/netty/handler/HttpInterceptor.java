@@ -3,14 +3,8 @@ package net.dongliu.proxy.netty.handler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.websocketx.WebSocket13FrameDecoder;
-import io.netty.handler.codec.http.websocketx.WebSocket13FrameEncoder;
-import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
-import io.netty.handler.codec.http.websocketx.WebSocketFrameEncoder;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.data.*;
 import net.dongliu.proxy.store.Body;
@@ -29,19 +23,15 @@ public class HttpInterceptor extends ChannelDuplexHandler {
 
     // the current http request/response
     private Http1Message httpMessage;
-    private boolean upgradeWebSocket;
 
     private final boolean ssl;
     private final NetAddress address;
     private final MessageListener messageListener;
-    private final ChannelPipeline clientPipeline;
 
-    public HttpInterceptor(boolean ssl, NetAddress address, MessageListener messageListener,
-                           ChannelPipeline clientPipeline) {
+    public HttpInterceptor(boolean ssl, NetAddress address, MessageListener messageListener) {
         this.ssl = ssl;
         this.address = address;
         this.messageListener = messageListener;
-        this.clientPipeline = clientPipeline;
     }
 
     @Override
@@ -58,16 +48,6 @@ public class HttpInterceptor extends ChannelDuplexHandler {
             Body body = requestHeader.createBody();
             httpMessage = new Http1Message(ssl ? "https" : "http", address, requestHeader, body);
             messageListener.onMessage(httpMessage);
-
-            // check connection upgrade
-            HttpHeaders headers = request.headers();
-            if ("Upgrade".equalsIgnoreCase(headers.get("Connection"))) {
-                if ("webSocket".equalsIgnoreCase(headers.get("Upgrade"))) {
-                    // web-socket
-                    upgradeWebSocket = true;
-                }
-                // TODO: upgrade h2c
-            }
         }
 
         if (msg instanceof HttpContent) {
@@ -96,7 +76,7 @@ public class HttpInterceptor extends ChannelDuplexHandler {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         if (!(msg instanceof HttpObject)) {
-            logger.error("not http message: {}", msg.getClass().getName());
+            logger.debug("not http message: {}", msg.getClass().getName());
             ctx.fireChannelRead(msg);
             return;
         }
@@ -118,31 +98,6 @@ public class HttpInterceptor extends ChannelDuplexHandler {
             if (msg instanceof LastHttpContent) {
                 message.responseBody().finish();
                 this.httpMessage = null;
-
-                // connection upgrade
-                //TODO: should check response header?
-                if (upgradeWebSocket) {
-                    ctx.fireChannelRead(msg);
-                    String url = message.url().replaceAll("^http", "ws");
-                    ctx.pipeline().replace("http-interceptor", "ws-interceptor",
-                            new WebSocketInterceptor(address.getHost(), url, messageListener));
-                    ctx.pipeline().remove(HttpClientCodec.class);
-                    WebSocketFrameDecoder frameDecoder = new WebSocket13FrameDecoder(false, true, 65536, false);
-                    WebSocketFrameEncoder frameEncoder = new WebSocket13FrameEncoder(true);
-                    ctx.pipeline().addBefore("ws-interceptor", "ws-decoder", frameDecoder);
-                    ctx.pipeline().addBefore("ws-interceptor", "ws-encoder", frameEncoder);
-
-
-                    clientPipeline.remove(HttpServerCodec.class);
-                    WebSocketFrameDecoder clientFrameDecoder = new WebSocket13FrameDecoder(true, true, 65536, false);
-                    WebSocketFrameEncoder clientFrameEncoder = new WebSocket13FrameEncoder(false);
-                    clientPipeline.addBefore("replay-handler", "ws-decoder", clientFrameDecoder);
-                    clientPipeline.addBefore("replay-handler", "ws-encoder", clientFrameEncoder);
-
-                    // do not fire the last empty content, httpCodec already removed
-                    // the last http content is always empty?
-                    return;
-                }
             }
         }
 
