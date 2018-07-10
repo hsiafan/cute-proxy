@@ -4,6 +4,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http2.DefaultHttp2SettingsFrame;
+import io.netty.handler.codec.http2.Http2Settings;
 import io.netty.util.ReferenceCountUtil;
 import net.dongliu.proxy.netty.NettyUtils;
 import org.slf4j.Logger;
@@ -28,7 +30,12 @@ public class ReplayHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        logger.debug("replay message: {}", msg.getClass());
+        logger.info("from {} to {}, replay message: {}", ctx.channel().remoteAddress(),
+                targetChannel.remoteAddress(), msg.getClass());
+        if (msg instanceof DefaultHttp2SettingsFrame) {
+            Http2Settings settings = ((DefaultHttp2SettingsFrame) msg).settings();
+            logger.info("{}", settings);
+        }
         ctx.fireChannelRead(ReferenceCountUtil.retain(msg));
         if (targetChannel.isActive()) {
             targetChannel.writeAndFlush(msg);

@@ -28,8 +28,11 @@ public class Http1Message extends HttpMessage implements Serializable {
     private static String getUrl(String scheme, NetAddress address, Http1RequestHeaders requestHeader) {
         String host = requestHeader.getHeader("Host").orElse(address.getHost());
         StringBuilder sb = new StringBuilder(scheme).append("://").append(host);
-        if (!(scheme.equals("https") && address.getPort() == 443 || scheme.equals("http") && address.getPort() == 80)) {
-            sb.append(":").append(address.getPort());
+        if (!host.contains(":")) {
+            if (!(scheme.equals("https") && address.getPort() == 443
+                    || scheme.equals("http") && address.getPort() == 80)) {
+                sb.append(":").append(address.getPort());
+            }
         }
         sb.append(requestHeader.requestLine().path());
         return sb.toString();

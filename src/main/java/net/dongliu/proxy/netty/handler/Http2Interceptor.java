@@ -170,6 +170,7 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
                 throw new RuntimeException("stream with id " + sourceId + " not exists");
             }
             int targetId = targetStream.id();
+            logger.info("sourceId: {}, targetId: {}", sourceId, targetId);
             Http2Message message = messageMap.get(targetId);
             if (message != null) {
                 Body body = message.requestBody();
@@ -194,7 +195,7 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error("", cause);
+        logger.error("http2 error, pipeline: {}", ctx.pipeline(), cause);
         ctx.close();
     }
 }

@@ -9,13 +9,18 @@ import io.netty.handler.codec.http.websocketx.WebSocket13FrameDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocket13FrameEncoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameEncoder;
+import io.netty.handler.codec.http2.Http2FrameCodec;
+import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
 import net.dongliu.commons.Strings;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Handle http upgrade(websocket, http2).
@@ -53,7 +58,8 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
 
         HttpRequest request = (HttpRequest) msg;
         HttpHeaders headers = request.headers();
-        if ("Upgrade".equalsIgnoreCase(headers.get("Connection"))) {
+        var items = getHeaderValues(Strings.nullToEmpty(headers.get("Connection")));
+        if (items.contains("upgrade")) {
             String upgrade = Strings.nullToEmpty(headers.get("Upgrade")).trim().toLowerCase();
             switch (upgrade) {
                 case "websocket":
@@ -77,8 +83,10 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
         HttpHeaders headers = request.headers();
         String host = Objects.requireNonNullElse(headers.get("Host"), address.getHost());
         StringBuilder sb = new StringBuilder(ssl ? "wss" : "ws").append("://").append(host);
-        if (!(ssl && address.getPort() == 443 || !ssl && address.getPort() == 80)) {
-            sb.append(":").append(address.getPort());
+        if (!host.contains(":")) {
+            if (!(ssl && address.getPort() == 443 || !ssl && address.getPort() == 80)) {
+                sb.append(":").append(address.getPort());
+            }
         }
         sb.append(request.uri());
         return sb.toString();
@@ -97,13 +105,12 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
         HttpResponse response = (HttpResponse) msg;
         if (upgradeWebSocket) {
             ctx.fireChannelRead(msg);
+            ctx.pipeline().remove(this);
             if (!webSocketUpgraded(response)) {
-                ctx.pipeline().remove(this);
                 logger.debug("webSocket upgrade failed");
                 return;
             }
             logger.debug("upgrade to web-socket");
-            //TODO: websocket message url
             ctx.pipeline().replace("http-interceptor", "ws-interceptor",
                     new WebSocketInterceptor(address.getHost(), wsUrl, messageListener));
             ctx.pipeline().remove(HttpClientCodec.class);
@@ -118,18 +125,35 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
             clientPipeline.addBefore("replay-handler", "ws-decoder", clientFrameDecoder);
             clientPipeline.addBefore("replay-handler", "ws-encoder", clientFrameEncoder);
         } else if (upgradeH2c) {
+            //TODO: https://www.wolfcstech.com/2016/10/29/3-zh-cn/
             ctx.fireChannelRead(msg);
+            ctx.pipeline().remove(this);
             if (!h2cUpgraded(response)) {
-                ctx.pipeline().remove(this);
+                //TODO: h2c upgrade
                 logger.debug("h2c upgrade failed");
                 return;
             }
             logger.debug("upgrade to h2c");
+
+            var http2Interceptor = new Http2Interceptor(address, messageListener);
+            Http2FrameCodec http2ClientCodec = Http2FrameCodecBuilder.forClient().build();
+            Http2FrameCodec http2ServerCodec = Http2FrameCodecBuilder.forServer().build();
+            ctx.pipeline().replace("http-codec", "http2-frame-codec", http2ClientCodec);
+            ctx.pipeline().replace("http-interceptor", "http2-interceptor", http2Interceptor);
+            clientPipeline.replace("http-codec", "http2-frame-codec", http2ServerCodec);
         } else {
             ctx.fireChannelRead(msg);
             ctx.pipeline().remove(this);
             logger.warn("no upgrade found but get a response?");
         }
+    }
+
+    private Collection<String> getHeaderValues(String value) {
+        return Stream.of(value.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
     }
 
     private boolean webSocketUpgraded(HttpResponse response) {

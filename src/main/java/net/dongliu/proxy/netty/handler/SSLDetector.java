@@ -8,6 +8,7 @@ import io.netty.handler.codec.ByteToMessageDecoder.Cumulator;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
+import io.netty.handler.codec.http2.Http2FrameCodec;
 import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.ssl.SslContext;
@@ -117,21 +118,23 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
     }
 
     private void setHttp2Interceptor(ChannelHandlerContext ctx) {
-        ctx.pipeline().addLast("http2-frame-codec", Http2FrameCodecBuilder.forServer().build());
+        Http2FrameCodec http2ServerCodec = Http2FrameCodecBuilder.forServer().build();
+        Http2FrameCodec http2ClientCodec = Http2FrameCodecBuilder.forClient().build();
+        ctx.pipeline().addLast("http2-frame-codec", http2ServerCodec);
         ctx.pipeline().addLast("replay-handler", new ReplayHandler(outboundChannel));
         outboundChannel.pipeline().addLast("setting-frame-fixer", new SettingFrameFixer());
-        outboundChannel.pipeline().addLast("http2-frame-codec", Http2FrameCodecBuilder.forClient().build());
+        outboundChannel.pipeline().addLast("http2-frame-codec", http2ClientCodec);
         Http2Interceptor interceptor = new Http2Interceptor(address, messageListener);
         outboundChannel.pipeline().addLast("http2-interceptor", interceptor);
         outboundChannel.pipeline().addLast("replay-handler", new ReplayHandler(ctx.channel()));
     }
 
     private void setHttpInterceptor(ChannelHandlerContext ctx, boolean ssl) {
-        ctx.pipeline().addLast(new HttpServerCodec());
-        ctx.pipeline().addLast("", new HttpServerExpectContinueHandler());
+        ctx.pipeline().addLast("http-codec", new HttpServerCodec());
+        ctx.pipeline().addLast(new HttpServerExpectContinueHandler());
         ctx.pipeline().addLast("replay-handler", new ReplayHandler(outboundChannel));
 
-        outboundChannel.pipeline().addLast(new HttpClientCodec());
+        outboundChannel.pipeline().addLast("http-codec", new HttpClientCodec());
         var httpUpgradeHandler = new HttpUpgradeHandler(ssl, address, messageListener, ctx.pipeline());
         outboundChannel.pipeline().addLast("http-upgrade-handler", httpUpgradeHandler);
         var httpInterceptor = new HttpInterceptor(ssl, address, messageListener);
