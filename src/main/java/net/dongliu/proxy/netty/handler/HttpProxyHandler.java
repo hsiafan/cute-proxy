@@ -142,7 +142,7 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
                     }
                 });
 
-        bootstrap.connect(address.getHost(), address.getPort()).addListener((ChannelFutureListener) future -> {
+        bootstrap.connect(address.host(), address.port()).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {
                 ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, BAD_GATEWAY));
                 NettyUtils.closeOnFlush(ctx.channel());

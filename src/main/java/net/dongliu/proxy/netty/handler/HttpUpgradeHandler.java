@@ -84,11 +84,11 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
 
     private static String getUrl(boolean ssl, NetAddress address, HttpRequest request) {
         HttpHeaders headers = request.headers();
-        String host = Objects.requireNonNullElse(headers.get("Host"), address.getHost());
+        String host = Objects.requireNonNullElse(headers.get("Host"), address.host());
         StringBuilder sb = new StringBuilder(ssl ? "wss" : "ws").append("://").append(host);
         if (!host.contains(":")) {
-            if (!(ssl && address.getPort() == 443 || !ssl && address.getPort() == 80)) {
-                sb.append(":").append(address.getPort());
+            if (!(ssl && address.port() == 443 || !ssl && address.port() == 80)) {
+                sb.append(":").append(address.port());
             }
         }
         sb.append(request.uri());
@@ -115,7 +115,7 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
             }
             logger.debug("upgrade to web-socket");
             ctx.pipeline().replace("http-interceptor", "ws-interceptor",
-                    new WebSocketInterceptor(address.getHost(), wsUrl, messageListener));
+                    new WebSocketInterceptor(address.host(), wsUrl, messageListener));
             ctx.pipeline().remove(HttpClientCodec.class);
             WebSocketFrameDecoder frameDecoder = new WebSocket13FrameDecoder(false, true, 65536, false);
             WebSocketFrameEncoder frameEncoder = new WebSocket13FrameEncoder(true);

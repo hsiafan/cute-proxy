@@ -90,21 +90,21 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
         queue = new ArrayDeque<>(2);
 
         SslContext sslContext = ClientSSLContextManager.getInstance().get();
-        SslHandler sslHandler = sslContext.newHandler(ctx.alloc(), address.getHost(), address.getPort());
+        SslHandler sslHandler = sslContext.newHandler(ctx.alloc(), address.host(), address.port());
         outboundChannel.pipeline().addLast("ssl-handler", sslHandler);
         outboundChannel.pipeline().addLast(new ApplicationProtocolNegotiationHandler(HTTP_1_1) {
             @Override
             protected void configurePipeline(ChannelHandlerContext c, String protocol) {
-                logger.debug("alpn with target server {}: {}", address.getHost(), protocol);
+                logger.debug("alpn with target server {}: {}", address.host(), protocol);
 
                 boolean useH2 = protocol.equalsIgnoreCase(HTTP_2);
-                SslContext serverContext = sslContextManager.createSSlContext(address.getHost(), useH2);
+                SslContext serverContext = sslContextManager.createSSlContext(address.host(), useH2);
                 SslHandler serverSSLHandler = serverContext.newHandler(ctx.alloc());
                 ctx.pipeline().addLast("ssl-handler", serverSSLHandler);
                 ctx.pipeline().addLast(new ApplicationProtocolNegotiationHandler(HTTP_1_1) {
                     @Override
                     protected void configurePipeline(ChannelHandlerContext ctx, String protocol) {
-                        logger.debug("alpn with client {}: {}", address.getHost(), protocol);
+                        logger.debug("alpn with client {}: {}", address.host(), protocol);
                         if (protocol.equalsIgnoreCase(HTTP_2)) {
                             setHttp2Interceptor(ctx);
                         } else {

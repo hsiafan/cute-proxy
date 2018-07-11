@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.netty.handler.ServerSSLContextManager;
-import net.dongliu.proxy.netty.handler.HttpTunnelProxyHandler;
+import net.dongliu.proxy.netty.handler.HttpTunnelProxyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +49,6 @@ public class HttpTunnelProxyMatcher extends ProtocolMatcher {
     @Override
     public void handlePipeline(ChannelPipeline pipeline) {
         pipeline.addLast(new HttpServerCodec());
-        pipeline.addLast(new HttpTunnelProxyHandler(messageListener, sslContextManager, proxyHandlerSupplier));
+        pipeline.addLast(new HttpTunnelProxyInitializer(messageListener, sslContextManager, proxyHandlerSupplier));
     }
 }

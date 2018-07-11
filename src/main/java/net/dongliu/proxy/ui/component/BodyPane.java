@@ -55,6 +55,7 @@ public class BodyPane extends BorderPane {
     private void initialize() {
         body.addListener((o, old, newValue) -> {
             try {
+                beautifyButton.selectedProperty().setValue(newValue.beautify());
                 refreshBody(newValue);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
@@ -68,7 +69,9 @@ public class BodyPane extends BorderPane {
         bodyTypeBox.getItems().addAll(BodyType.values());
         beautifyButton.selectedProperty().addListener((ob, old, value) -> {
             try {
-                refreshBody(body.get());
+                Body body = this.body.get();
+                body.beautify(value);
+                refreshBody(body);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -123,7 +126,7 @@ public class BodyPane extends BorderPane {
             }
 
             // beautify
-            if (beautifyButton.selectedProperty().get()) {
+            if (body.beautify()) {
                 Beautifier beautifier = beautifiers.get(storeType);
                 if (beautifier != null) {
                     text = beautifier.beautify(text, body.charset().orElse(UTF_8));

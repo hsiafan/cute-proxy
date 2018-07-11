@@ -27,11 +27,11 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 /**
  * Handle http connect tunnel proxy request
  */
-public class HttpTunnelProxyHandler extends TunnelProxyHandler<HttpRequest> {
-    private static final Logger logger = LoggerFactory.getLogger(HttpTunnelProxyHandler.class);
+public class HttpTunnelProxyInitializer extends TunnelProxyHandler<HttpRequest> {
+    private static final Logger logger = LoggerFactory.getLogger(HttpTunnelProxyInitializer.class);
 
-    public HttpTunnelProxyHandler(MessageListener messageListener, ServerSSLContextManager sslContextManager,
-                                  Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public HttpTunnelProxyInitializer(MessageListener messageListener, ServerSSLContextManager sslContextManager,
+                                      Supplier<ProxyHandler> proxyHandlerSupplier) {
         super(messageListener, sslContextManager, proxyHandlerSupplier);
     }
 
@@ -41,7 +41,7 @@ public class HttpTunnelProxyHandler extends TunnelProxyHandler<HttpRequest> {
         Bootstrap bootstrap = initBootStrap(promise, ctx.channel().eventLoop());
 
         NetAddress address = Networks.parseAddress(request.uri());
-        bootstrap.connect(address.getHost(), address.getPort()).addListener((ChannelFutureListener) future -> {
+        bootstrap.connect(address.host(), address.port()).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {
                 ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, BAD_GATEWAY));
                 NettyUtils.closeOnFlush(ctx.channel());
@@ -58,7 +58,8 @@ public class HttpTunnelProxyHandler extends TunnelProxyHandler<HttpRequest> {
             Channel outboundChannel = future.getNow();
             ChannelFuture responseFuture = ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, OK));
             responseFuture.addListener((ChannelFutureListener) channelFuture -> {
-                ctx.pipeline().remove(HttpTunnelProxyHandler.this);
+                //FIXME: throw NoSuchElementException
+                ctx.pipeline().remove(HttpTunnelProxyInitializer.this);
                 ctx.pipeline().remove(HttpServerCodec.class);
                 initTcpProxyHandlers(ctx, address, outboundChannel);
             });

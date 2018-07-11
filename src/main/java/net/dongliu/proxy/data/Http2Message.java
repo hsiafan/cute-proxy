@@ -20,16 +20,16 @@ public class Http2Message extends HttpMessage implements Serializable {
     private volatile Body responseBody;
 
     public Http2Message(NetAddress address, Http2RequestHeaders requestHeader, Body body) {
-        super(requestHeader.getHeader("Host").orElse(address.getHost()), getUrl(address, requestHeader));
+        super(requestHeader.getHeader("Host").orElse(address.host()), getUrl(address, requestHeader));
         this.requestHeader = requireNonNull(requestHeader);
         this.requestBody = body;
     }
 
     private static String getUrl(NetAddress address, Http2RequestHeaders requestHeader) {
         String scheme = requestHeader.scheme();
-        int port = address.getPort();
+        int port = address.port();
         StringBuilder sb = new StringBuilder(scheme).append("://");
-        sb.append(requestHeader.getHeader("Host").orElse(address.getHost()));
+        sb.append(requestHeader.getHeader("Host").orElse(address.host()));
         if (scheme.equals("https") && port != 443 || scheme.equals("http") && port != 80) {
             sb.append(":").append(port);
         }

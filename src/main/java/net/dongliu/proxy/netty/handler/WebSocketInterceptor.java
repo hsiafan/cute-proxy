@@ -103,12 +103,11 @@ public class WebSocketInterceptor extends ChannelDuplexHandler {
     }
 
     private void newWebSocketMessage(ChannelHandlerContext ctx, WebSocketFrame frame, int type, boolean request) {
-        WebSocketMessage message = new WebSocketMessage(host, url, type, request);
         BodyType bodyType = type == WebSocketMessage.TYPE_TEXT ? BodyType.text : BodyType.binary;
         Body body = new Body(bodyType, Optional.empty(), "");
         ByteBuf content = frame.content();
         body.append(content.nioBuffer());
-        message.body(body);
+        WebSocketMessage message = new WebSocketMessage(host, url, type, request, body);
         messageListener.onMessage(message);
         if (frame.isFinalFragment()) {
             body.finish();

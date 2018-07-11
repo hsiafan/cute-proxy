@@ -28,13 +28,17 @@ public class Body implements Serializable {
     private static final long serialVersionUID = -5119917294712380816L;
     private static Logger logger = LoggerFactory.getLogger(Body.class);
 
-    private volatile long size;
+    //TODO: need to sync?
+    private long size;
     // http body has been finished
-    private volatile boolean finished;
+    private boolean finished;
 
-    private volatile BodyType type;
-    private volatile Optional<Charset> charset;
+    private BodyType type;
+    private Optional<Charset> charset;
     private String contentEncoding;
+
+    // only for display
+    private transient boolean beautify;
 
     private List<Chunk> chunkList;
 
@@ -257,6 +261,15 @@ public class Body implements Serializable {
 
     public void type(BodyType type) {
         this.type = type;
+    }
+
+    public boolean beautify() {
+        return beautify;
+    }
+
+    public Body beautify(boolean beautify) {
+        this.beautify = beautify;
+        return this;
     }
 
     @Override

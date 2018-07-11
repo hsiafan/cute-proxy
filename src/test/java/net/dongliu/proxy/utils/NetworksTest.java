@@ -20,10 +20,10 @@ public class NetworksTest {
     @Test
     public void parseAddress() throws Exception {
         NetAddress address = Networks.parseAddress("mvnrepository.com:443");
-        assertEquals("mvnrepository.com", address.getHost());
-        assertEquals(443, address.getPort());
+        assertEquals("mvnrepository.com", address.host());
+        assertEquals(443, address.port());
         NetAddress netAddress = Networks.parseAddress("mvnrepository.com");
-        assertEquals("mvnrepository.com", netAddress.getHost());
+        assertEquals("mvnrepository.com", netAddress.host());
     }
 
     @Test

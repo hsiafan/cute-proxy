@@ -17,12 +17,13 @@ public class WebSocketMessage extends Message implements Serializable {
     // type: 2 binary
     private int type;
     private boolean request;
-    private volatile Body body;
+    private Body body;
 
-    public WebSocketMessage(String host, String url, int type, boolean request) {
+    public WebSocketMessage(String host, String url, int type, boolean request, Body body) {
         super(host, url);
         this.type = type;
         this.request = request;
+        this.body = body;
     }
 
     @Override
@@ -40,10 +41,6 @@ public class WebSocketMessage extends Message implements Serializable {
 
     public Body body() {
         return body;
-    }
-
-    public void body(Body body) {
-        this.body = body;
     }
 
     @Override
