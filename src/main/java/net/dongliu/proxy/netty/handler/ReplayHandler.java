@@ -30,12 +30,8 @@ public class ReplayHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        logger.info("from {} to {}, replay message: {}", ctx.channel().remoteAddress(),
+        logger.debug("from {} to {}, replay message: {}", ctx.channel().remoteAddress(),
                 targetChannel.remoteAddress(), msg.getClass());
-        if (msg instanceof DefaultHttp2SettingsFrame) {
-            Http2Settings settings = ((DefaultHttp2SettingsFrame) msg).settings();
-            logger.info("{}", settings);
-        }
         ctx.fireChannelRead(ReferenceCountUtil.retain(msg));
         if (targetChannel.isActive()) {
             targetChannel.writeAndFlush(msg);

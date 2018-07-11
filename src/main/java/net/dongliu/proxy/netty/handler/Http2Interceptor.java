@@ -195,7 +195,7 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error("http2 error, pipeline: {}", ctx.pipeline(), cause);
+        logger.error("http2 error", cause);
         ctx.close();
     }
 }

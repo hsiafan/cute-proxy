@@ -9,6 +9,7 @@ import io.netty.handler.codec.http.websocketx.WebSocket13FrameDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocket13FrameEncoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameEncoder;
+import io.netty.handler.codec.http2.Http2Exception;
 import io.netty.handler.codec.http2.Http2FrameCodec;
 import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
 import net.dongliu.commons.Strings;
@@ -21,6 +22,8 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.netty.handler.codec.http2.Http2CodecUtil.HTTP_UPGRADE_STREAM_ID;
 
 /**
  * Handle http upgrade(websocket, http2).
@@ -37,14 +40,14 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
     private final boolean ssl;
     private final NetAddress address;
     private final MessageListener messageListener;
-    private final ChannelPipeline clientPipeline;
+    private final ChannelPipeline localPipeline;
 
     public HttpUpgradeHandler(boolean ssl, NetAddress address, MessageListener messageListener,
-                              ChannelPipeline clientPipeline) {
+                              ChannelPipeline localPipeline) {
         this.ssl = ssl;
         this.address = address;
         this.messageListener = messageListener;
-        this.clientPipeline = clientPipeline;
+        this.localPipeline = localPipeline;
     }
 
     // read request
@@ -94,7 +97,7 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
 
     // read response
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Http2Exception {
         if (!(msg instanceof HttpResponse)) {
             logger.error("not http message: {}", msg.getClass().getName());
             ctx.fireChannelRead(msg);
@@ -119,13 +122,13 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
             ctx.pipeline().addBefore("ws-interceptor", "ws-decoder", frameDecoder);
             ctx.pipeline().addBefore("ws-interceptor", "ws-encoder", frameEncoder);
 
-            clientPipeline.remove(HttpServerCodec.class);
+            localPipeline.remove(HttpServerCodec.class);
             WebSocketFrameDecoder clientFrameDecoder = new WebSocket13FrameDecoder(true, true, 65536, false);
             WebSocketFrameEncoder clientFrameEncoder = new WebSocket13FrameEncoder(false);
-            clientPipeline.addBefore("replay-handler", "ws-decoder", clientFrameDecoder);
-            clientPipeline.addBefore("replay-handler", "ws-encoder", clientFrameEncoder);
+            localPipeline.addBefore("replay-handler", "ws-decoder", clientFrameDecoder);
+            localPipeline.addBefore("replay-handler", "ws-encoder", clientFrameEncoder);
         } else if (upgradeH2c) {
-            //TODO: https://www.wolfcstech.com/2016/10/29/3-zh-cn/
+            //TODO: upgrade h2c http2 stream bug
             ctx.fireChannelRead(msg);
             ctx.pipeline().remove(this);
             if (!h2cUpgraded(response)) {
@@ -140,7 +143,9 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
             Http2FrameCodec http2ServerCodec = Http2FrameCodecBuilder.forServer().build();
             ctx.pipeline().replace("http-codec", "http2-frame-codec", http2ClientCodec);
             ctx.pipeline().replace("http-interceptor", "http2-interceptor", http2Interceptor);
-            clientPipeline.replace("http-codec", "http2-frame-codec", http2ServerCodec);
+            localPipeline.replace("http-codec", "http2-frame-codec", http2ServerCodec);
+            http2ClientCodec.connection().local().createStream(HTTP_UPGRADE_STREAM_ID, true);
+
         } else {
             ctx.fireChannelRead(msg);
             ctx.pipeline().remove(this);
