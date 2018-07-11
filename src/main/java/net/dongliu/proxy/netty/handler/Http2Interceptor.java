@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.stream.StreamSupport;
 
 import static java.util.stream.Collectors.toList;
+import static net.dongliu.proxy.netty.NettyUtils.causedByClientClose;
 
 /**
  * Intercept http2 frames. This interceptor is set on connection to target server.
@@ -123,11 +124,12 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
             Http2FrameStream fromStream = frame.stream();
             int sourceId = fromStream.id();
             Http2FrameStream stream = streamMap.get(sourceId);
-            Http2FrameStream targetStream;
+            // null means not new target stream
+            Http2FrameStream newTargetStream;
             if (stream == null) {
-                stream = targetStream = newStream();
+                stream = newTargetStream = newStream();
             } else {
-                targetStream = null;
+                newTargetStream = null;
             }
             frame.stream(stream);
 
@@ -146,11 +148,13 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
 
             ctx.write(frame, promise);
             promise.addListener(fu -> {
-                if (targetStream != null) {
-                    streamMap.put(sourceId, targetStream);
-                    int targetId = targetStream.id();
+                if (newTargetStream != null) {
+                    streamMap.put(sourceId, newTargetStream);
+                    // stream id only can be get when frame are send out.
+                    int targetId = newTargetStream.id();
                     reverseMap.put(targetId, fromStream);
                     messageMap.put(targetId, message);
+                    logger.debug("stream id map, source: {}, target: {}", sourceId, targetId);
                     if (frame.isEndStream()) {
                         Body body = message.requestBody();
                         body.finish();
@@ -170,7 +174,7 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
                 throw new RuntimeException("stream with id " + sourceId + " not exists");
             }
             int targetId = targetStream.id();
-            logger.info("sourceId: {}, targetId: {}", sourceId, targetId);
+            logger.debug("sourceId: {}, targetId: {}", sourceId, targetId);
             Http2Message message = messageMap.get(targetId);
             if (message != null) {
                 Body body = message.requestBody();
@@ -195,7 +199,11 @@ public class Http2Interceptor extends Http2ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        logger.error("http2 error", cause);
+        if (causedByClientClose(cause)) {
+            logger.warn("client closed connection: {}", cause.getMessage());
+        } else {
+            logger.error("http2 error", cause);
+        }
         ctx.close();
     }
 }

@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.proxy.ProxyHandler;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.netty.handler.ServerSSLContextManager;
-import net.dongliu.proxy.netty.handler.HttpTunnelProxyInitializer;
+import net.dongliu.proxy.netty.handler.HttpConnectProxyInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,16 +17,16 @@ import static java.nio.charset.StandardCharsets.US_ASCII;
 /**
  * Matcher for http proxy connect tunnel.
  */
-public class HttpTunnelProxyMatcher extends ProtocolMatcher {
-    private static final Logger logger = LoggerFactory.getLogger(HttpTunnelProxyMatcher.class);
+public class HttpConnectProxyMatcher extends ProtocolMatcher {
+    private static final Logger logger = LoggerFactory.getLogger(HttpConnectProxyMatcher.class);
 
     private final MessageListener messageListener;
     private final ServerSSLContextManager sslContextManager;
     private final Supplier<ProxyHandler> proxyHandlerSupplier;
 
-    public HttpTunnelProxyMatcher(MessageListener messageListener,
-                                  ServerSSLContextManager sslContextManager,
-                                  Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public HttpConnectProxyMatcher(MessageListener messageListener,
+                                   ServerSSLContextManager sslContextManager,
+                                   Supplier<ProxyHandler> proxyHandlerSupplier) {
         this.messageListener = messageListener;
         this.sslContextManager = sslContextManager;
         this.proxyHandlerSupplier = proxyHandlerSupplier;
@@ -49,6 +49,6 @@ public class HttpTunnelProxyMatcher extends ProtocolMatcher {
     @Override
     public void handlePipeline(ChannelPipeline pipeline) {
         pipeline.addLast(new HttpServerCodec());
-        pipeline.addLast(new HttpTunnelProxyInitializer(messageListener, sslContextManager, proxyHandlerSupplier));
+        pipeline.addLast(new HttpConnectProxyInitializer(messageListener, sslContextManager, proxyHandlerSupplier));
     }
 }

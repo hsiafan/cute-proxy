@@ -27,11 +27,12 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 /**
  * Handle http connect tunnel proxy request
  */
-public class HttpTunnelProxyInitializer extends TunnelProxyHandler<HttpRequest> {
-    private static final Logger logger = LoggerFactory.getLogger(HttpTunnelProxyInitializer.class);
+public class HttpConnectProxyInitializer extends TunnelProxyHandler<HttpRequest> {
+    private static final Logger logger = LoggerFactory.getLogger(HttpConnectProxyInitializer.class);
+    private boolean removed;
 
-    public HttpTunnelProxyInitializer(MessageListener messageListener, ServerSSLContextManager sslContextManager,
-                                      Supplier<ProxyHandler> proxyHandlerSupplier) {
+    public HttpConnectProxyInitializer(MessageListener messageListener, ServerSSLContextManager sslContextManager,
+                                       Supplier<ProxyHandler> proxyHandlerSupplier) {
         super(messageListener, sslContextManager, proxyHandlerSupplier);
     }
 
@@ -58,12 +59,25 @@ public class HttpTunnelProxyInitializer extends TunnelProxyHandler<HttpRequest> 
             Channel outboundChannel = future.getNow();
             ChannelFuture responseFuture = ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, OK));
             responseFuture.addListener((ChannelFutureListener) channelFuture -> {
+                logger.debug("try to remove HttpConnectProxyInitializer, pipeline: {}", ctx.pipeline());
                 //FIXME: throw NoSuchElementException
-                ctx.pipeline().remove(HttpTunnelProxyInitializer.this);
+                if (removed) {
+                    logger.warn("HttpConnectProxyInitializer removed by others?");
+                    ctx.close();
+                    return;
+                }
+                ctx.pipeline().remove(HttpConnectProxyInitializer.this);
                 ctx.pipeline().remove(HttpServerCodec.class);
                 initTcpProxyHandlers(ctx, address, outboundChannel);
             });
         });
+    }
+
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        super.handlerRemoved(ctx);
+        removed = true;
+        logger.debug("HttpConnectProxyInitializer removed, pipeline: {}", ctx.pipeline());
     }
 
     @Override

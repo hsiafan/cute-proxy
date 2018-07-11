@@ -55,7 +55,11 @@ public class BodyPane extends BorderPane {
     private void initialize() {
         body.addListener((o, old, newValue) -> {
             try {
-                beautifyButton.selectedProperty().setValue(newValue.beautify());
+                if (newValue != null) {
+                    beautifyButton.selectedProperty().setValue(newValue.beautify());
+                } else {
+                    beautifyButton.selectedProperty().set(false);
+                }
                 refreshBody(newValue);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);

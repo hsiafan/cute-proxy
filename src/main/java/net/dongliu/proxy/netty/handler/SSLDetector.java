@@ -26,6 +26,7 @@ import java.util.Queue;
 import static io.netty.handler.codec.ByteToMessageDecoder.MERGE_CUMULATOR;
 import static io.netty.handler.ssl.ApplicationProtocolNames.HTTP_1_1;
 import static io.netty.handler.ssl.ApplicationProtocolNames.HTTP_2;
+import static net.dongliu.proxy.netty.NettyUtils.causedByClientClose;
 
 /**
  * Detect ssl and alpn protocol
@@ -110,6 +111,16 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
                         } else {
                             setHttpInterceptor(ctx, true);
                         }
+                    }
+
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                        if (causedByClientClose(cause)) {
+                            logger.warn("client closed connection: {}", cause.getMessage());
+                        } else {
+                            logger.error("application protocol negotiation error", cause);
+                        }
+                        ctx.close();
                     }
                 });
                 ctx.pipeline().remove(SSLDetector.this);

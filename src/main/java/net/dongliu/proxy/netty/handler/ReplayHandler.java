@@ -4,12 +4,12 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http2.DefaultHttp2SettingsFrame;
-import io.netty.handler.codec.http2.Http2Settings;
 import io.netty.util.ReferenceCountUtil;
 import net.dongliu.proxy.netty.NettyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static net.dongliu.proxy.netty.NettyUtils.causedByClientClose;
 
 /**
  * Handler tunnel proxy traffic, for socks proxy or http connect proxy.
@@ -50,8 +50,10 @@ public class ReplayHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
-        if (e.getMessage() == null || !e.getMessage().contains("Connection reset by peer")) {
-            logger.error("{} to {} error occurred", ctx.channel().remoteAddress(), targetChannel.remoteAddress(), e);
+        if (causedByClientClose(e)) {
+            logger.warn("client closed connection: {}", e.getMessage());
+        } else {
+            logger.error("something error", e);
         }
         NettyUtils.closeOnFlush(ctx.channel());
     }

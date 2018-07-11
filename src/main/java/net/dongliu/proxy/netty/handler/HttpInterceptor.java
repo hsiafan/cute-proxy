@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.dongliu.proxy.netty.NettyUtils.causedByClientClose;
+
 /**
  * Intercept http message. This interceptor is set on connection to target server.
  */
@@ -114,10 +116,12 @@ public class HttpInterceptor extends ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if (cause.getMessage() == null || !cause.getMessage().contains("Connection reset by peer")) {
-            logger.error("", cause);
+        if (causedByClientClose(cause)) {
+            logger.warn("client closed connection: {}", cause.getMessage());
+        } else {
+            logger.error("http error", cause);
         }
-        super.exceptionCaught(ctx, cause);
+        ctx.close();
     }
 
 }

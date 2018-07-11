@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Objects;
 import java.util.Optional;
 
+import static net.dongliu.proxy.netty.NettyUtils.causedByClientClose;
+
 /**
  * Websocket frame interceptor. This interceptor is set on connection to target server.
  */
@@ -118,5 +120,15 @@ public class WebSocketInterceptor extends ChannelDuplexHandler {
                 responseMessage = message;
             }
         }
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        if (causedByClientClose(cause)) {
+            logger.warn("client closed connection: {}", cause.getMessage());
+        } else {
+            logger.error("websocket error", cause);
+        }
+        ctx.close();
     }
 }

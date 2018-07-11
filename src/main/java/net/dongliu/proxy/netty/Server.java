@@ -68,7 +68,7 @@ public class Server {
                         var protocolDetector = new ProtocolDetector(
                                 new Socks5ProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
                                 new Socks4ProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
-                                new HttpTunnelProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
+                                new HttpConnectProxyMatcher(messageListener, sslContextManager, proxyHandlerSupplier),
                                 new HttpProxyMatcher(messageListener, proxyHandlerSupplier),
                                 new HttpMatcher(sslContextManager)
                         );
