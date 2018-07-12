@@ -8,13 +8,13 @@ import io.netty.handler.codec.ByteToMessageDecoder.Cumulator;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.HttpServerExpectContinueHandler;
-import io.netty.handler.codec.http2.Http2FrameCodec;
-import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
+import io.netty.handler.codec.http2.Http2Exception;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.netty.NettyUtils;
+import net.dongliu.proxy.netty.codec.Http2EventCodec;
 import net.dongliu.proxy.netty.detector.ProtocolDetector;
 import net.dongliu.proxy.utils.NetAddress;
 import org.slf4j.Logger;
@@ -104,7 +104,7 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
                 ctx.pipeline().addLast("ssl-handler", serverSSLHandler);
                 ctx.pipeline().addLast(new ApplicationProtocolNegotiationHandler(HTTP_1_1) {
                     @Override
-                    protected void configurePipeline(ChannelHandlerContext ctx, String protocol) {
+                    protected void configurePipeline(ChannelHandlerContext ctx, String protocol) throws Http2Exception {
                         logger.debug("alpn with client {}: {}", address.host(), protocol);
                         if (protocol.equalsIgnoreCase(HTTP_2)) {
                             setHttp2Interceptor(ctx);
@@ -114,7 +114,7 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
                     }
 
                     @Override
-                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
                         if (causedByClientClose(cause)) {
                             logger.warn("client closed connection: {}", cause.getMessage());
                         } else {
@@ -128,13 +128,10 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
         });
     }
 
-    private void setHttp2Interceptor(ChannelHandlerContext ctx) {
-        Http2FrameCodec http2ServerCodec = Http2FrameCodecBuilder.forServer().build();
-        Http2FrameCodec http2ClientCodec = Http2FrameCodecBuilder.forClient().build();
-        ctx.pipeline().addLast("http2-frame-codec", http2ServerCodec);
+    private void setHttp2Interceptor(ChannelHandlerContext ctx) throws Http2Exception {
+        ctx.pipeline().addLast("http2-frame-codec", new Http2EventCodec());
         ctx.pipeline().addLast("replay-handler", new ReplayHandler(outboundChannel));
-        outboundChannel.pipeline().addLast("setting-frame-fixer", new SettingFrameFixer());
-        outboundChannel.pipeline().addLast("http2-frame-codec", http2ClientCodec);
+        outboundChannel.pipeline().addLast("http2-frame-codec", new Http2EventCodec());
         Http2Interceptor interceptor = new Http2Interceptor(address, messageListener);
         outboundChannel.pipeline().addLast("http2-interceptor", interceptor);
         outboundChannel.pipeline().addLast("replay-handler", new ReplayHandler(ctx.channel()));
@@ -151,9 +148,6 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
         var httpInterceptor = new HttpInterceptor(ssl, address, messageListener);
         outboundChannel.pipeline().addLast("http-interceptor", httpInterceptor);
         outboundChannel.pipeline().addLast("replay-handler", new ReplayHandler(ctx.channel()));
-        if (!ssl) {
-            // detect h2c
-        }
     }
 
     @Override
