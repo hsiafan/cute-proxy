@@ -38,6 +38,7 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
     private ByteBuf buf;
     private boolean isSSL;
     private Queue<ByteBuf> queue;
+    private boolean removed;
 
     private final NetAddress address;
     private final MessageListener messageListener;
@@ -123,7 +124,10 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
                         ctx.close();
                     }
                 });
-                ctx.pipeline().remove(SSLDetector.this);
+                if (!removed) {
+                    ctx.pipeline().remove(SSLDetector.this);
+                    removed = true;
+                }
             }
         });
     }
@@ -162,6 +166,7 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) {
+        removed = true;
         if (buf != null) {
             ctx.fireChannelRead(buf);
         }

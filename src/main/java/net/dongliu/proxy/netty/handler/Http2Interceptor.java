@@ -100,6 +100,7 @@ public class Http2Interceptor extends ChannelDuplexHandler {
                 message.setResponseBody(responseHeaders.createBody());
                 if (headersEvent.endOfStream()) {
                     message.responseBody().finish();
+                    messageMap.remove(streamId);
                 }
             } else {
                 logger.error("message for stream id {} not found", streamId);
@@ -114,6 +115,7 @@ public class Http2Interceptor extends ChannelDuplexHandler {
                 body.append(dataEvent.data().nioBuffer());
                 if (dataEvent.endOfStream()) {
                     body.finish();
+                    messageMap.remove(streamId);
                 }
             } else {
                 logger.error("message for stream id {} not found", streamId);
