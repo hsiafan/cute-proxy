@@ -35,10 +35,27 @@ public class Http2Interceptor extends ChannelDuplexHandler {
     private Map<Integer, Http2Message> messageMap = new HashMap<>();
     private final NetAddress address;
     private final MessageListener messageListener;
+    // if is from clear text upgrade
+    private final boolean clearText;
+    // only for clear text
+    private final String method;
+    private final String path;
 
-    public Http2Interceptor(NetAddress address, MessageListener messageListener) {
+    public Http2Interceptor(NetAddress address, MessageListener messageListener, boolean clearText) {
         this.address = address;
         this.messageListener = messageListener;
+        this.clearText = clearText;
+        this.method = "";
+        this.path = "";
+    }
+
+    public Http2Interceptor(NetAddress address, MessageListener messageListener, boolean clearText,
+                            String method, String path) {
+        this.address = address;
+        this.messageListener = messageListener;
+        this.clearText = clearText;
+        this.method = method;
+        this.path = path;
     }
 
     @Override
@@ -58,6 +75,19 @@ public class Http2Interceptor extends ChannelDuplexHandler {
         if (msg instanceof IHttp2HeadersEvent) {
             var headersEvent = (IHttp2HeadersEvent) http2Event;
             Http2Message message = messageMap.get(streamId);
+            if (message == null) {
+                if (clearText && streamId == 1) {
+                    Http2RequestHeaders fakeRequestHeaders = new Http2RequestHeaders(
+                            List.of(new Header("", "mock request for h2c upgrade. look back for upgrade request")),
+                            "http", method, path);
+                    Body body = fakeRequestHeaders.createBody();
+                    body.finish();
+                    message = new Http2Message(address, fakeRequestHeaders, body);
+                    messageListener.onMessage(message);
+                    messageMap.put(streamId, message);
+                }
+            }
+
             if (message != null) {
                 Http2Headers nettyHeaders = headersEvent.headers();
                 List<Header> headers = StreamSupport.stream(nettyHeaders.spliterator(), false)

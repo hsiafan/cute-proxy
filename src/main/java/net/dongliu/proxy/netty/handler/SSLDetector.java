@@ -132,7 +132,7 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
         ctx.pipeline().addLast("http2-frame-codec", new Http2EventCodec());
         ctx.pipeline().addLast("replay-handler", new ReplayHandler(outboundChannel));
         outboundChannel.pipeline().addLast("http2-frame-codec", new Http2EventCodec());
-        Http2Interceptor interceptor = new Http2Interceptor(address, messageListener);
+        Http2Interceptor interceptor = new Http2Interceptor(address, messageListener, false);
         outboundChannel.pipeline().addLast("http2-interceptor", interceptor);
         outboundChannel.pipeline().addLast("replay-handler", new ReplayHandler(ctx.channel()));
     }

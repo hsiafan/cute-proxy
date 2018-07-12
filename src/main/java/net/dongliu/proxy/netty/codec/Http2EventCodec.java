@@ -50,7 +50,7 @@ public class Http2EventCodec extends ChannelDuplexHandler {
             ctx.write(msg, promise);
             return;
         }
-        logger.debug("write http2 event, endpoint: {}, type: {}", ctx.channel().remoteAddress(),
+        logger.debug("write http2 event to {}, type: {}", ctx.channel().remoteAddress(),
                 msg.getClass().getSimpleName());
 
         if (msg instanceof Http2DataEvent) {
@@ -120,7 +120,7 @@ public class Http2EventCodec extends ChannelDuplexHandler {
                     prefaceBuffer = null;
                     var prefaceBuf = in.retain().slice(in.readerIndex(), 24);
                     in.skipBytes(24);
-                    logger.debug("preface read, endpoint: {}", ctx.channel().remoteAddress());
+                    logger.debug("preface read from {}", ctx.channel().remoteAddress());
                     ctx.fireChannelRead(prefaceBuf);
                     expectPreface = false;
                 } else {
@@ -226,7 +226,7 @@ public class Http2EventCodec extends ChannelDuplexHandler {
             }
 
             private void onEventRead(ChannelHandlerContext ctx, Http2Event http2Event) {
-                logger.debug("http2 event read, endpoint:{}, type: {}", ctx.channel().remoteAddress(),
+                logger.debug("http2 event read from {}, type: {}", ctx.channel().remoteAddress(),
                         http2Event.getClass().getSimpleName());
                 ctx.fireChannelRead(http2Event);
                 ctx.flush();

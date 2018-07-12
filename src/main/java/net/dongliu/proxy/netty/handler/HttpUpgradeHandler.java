@@ -10,10 +10,9 @@ import io.netty.handler.codec.http.websocketx.WebSocket13FrameEncoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameEncoder;
 import io.netty.handler.codec.http2.Http2Exception;
-import io.netty.handler.codec.http2.Http2FrameCodec;
-import io.netty.handler.codec.http2.Http2FrameCodecBuilder;
 import net.dongliu.commons.Strings;
 import net.dongliu.proxy.MessageListener;
+import net.dongliu.proxy.netty.codec.Http2EventCodec;
 import net.dongliu.proxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.SWITCHING_PROTOCOLS;
-import static io.netty.handler.codec.http2.Http2CodecUtil.HTTP_UPGRADE_STREAM_ID;
 
 /**
  * Handle http upgrade(websocket, http2).
@@ -44,6 +42,10 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
     private final NetAddress address;
     private final MessageListener messageListener;
     private final ChannelPipeline localPipeline;
+
+    // for h2c upgrade
+    private String method;
+    private String path;
 
     public HttpUpgradeHandler(boolean ssl, NetAddress address, MessageListener messageListener,
                               ChannelPipeline localPipeline) {
@@ -75,6 +77,8 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
                         break;
                     case "h2c":
                         upgradeH2c = true;
+                        method = request.method().name();
+                        path = request.uri();
                         break;
                     default:
                         logger.warn("unsupported upgrade header value: {}", upgrade);
@@ -126,7 +130,6 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
                     return;
                 }
             } else if (upgradeH2c) {
-                //TODO: upgrade h2c http2 stream bug
                 upgradeH2cSucceed = h2cUpgraded(response);
                 if (!upgradeH2cSucceed) {
                     ctx.fireChannelRead(msg);
@@ -147,7 +150,7 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
                 if (upgradeWebSocketSucceed) {
                     upgradeWebSocket(ctx);
                 } else if (upgradeH2cSucceed) {
-                    upgradeHttp2(ctx);
+                    upgradeHttp2(ctx, method, path);
                 }
                 return;
             }
@@ -173,16 +176,13 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
         localPipeline.addBefore("replay-handler", "ws-encoder", clientFrameEncoder);
     }
 
-    private void upgradeHttp2(ChannelHandlerContext ctx) throws Http2Exception {
+    private void upgradeHttp2(ChannelHandlerContext ctx, String method, String path) throws Http2Exception {
         logger.debug("upgrade to h2c");
 
-        var http2Interceptor = new Http2Interceptor(address, messageListener);
-        Http2FrameCodec http2ClientCodec = Http2FrameCodecBuilder.forClient().build();
-        Http2FrameCodec http2ServerCodec = Http2FrameCodecBuilder.forServer().build();
-        ctx.pipeline().replace("http-codec", "http2-frame-codec", http2ClientCodec);
+        var http2Interceptor = new Http2Interceptor(address, messageListener, true, method, path);
+        localPipeline.replace("http-codec", "http2-frame-codec", new Http2EventCodec());
+        ctx.pipeline().replace("http-codec", "http2-frame-codec", new Http2EventCodec());
         ctx.pipeline().replace("http-interceptor", "http2-interceptor", http2Interceptor);
-        localPipeline.replace("http-codec", "http2-frame-codec", http2ServerCodec);
-        http2ClientCodec.connection().local().createStream(HTTP_UPGRADE_STREAM_ID, true);
     }
 
     private Collection<String> getHeaderValues(String value) {
