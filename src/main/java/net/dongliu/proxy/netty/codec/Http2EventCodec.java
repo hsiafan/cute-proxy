@@ -32,11 +32,15 @@ public class Http2EventCodec extends ChannelDuplexHandler {
     private Http2FrameWriter frameWriter;
 
     public Http2EventCodec() throws Http2Exception {
-        var frameReader = new DefaultHttp2FrameReader();
+        //TODO: fix HPACK - invalid max dynamic table size
+        // we cannot get a HpackDecoder due to internal access constructor
+        var headersDecoder = new DefaultHttp2HeadersDecoder(true);
+        headersDecoder.maxHeaderTableSize(40960);
+        var frameReader = new DefaultHttp2FrameReader(headersDecoder);
         frameReader.maxFrameSize(0xffffff);
         this.frameReader = frameReader;
         var frameWriter = new DefaultHttp2FrameWriter();
-        frameWriter.maxFrameSize(0xffffff);
+//        frameWriter.maxFrameSize(0xffffff);
         this.frameWriter = frameWriter;
     }
 
