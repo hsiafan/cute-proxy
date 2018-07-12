@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.netty.buffer.Unpooled.unreleasableBuffer;
-import static io.netty.handler.codec.ByteToMessageDecoder.COMPOSITE_CUMULATOR;
 import static io.netty.handler.codec.ByteToMessageDecoder.MERGE_CUMULATOR;
 import static io.netty.handler.codec.http2.Http2CodecUtil.connectionPrefaceBuf;
 
@@ -24,7 +23,7 @@ public class Http2EventCodec extends ChannelDuplexHandler {
     private static final ByteBuf CONNECTION_PREFACE = unreleasableBuffer(connectionPrefaceBuf());
     private static final Cumulator prefaceCumulator = MERGE_CUMULATOR;
     private ByteBuf prefaceBuffer;
-    private static final Cumulator frameDataCumulator = COMPOSITE_CUMULATOR;
+    private static final Cumulator frameDataCumulator = MERGE_CUMULATOR;
     private ByteBuf frameDataBuffer;
 
     private boolean expectPreface = true;
@@ -234,6 +233,8 @@ public class Http2EventCodec extends ChannelDuplexHandler {
         });
         if (in.readableBytes() > 0) {
             frameDataBuffer = in;
+        } else {
+            in.release();
         }
     }
 
