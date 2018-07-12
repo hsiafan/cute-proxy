@@ -3,7 +3,6 @@ package net.dongliu.proxy.data;
 import net.dongliu.proxy.utils.Texts;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -53,17 +52,13 @@ public class Http2RequestHeaders extends Http2Headers implements HttpRequestHead
 
     @Override
     public List<String> rawLines() {
-        List<Header> allHeaders = new ArrayList<>(1 + headers().size());
-        allHeaders.add(new Header(":scheme", scheme));
-        allHeaders.add(new Header(":method", method));
-        allHeaders.add(new Header(":path", path));
-        allHeaders.addAll(headers());
-        return Texts.toAlignText(allHeaders, ": ");
+        return Texts.toAlignText(headers(), ": ");
     }
 
     @Override
     public List<NameValue> cookieValues() {
-        return getHeader("Cookie").stream().flatMap(v -> Stream.of(v.split(";")))
+        return getHeaders("Cookie").stream()
+                .flatMap(v -> Stream.of(v.split(";")))
                 .map(String::trim)
                 .map(Parameter::parse)
                 .collect(toList());

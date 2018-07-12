@@ -54,7 +54,7 @@ public class Http1ResponseHeaders extends Http1Headers implements HttpResponseHe
 
     @Override
     public List<NameValue> cookieValues() {
-        return Lists.convert(headers("Set-Cookie"), CookieUtils::parseCookieHeader);
+        return Lists.convert(getHeaders("Set-Cookie"), CookieUtils::parseCookieHeader);
     }
 
     public StatusLine statusLine() {

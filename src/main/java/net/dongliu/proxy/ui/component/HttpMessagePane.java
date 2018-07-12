@@ -46,7 +46,7 @@ public class HttpMessagePane extends TabPane {
             List<String> rawHeaders = headers.get().rawLines();
             String headerString = String.join("\n", rawHeaders);
             headerText.setText(headerString);
-            List<String> cookies = Texts.toAlignText(headers.get().cookieValues(), "=");
+            List<String> cookies = Texts.toAlignText(headers.get().cookieValues(), " = ");
             cookieText.setText(String.join("\n", cookies));
         });
 

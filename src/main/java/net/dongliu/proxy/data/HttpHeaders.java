@@ -28,11 +28,9 @@ public abstract class HttpHeaders implements Serializable {
     }
 
     /**
-     * Get first header value by name
-     *
-     * @return null if not found
+     * Get headers match the given name
      */
-    public List<String> headers(String name) {
+    public List<String> getHeaders(String name) {
         return headers.stream()
                 .filter(h -> h.name().equalsIgnoreCase(name))
                 .map(Header::value)

@@ -13,9 +13,11 @@ public class Texts {
      */
     public static List<String> toAlignText(List<? extends NameValue> nameValues, String sep) {
         int maxLen = nameValues.stream().mapToInt(n -> n.name().length()).max().orElse(0);
+        int paddingLen = Math.min(maxLen, 20);
         return Lists.convert(nameValues, nv -> {
-            String padding = Strings.repeat(" ", maxLen - nv.name().length());
-            return padding + nv.name() + sep + nv.value();
+            int paddingCount = Math.max(paddingLen - nv.name().length(), 0);
+            String padding = Strings.repeat(" ", paddingCount);
+            return nv.name() + padding + sep + nv.value();
         });
     }
 }

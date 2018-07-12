@@ -47,7 +47,8 @@ public class Http1RequestHeaders extends Http1Headers implements HttpRequestHead
 
     @Override
     public List<NameValue> cookieValues() {
-        return getHeader("Cookie").stream().flatMap(v -> Stream.of(v.split(";")))
+        return getHeader("Cookie").stream()
+                .flatMap(v -> Stream.of(v.split(";")))
                 .map(String::trim)
                 .map(Parameter::parse)
                 .collect(toList());
