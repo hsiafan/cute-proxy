@@ -1,5 +1,7 @@
 package net.dongliu.proxy.data;
 
+import net.dongliu.proxy.utils.Texts;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,13 +53,12 @@ public class Http2RequestHeaders extends Http2Headers implements HttpRequestHead
 
     @Override
     public List<String> rawLines() {
-        List<Header> headers = headers();
-        List<String> lines = new ArrayList<>(headers.size() + 3);
-        lines.add(":scheme: " + scheme);
-        lines.add(":method: " + method);
-        lines.add(":path: " + path);
-        headers.forEach(h -> lines.add(h.name() + ": " + h.value()));
-        return lines;
+        List<Header> allHeaders = new ArrayList<>(1 + headers().size());
+        allHeaders.add(new Header(":scheme", scheme));
+        allHeaders.add(new Header(":method", method));
+        allHeaders.add(new Header(":path", path));
+        allHeaders.addAll(headers());
+        return Texts.toAlignText(allHeaders, ": ");
     }
 
     @Override
