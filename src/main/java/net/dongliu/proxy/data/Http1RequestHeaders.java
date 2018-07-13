@@ -1,6 +1,6 @@
 package net.dongliu.proxy.data;
 
-import net.dongliu.proxy.utils.Texts;
+import net.dongliu.proxy.utils.NameValues;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class Http1RequestHeaders extends Http1Headers implements HttpRequestHead
     public List<String> rawLines() {
         List<String> rawLines = new ArrayList<>(headers().size() + 1);
         rawLines.add(requestLine.rawRequestLine());
-        rawLines.addAll(Texts.toAlignText(headers(), ": "));
+        rawLines.addAll(NameValues.toAlignText(headers(), ": "));
         return rawLines;
     }
 

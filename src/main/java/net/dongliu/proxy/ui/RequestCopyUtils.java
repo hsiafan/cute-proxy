@@ -1,6 +1,5 @@
 package net.dongliu.proxy.ui;
 
-import net.dongliu.commons.collection.Lists;
 import net.dongliu.commons.io.Readers;
 import net.dongliu.proxy.data.*;
 import net.dongliu.proxy.store.Body;
@@ -13,6 +12,7 @@ import java.util.Set;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static net.dongliu.proxy.utils.Headers.headerSet;
 
 /**
@@ -120,7 +120,8 @@ public class RequestCopyUtils {
                 sb.append(".headers(\n");
                 int count = 0;
                 for (Header header : headers) {
-                    sb.append("Parameter.of(\"").append(header.name()).append("\", \"").append(header.value());
+                    String name = header.name();
+                    sb.append("Parameter.of(\"").append(name).append("\", \"").append(header.value());
                     if (++count < headers.size()) {
                         sb.append("\"),\n");
                     } else {
@@ -155,8 +156,12 @@ public class RequestCopyUtils {
         HttpHeaders httpHeaders = httpMessage.requestHeader();
         String method = ((HttpRequestHeaders) httpHeaders).method();
         transformer.onRequestBegin(sb, method, httpMessage.url());
-        List<Header> headers = httpHeaders.headers();
-        headers = Lists.filter(headers, h -> !filterRequestHeaders.contains(h.name()));
+        List<Header> headers = httpHeaders.headers().stream()
+                .filter(h -> !h.name().isEmpty())
+                .filter(h -> h.name().charAt(0) != ':') //http2 pseudo-header
+                .filter(h -> !filterRequestHeaders.contains(h.name())) //header set by http tools
+                .map(h -> new Header(toHttp1HeaderName(h.name()), h.value())) // http2 names to http1 names
+                .collect(toList());
         transformer.onHeaders(sb, headers);
         Body body = httpMessage.requestBody();
 
@@ -179,6 +184,25 @@ public class RequestCopyUtils {
         }
         transformer.onEnd(sb);
         UIUtils.copyToClipBoard(sb.toString());
+    }
+
+    private static String toHttp1HeaderName(String name) {
+        if (!Character.isLowerCase(name.charAt(0))) {
+            return name;
+        }
+        char[] chars = name.toCharArray();
+        boolean toUpper = true;
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            if (toUpper) {
+                chars[i] = Character.toUpperCase(c);
+                toUpper = false;
+            }
+            if (c == '-') {
+                toUpper = true;
+            }
+        }
+        return new String(chars);
     }
 
     private interface RequestTransformer {

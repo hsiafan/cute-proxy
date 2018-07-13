@@ -8,11 +8,11 @@ import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.util.StringConverter;
+import net.dongliu.commons.Strings;
 import net.dongliu.commons.collection.Lists;
 import net.dongliu.proxy.setting.ServerSetting;
 import net.dongliu.proxy.utils.NetworkInfo;
 import net.dongliu.proxy.utils.Networks;
-import net.dongliu.proxy.utils.StringUtils;
 
 import java.io.IOException;
 
@@ -88,8 +88,8 @@ public class MainSettingDialog extends MyDialog<ServerSetting> {
     public ServerSetting getModel() {
         var networkInfo = hostBox.getSelectionModel().getSelectedItem();
         return new ServerSetting(networkInfo.getIp(),
-                StringUtils.toInt(portFiled.getText()),
-                StringUtils.toInt(timeoutField.getText()));
+                Strings.toInt(portFiled.getText(), 0),
+                Strings.toInt(timeoutField.getText(), 0));
     }
 
 }

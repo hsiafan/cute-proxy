@@ -8,7 +8,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import net.dongliu.proxy.data.HttpHeaders;
 import net.dongliu.proxy.store.Body;
-import net.dongliu.proxy.utils.Texts;
+import net.dongliu.proxy.utils.NameValues;
 
 import java.io.IOException;
 import java.util.List;
@@ -46,7 +46,7 @@ public class HttpMessagePane extends TabPane {
             List<String> rawHeaders = headers.get().rawLines();
             String headerString = String.join("\n", rawHeaders);
             headerText.setText(headerString);
-            List<String> cookies = Texts.toAlignText(headers.get().cookieValues(), " = ");
+            List<String> cookies = NameValues.toAlignText(headers.get().cookieValues(), " = ");
             cookieText.setText(String.join("\n", cookies));
         });
 

@@ -6,7 +6,7 @@ import net.dongliu.proxy.data.NameValue;
 
 import java.util.List;
 
-public class Texts {
+public class NameValues {
 
     /**
      * key are ascii chars

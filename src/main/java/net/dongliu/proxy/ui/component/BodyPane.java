@@ -13,12 +13,13 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
+import net.dongliu.commons.Strings;
 import net.dongliu.commons.io.Readers;
 import net.dongliu.proxy.store.Body;
 import net.dongliu.proxy.store.BodyType;
 import net.dongliu.proxy.ui.UIUtils;
 import net.dongliu.proxy.ui.beautifier.*;
-import net.dongliu.proxy.utils.StringUtils;
+import net.dongliu.proxy.utils.Storages;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -100,7 +101,7 @@ public class BodyPane extends BorderPane {
         charsetBox.setValue(body.charset().orElse(UTF_8));
         charsetBox.setManaged(storeType.isText());
         charsetBox.setVisible(storeType.isText());
-        sizeLabel.setText(StringUtils.humanReadableSize(body.size()));
+        sizeLabel.setText(Storages.toHumanReadableSize(body.size()));
 
         bodyTypeBox.setValue(storeType);
 
@@ -180,11 +181,11 @@ public class BodyPane extends BorderPane {
 
 
     private static String suggestFileName(String url, BodyType type) {
-        url = StringUtils.before(url, "?");
-        String fileName = StringUtils.afterLast(url, "/");
+        url = Strings.subStringBefore(url, "?");
+        String fileName = Strings.subStringAfterLast(url, "/");
         if (fileName.isEmpty()) {
-            fileName = StringUtils.beforeLast(url, "/");
-            fileName = StringUtils.afterLast(fileName, "/");
+            fileName = Strings.subStringBeforeLast(url, "/");
+            fileName = Strings.subStringAfterLast(fileName, "/");
             fileName = fileName.replace(".", "_");
         }
         if (!fileName.contains(".")) {

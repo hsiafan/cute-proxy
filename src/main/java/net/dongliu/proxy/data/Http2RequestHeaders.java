@@ -1,6 +1,6 @@
 package net.dongliu.proxy.data;
 
-import net.dongliu.proxy.utils.Texts;
+import net.dongliu.proxy.utils.NameValues;
 
 import java.io.Serializable;
 import java.util.List;
@@ -52,7 +52,7 @@ public class Http2RequestHeaders extends Http2Headers implements HttpRequestHead
 
     @Override
     public List<String> rawLines() {
-        return Texts.toAlignText(headers(), ": ");
+        return NameValues.toAlignText(headers(), ": ");
     }
 
     @Override
