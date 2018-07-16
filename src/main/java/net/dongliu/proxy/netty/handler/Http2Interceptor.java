@@ -63,7 +63,8 @@ public class Http2Interceptor extends ChannelDuplexHandler {
         }
         var event = (Http2StreamEvent) msg;
         var streamId = event.streamId();
-        logger.debug("send {}, inId: {}", msg.getClass(), event.streamId());
+        logger.debug("send {} to {}, inId: {}", msg.getClass().getSimpleName(),
+                ctx.channel().remoteAddress(), event.streamId());
 
         if (msg instanceof IHttp2HeadersEvent) {
             var headersEvent = (IHttp2HeadersEvent) msg;
@@ -102,7 +103,8 @@ public class Http2Interceptor extends ChannelDuplexHandler {
             return;
         }
         var event = (Http2StreamEvent) msg;
-        logger.debug("http2 event received type: {}, steam id: {}", event.frameType(), event.streamId());
+        logger.debug("http2 event {} received from {}, steam id: {}", event.getClass().getSimpleName(),
+                ctx.channel().remoteAddress(), event.streamId());
         var streamId = event.streamId();
 
         if (msg instanceof Http2PushPromiseEvent) {
@@ -162,19 +164,20 @@ public class Http2Interceptor extends ChannelDuplexHandler {
     }
 
 
-    private Http2RequestHeaders onRequestHeaders(int streamId, Http2Headers nettyHeaders, boolean endOfStream) {
-        List<Header> headers = convertHeaders(nettyHeaders);
+    private Http2RequestHeaders onRequestHeaders(int streamId, Http2Headers http2Headers, boolean endOfStream) {
+        logger.debug("request header for: {} {}, streamId: {}", http2Headers.method(), http2Headers.path(), streamId);
+        List<Header> headers = convertHeaders(http2Headers);
         Http2RequestHeaders requestHeaders = new Http2RequestHeaders(headers,
-                nettyHeaders.scheme().toString(),
-                nettyHeaders.method().toString(),
-                nettyHeaders.path().toString()
+                http2Headers.scheme().toString(),
+                http2Headers.method().toString(),
+                http2Headers.path().toString()
         );
         Http2Message message = new Http2Message(address, requestHeaders, requestHeaders.createBody());
         if (endOfStream) {
             Body body = message.requestBody();
             body.finish();
-            messageListener.onMessage(message);
         }
+        messageListener.onMessage(message);
         messageMap.put(streamId, message);
         return requestHeaders;
     }

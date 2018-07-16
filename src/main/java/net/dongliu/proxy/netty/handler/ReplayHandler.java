@@ -36,7 +36,7 @@ public class ReplayHandler extends ChannelInboundHandlerAdapter {
         if (targetChannel.isActive()) {
             targetChannel.writeAndFlush(msg);
         } else {
-            logger.warn("proxy target channel {} inactive", targetChannel.remoteAddress());
+            logger.debug("proxy target channel {} inactive", targetChannel.remoteAddress());
             ReferenceCountUtil.release(msg);
         }
     }
@@ -51,7 +51,7 @@ public class ReplayHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e) {
         if (causedByClientClose(e)) {
-            logger.warn("client closed connection: {}", e.getMessage());
+            logger.debug("client closed connection: {}", e.getMessage());
         } else {
             logger.error("something error", e);
         }
