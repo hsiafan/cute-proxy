@@ -8,6 +8,7 @@ package net.dongliu.proxy.store;
 public enum BodyType {
 
     text(0), html(0), xml(0), json(0), css(0), javascript(0), www_form(0),
+    //TODO: multipart form encoded body
     jpeg(1), png(1), bmp(1), gif(1), icon(1), otherImage(1),
     binary(2), unknown(2);
 

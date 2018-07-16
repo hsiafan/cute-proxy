@@ -1,5 +1,6 @@
 package net.dongliu.proxy.store;
 
+import net.dongliu.commons.io.Readers;
 import net.dongliu.proxy.data.ContentType;
 import org.brotli.dec.BrotliInputStream;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -186,6 +188,22 @@ public class Body implements Serializable {
             return input;
         }
         return input;
+    }
+
+
+    /**
+     * If is text body, read to string
+     */
+    public String getAsString() {
+        if (!type.isText()) {
+            throw new UnsupportedOperationException("not textual body");
+        }
+        try (var input = getDecodedInputStream();
+             var reader = new InputStreamReader(input, charset().orElse(UTF_8))) {
+            return Readers.readAll(reader);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private void writeObject(ObjectOutputStream out) throws IOException {

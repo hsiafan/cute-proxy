@@ -3,7 +3,11 @@ package net.dongliu.proxy.utils;
 import net.dongliu.commons.Strings;
 import net.dongliu.commons.collection.Lists;
 import net.dongliu.proxy.data.NameValue;
+import net.dongliu.proxy.data.Parameter;
 
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 
 public class NameValues {
@@ -19,5 +23,33 @@ public class NameValues {
             String padding = Strings.repeat(" ", paddingCount);
             return nv.name() + padding + sep + nv.value();
         });
+    }
+
+
+    /**
+     * Parse url encoded key values.
+     */
+    public static List<? extends NameValue> parseUrlEncodedParams(String text, Charset charset) {
+        if (text.isEmpty()) {
+            return List.of();
+        }
+        var params = new ArrayList<Parameter>();
+        for (String segment : text.split("&")) {
+            segment = segment.trim();
+            if (segment.isEmpty()) {
+                continue;
+            }
+            int idx = segment.indexOf("=");
+            if (idx >= 0) {
+                String name = segment.substring(0, idx).trim();
+                String value = segment.substring(idx + 1).trim();
+                value = URLDecoder.decode(value, charset);
+                params.add(new Parameter(name, value));
+            } else {
+                String value = URLDecoder.decode(segment, charset);
+                params.add(new Parameter("", value));
+            }
+        }
+        return params;
     }
 }

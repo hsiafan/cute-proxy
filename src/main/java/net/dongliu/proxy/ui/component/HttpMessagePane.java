@@ -11,7 +11,6 @@ import net.dongliu.proxy.store.Body;
 import net.dongliu.proxy.utils.NameValues;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Http message(request or response)
@@ -40,14 +39,15 @@ public class HttpMessagePane extends TabPane {
         headers.addListener((o, old, message) -> {
             if (message == null) {
                 headerText.clear();
-                cookieText.clear();
+                headerText.clear();
                 return;
             }
-            List<String> rawHeaders = headers.get().rawLines();
+            var rawHeaders = headers.get().rawLines();
             String headerString = String.join("\n", rawHeaders);
             headerText.setText(headerString);
-            List<String> cookies = NameValues.toAlignText(headers.get().cookieValues(), " = ");
+            var cookies = NameValues.toAlignText(headers.get().cookieValues(), " = ");
             cookieText.setText(String.join("\n", cookies));
+
         });
 
     }

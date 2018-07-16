@@ -1,19 +1,18 @@
 package net.dongliu.proxy.ui;
 
-import net.dongliu.commons.io.Readers;
 import net.dongliu.proxy.data.*;
 import net.dongliu.proxy.store.Body;
+import net.dongliu.proxy.store.BodyType;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static net.dongliu.proxy.utils.Headers.headerSet;
+import static net.dongliu.proxy.utils.NameValues.parseUrlEncodedParams;
 
 /**
  * Utils for copy request
@@ -43,11 +42,21 @@ public class RequestCopyUtils {
             }
 
             @Override
-            public void onBody(StringBuilder sb, TheBody theBody) {
-                if (theBody.type == TheBody.TYPE_TEXT) {
-                    sb.append(" \\\n\t -d'").append(theBody.asText()).append("'");
-                } else if (theBody.type == TheBody.TYPE_BINARY) {
-                    sb.append(" \\\n\t -d'@").append("{your_body_file}").append("'");
+            public void onBody(StringBuilder sb, ReqBody reqBody) {
+                switch (reqBody.type) {
+                    case ReqBody.TYPE_FORM:
+                        List<? extends NameValue> params = reqBody.asForm();
+                        //TODO: what if value contains '&'
+                        var forms = params.stream().map(nv -> nv.name() + "=" + nv.value())
+                                .collect(joining("&"));
+                        sb.append(" \\\n\t --data-raw '").append(forms).append("'");
+                        break;
+                    case ReqBody.TYPE_TEXT:
+                        sb.append(" \\\n\t --data-raw '").append(reqBody.asText()).append("'");
+                        break;
+                    case ReqBody.TYPE_BINARY:
+                        sb.append(" \\\n\t --data-binary '@").append("{your_body_file}").append("'");
+                        break;
                 }
             }
 
@@ -60,7 +69,8 @@ public class RequestCopyUtils {
             public void onRequestBegin(StringBuilder sb, String method, String url) {
                 sb.append("# install requests with pip install requests\n");
                 sb.append("# import requests\n");
-                sb.append("response = requests.").append(method.toLowerCase()).append("(r'").append(url).append("'");
+                sb.append("response = requests.").append(method.toLowerCase()).append("(")
+                        .append(toPyStr(url));
             }
 
             @Override
@@ -70,18 +80,29 @@ public class RequestCopyUtils {
                 }
                 sb.append(", headers = {\n");
                 for (Header header : headers) {
-                    sb.append("    r'").append(header.name()).append("': r'").append(header.value()).append("',\n");
+                    sb.append("    ").append(toPyStr(header.name()))
+                            .append(": ").append(toPyStr(header.value())).append(",\n");
                 }
                 sb.append("}");
             }
 
             @Override
-            public void onBody(StringBuilder sb, TheBody theBody) {
-                switch (theBody.type) {
-                    case TheBody.TYPE_TEXT:
-                        sb.append(", data=r'").append(theBody.asText()).append("'");
+            public void onBody(StringBuilder sb, ReqBody reqBody) {
+                switch (reqBody.type) {
+                    case ReqBody.TYPE_FORM:
+                        sb.append(", data=(\n");
+                        var forms = reqBody.asForm();
+                        for (NameValue param : forms) {
+                            sb.append("    (")
+                                    .append(toPyStr(param.name())).append(", ")
+                                    .append(toPyStr(param.value())).append("),\n");
+                        }
+                        sb.append(")");
                         break;
-                    case TheBody.TYPE_BINARY:
+                    case ReqBody.TYPE_TEXT:
+                        sb.append(", data=").append(toPyStr(reqBody.asText()));
+                        break;
+                    case ReqBody.TYPE_BINARY:
                         sb.append(", data=").append("{your_body_file}");
                         break;
                 }
@@ -109,7 +130,7 @@ public class RequestCopyUtils {
                         "//import net.dongliu.requests.Response;\n");
 
                 sb.append("\nResponse<String> response = Requests.")
-                        .append(method.toLowerCase()).append("(\"").append(url.replace("\"", "\\\"")).append("\")");
+                        .append(method.toLowerCase()).append("(").append(toJavaStr(url)).append(")");
             }
 
             @Override
@@ -121,24 +142,41 @@ public class RequestCopyUtils {
                 int count = 0;
                 for (Header header : headers) {
                     String name = header.name();
-                    sb.append("Parameter.of(\"").append(name).append("\", \"").append(header.value());
+                    sb.append("        Parameter.of(").append(toJavaStr(name))
+                            .append(", ").append(toJavaStr(header.value())).append(")");
                     if (++count < headers.size()) {
-                        sb.append("\"),\n");
+                        sb.append(",\n");
                     } else {
-                        sb.append("\")\n");
+                        sb.append("\n");
                     }
                 }
-                sb.append(")");
+                sb.append("    )");
             }
 
             @Override
-            public void onBody(StringBuilder sb, TheBody theBody) {
-                switch (theBody.type) {
-                    case TheBody.TYPE_TEXT:
-                        sb.append(", data=r'").append(theBody.asText()).append("'");
+            public void onBody(StringBuilder sb, ReqBody reqBody) {
+                switch (reqBody.type) {
+                    case ReqBody.TYPE_FORM:
+                        sb.append(".body(\n");
+                        var params = reqBody.asForm();
+                        for (int i = 0; i < params.size(); i++) {
+                            var param = params.get(i);
+                            sb.append("        Parameter.of(")
+                                    .append(toJavaStr(param.name())).append(", ")
+                                    .append(toJavaStr(param.value())).append(")");
+                            if (i < params.size() - 1) {
+                                sb.append(",\n");
+                            } else {
+                                sb.append("\n");
+                            }
+                        }
+                        sb.append("    )");
                         break;
-                    case TheBody.TYPE_BINARY:
-                        sb.append(", data=").append("{your_body_file}");
+                    case ReqBody.TYPE_TEXT:
+                        sb.append("    .body(").append(toJavaStr(reqBody.asText())).append(")\n");
+                        break;
+                    case ReqBody.TYPE_BINARY:
+                        sb.append("    .body(").append("{your_body_file})\n");
                         break;
                 }
             }
@@ -166,21 +204,19 @@ public class RequestCopyUtils {
         Body body = httpMessage.requestBody();
 
         if (body.size() > 0) {
-            TheBody theBody;
+            ReqBody reqBody;
             if (body.type().isText()) {
-                String text;
-                try (var input = body.getDecodedInputStream();
-                     var reader = new InputStreamReader(input, body.charset().orElse(UTF_8))) {
-                    text = Readers.readAll(reader);
-                    theBody = new TheBody(TheBody.TYPE_TEXT, text);
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
+                String text = body.getAsString();
+                if (body.type() == BodyType.www_form) {
+                    var params = parseUrlEncodedParams(text, body.charset().orElse(StandardCharsets.UTF_8));
+                    reqBody = new ReqBody(ReqBody.TYPE_FORM, params);
+                } else {
+                    reqBody = new ReqBody(ReqBody.TYPE_TEXT, text);
                 }
             } else {
-                //TODO: binary body
-                theBody = new TheBody(TheBody.TYPE_BINARY, body);
+                reqBody = new ReqBody(ReqBody.TYPE_BINARY, body);
             }
-            transformer.onBody(sb, theBody);
+            transformer.onBody(sb, reqBody);
         }
         transformer.onEnd(sb);
         UIUtils.copyToClipBoard(sb.toString());
@@ -205,32 +241,70 @@ public class RequestCopyUtils {
         return new String(chars);
     }
 
+    private static String toJavaStr(String str) {
+        str = str.replace("\\", "\\\\");
+        str = str.replace("\"", "\\\"");
+        return "\"" + str + "\"";
+    }
+
+    private static String toPyStr(String str) {
+        boolean raw = false;
+        if (str.contains("\\")) {
+            raw = true;
+        }
+        String del;
+        if (!str.contains("'")) {
+            del = "'";
+        } else if (!str.contains("\"")) {
+            del = "\"";
+        } else if (!str.contains("'''")) {
+            //
+            del = "'''";
+        } else if (!str.contains("\"\"\"")) {
+            //
+            del = "\"\"\"";
+        } else {
+            raw = false;
+            del = "'";
+            str = str.replace("\\", "\\\\");
+            str = str.replace("'", "\\'");
+        }
+
+        var sb = new StringBuilder();
+        if (raw) {
+            sb.append("r");
+        }
+        sb.append(del).append(str).append(del);
+        return sb.toString();
+    }
+
     private interface RequestTransformer {
         void onRequestBegin(StringBuilder sb, String method, String url);
 
         void onHeaders(StringBuilder sb, List<Header> headers);
 
-        void onBody(StringBuilder sb, TheBody body);
+        void onBody(StringBuilder sb, ReqBody body);
 
         default void onEnd(StringBuilder sb) {
         }
     }
 
-    private static class TheBody {
+    private static class ReqBody {
         private final int type;
         private final static int TYPE_BINARY = 0;
         private final static int TYPE_TEXT = 1;
         private final static int TYPE_FORM = 2;
+        //TODO: Multipart form type
         private final Object value;
 
-        public TheBody(int type, Object value) {
+        public ReqBody(int type, Object value) {
             this.type = type;
             this.value = requireNonNull(value);
         }
 
         @SuppressWarnings("unchecked")
-        public List<NameValue> asForm() {
-            return (List<NameValue>) this.value;
+        public List<? extends NameValue> asForm() {
+            return (List<? extends NameValue>) this.value;
         }
 
         public String asText() {

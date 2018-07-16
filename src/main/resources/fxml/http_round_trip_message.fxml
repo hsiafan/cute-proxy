@@ -17,8 +17,8 @@
                 </tooltip>
                 <items>
                     <MenuItem text="Copy as Curl" onAction="#copyAsCurl"/>
-                    <MenuItem text="Copy as Python(requests)" onAction="#copyAsPython"/>
-                    <MenuItem text="Copy as Java(OkHttp)" onAction="#copyAsJava"/>
+                    <MenuItem text="Copy as Python" onAction="#copyAsPython"/>
+                    <MenuItem text="Copy as Java" onAction="#copyAsJava"/>
                 </items>
             </MenuButton>
         </HBox>
