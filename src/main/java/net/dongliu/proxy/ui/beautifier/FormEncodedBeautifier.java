@@ -1,11 +1,11 @@
 package net.dongliu.proxy.ui.beautifier;
 
-import java.io.UncheckedIOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
+import net.dongliu.proxy.store.BodyType;
+import net.dongliu.proxy.utils.NameValues;
+
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
+
+import static net.dongliu.proxy.utils.NameValues.parseUrlEncodedParams;
 
 /**
  * Format www-form-encoded content text
@@ -14,7 +14,9 @@ import java.util.List;
  */
 public class FormEncodedBeautifier implements Beautifier {
 
-    public FormEncodedBeautifier() {
+    @Override
+    public boolean accept(BodyType type) {
+        return type == BodyType.www_form;
     }
 
     @Override
@@ -22,27 +24,7 @@ public class FormEncodedBeautifier implements Beautifier {
         if (s.isEmpty()) {
             return s;
         }
-        String[] items = s.split("&");
-        List<String> lines = new ArrayList<>(items.length);
-        for (String item : items) {
-            int idx = item.indexOf('=');
-            String name, value;
-            if (idx < 0) {
-                lines.add(decode(item, charset));
-            } else {
-                name = item.substring(0, idx);
-                value = item.substring(idx + 1);
-                lines.add(decode(name, charset) + "=" + decode(value, charset));
-            }
-        }
-        return String.join("\n", lines);
-    }
-
-    private String decode(String item, Charset charset) {
-        try {
-            return URLDecoder.decode(item, charset.name());
-        } catch (UnsupportedEncodingException e) {
-            throw new UncheckedIOException(e);
-        }
+        var nameValues = parseUrlEncodedParams(s, charset);
+        return String.join("\n", NameValues.toAlignText(nameValues, " = "));
     }
 }

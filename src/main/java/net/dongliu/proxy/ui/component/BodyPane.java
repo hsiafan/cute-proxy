@@ -24,7 +24,7 @@ import net.dongliu.proxy.utils.Storages;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -83,11 +83,11 @@ public class BodyPane extends BorderPane {
         });
     }
 
-    private static final Map<BodyType, Beautifier> beautifiers = Map.of(
-            BodyType.json, new JsonBeautifier(),
-            BodyType.www_form, new FormEncodedBeautifier(),
-            BodyType.xml, new XMLBeautifier(),
-            BodyType.html, new HtmlBeautifier()
+    private static final List<Beautifier> beautifiers = List.of(
+            new JsonBeautifier(),
+            new FormEncodedBeautifier(),
+            new XMLBeautifier(),
+            new HtmlBeautifier()
     );
 
     private void refreshBody(Body body) throws IOException {
@@ -96,14 +96,15 @@ public class BodyPane extends BorderPane {
             return;
         }
 
-        BodyType storeType = body.type();
+        BodyType bodyType = body.type();
+        Charset charset = body.charset().orElse(UTF_8);
 
-        charsetBox.setValue(body.charset().orElse(UTF_8));
-        charsetBox.setManaged(storeType.isText());
-        charsetBox.setVisible(storeType.isText());
+        charsetBox.setValue(charset);
+        charsetBox.setManaged(bodyType.isText());
+        charsetBox.setVisible(bodyType.isText());
         sizeLabel.setText(Storages.toHumanReadableSize(body.size()));
 
-        bodyTypeBox.setValue(storeType);
+        bodyTypeBox.setValue(bodyType);
 
         if (!body.finished()) {
             this.setCenter(new Text("Still reading..."));
@@ -116,25 +117,27 @@ public class BodyPane extends BorderPane {
         }
 
         // handle images
-        if (storeType.isImage()) {
-            Node imagePane = UIUtils.getImagePane(body.getDecodedInputStream(), storeType);
+        if (bodyType.isImage()) {
+            Node imagePane = UIUtils.getImagePane(body.getDecodedInputStream(), bodyType);
             this.setCenter(imagePane);
             return;
         }
 
         // textual body
-        if (storeType.isText()) {
+        if (bodyType.isText()) {
             String text;
             try (InputStream input = body.getDecodedInputStream();
-                 Reader reader = new InputStreamReader(input, body.charset().orElse(UTF_8))) {
+                 Reader reader = new InputStreamReader(input, charset)) {
                 text = Readers.readAll(reader);
             }
 
             // beautify
             if (body.beautify()) {
-                Beautifier beautifier = beautifiers.get(storeType);
-                if (beautifier != null) {
-                    text = beautifier.beautify(text, body.charset().orElse(UTF_8));
+                for (Beautifier beautifier : beautifiers) {
+                    if (beautifier.accept(bodyType)) {
+                        text = beautifier.beautify(text, charset);
+                        break;
+                    }
                 }
             }
 

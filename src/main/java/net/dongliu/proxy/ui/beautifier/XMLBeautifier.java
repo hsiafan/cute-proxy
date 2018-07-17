@@ -1,5 +1,6 @@
 package net.dongliu.proxy.ui.beautifier;
 
+import net.dongliu.proxy.store.BodyType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -26,7 +27,9 @@ import java.nio.charset.Charset;
 public class XMLBeautifier implements Beautifier {
     private static Logger logger = LoggerFactory.getLogger(XMLBeautifier.class);
 
-    public XMLBeautifier() {
+    @Override
+    public boolean accept(BodyType type) {
+        return type == BodyType.xml;
     }
 
     @Override

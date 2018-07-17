@@ -1,5 +1,6 @@
 package net.dongliu.proxy.ui.beautifier;
 
+import net.dongliu.proxy.store.BodyType;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -10,6 +11,11 @@ import java.nio.charset.Charset;
  */
 public class HtmlBeautifier implements Beautifier {
     public HtmlBeautifier() {
+    }
+
+    @Override
+    public boolean accept(BodyType type) {
+        return type == BodyType.html;
     }
 
     @Override
