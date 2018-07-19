@@ -194,14 +194,21 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
     }
 
     private boolean webSocketUpgraded(HttpResponse response) {
+        return checkUpgradeResponse(response, "websocket");
+    }
+
+    private boolean checkUpgradeResponse(HttpResponse response, String protocol) {
         HttpHeaders headers = response.headers();
-        String connection = Strings.nullToEmpty(headers.get("Connection"));
-        String upgrade = Strings.nullToEmpty(headers.get("Upgrade"));
-        return "Upgrade".equalsIgnoreCase(connection) && upgrade.equalsIgnoreCase("WebSocket");
+        if (!response.status().equals(SWITCHING_PROTOCOLS)) {
+            return false;
+        }
+        String connectionHeader = Strings.nullToEmpty(headers.get("Connection"));
+        String upgradeHeader = Strings.nullToEmpty(headers.get("Upgrade"));
+        return connectionHeader.equals("Upgrade") && upgradeHeader.equalsIgnoreCase(protocol);
     }
 
     private boolean h2cUpgraded(HttpResponse response) {
-        return response.status().equals(SWITCHING_PROTOCOLS);
+        return checkUpgradeResponse(response, "h2c");
     }
 
 }
