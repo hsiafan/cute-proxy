@@ -7,7 +7,7 @@ Capture Http/Https/WebSocket traffics via Http Proxy.
 [Pre Build Native Releases for macOS](https://github.com/hsiafan/monkey-proxy/releases).
 
 ## Build By Yourself
-Java9+ required To build this project.
+Oracle JDK 10 is required To build this project, and generate native images.
 
 Create platform native application: 
 
