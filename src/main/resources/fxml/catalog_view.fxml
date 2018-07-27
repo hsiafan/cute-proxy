@@ -1,21 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import net.dongliu.proxy.ui.component.CatalogPane?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import net.dongliu.proxy.ui.component.CatalogPane?>
 <fx:root type="net.dongliu.proxy.ui.component.CatalogPane" xmlns:fx="http://javafx.com/fxml">
     <top>
-        <HBox spacing="4" alignment="CENTER">
-            <padding>
-                <Insets top="4" bottom="2" left="4" right="4"/>
-            </padding>
-            <fx:define>
-                <ToggleGroup fx:id="viewTypeGroup"/>
-            </fx:define>
-            <RadioButton text="Tree view" toggleGroup="$viewTypeGroup" userData="tree" selected="true"/>
-            <RadioButton text="List view" toggleGroup="$viewTypeGroup" userData="list"/>
-        </HBox>
+        <VBox>
+            <FlowPane alignment="CENTER" hgap="4">
+                <padding>
+                    <Insets top="4" bottom="2" left="4" right="4"/>
+                </padding>
+                <TextField fx:id="filterText" onAction="#changeFilter"/>
+                <Button text="Search" onAction="#changeFilter"/>
+            </FlowPane>
+            <HBox spacing="4" alignment="CENTER">
+                <padding>
+                    <Insets top="4" bottom="2" left="4" right="4"/>
+                </padding>
+                <fx:define>
+                    <ToggleGroup fx:id="viewTypeGroup"/>
+                </fx:define>
+                <RadioButton text="Tree view" toggleGroup="$viewTypeGroup" userData="tree" selected="true"/>
+                <RadioButton text="List view" toggleGroup="$viewTypeGroup" userData="list"/>
+            </HBox>
+        </VBox>
     </top>
     <center>
         <VBox>
