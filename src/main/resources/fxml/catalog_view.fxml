@@ -6,15 +6,8 @@
 <?import net.dongliu.proxy.ui.component.CatalogPane?>
 <fx:root type="net.dongliu.proxy.ui.component.CatalogPane" xmlns:fx="http://javafx.com/fxml">
     <top>
-        <VBox>
-            <FlowPane alignment="CENTER" hgap="4">
-                <padding>
-                    <Insets top="4" bottom="2" left="4" right="4"/>
-                </padding>
-                <TextField fx:id="filterText" onAction="#changeFilter"/>
-                <Button text="Search" onAction="#changeFilter"/>
-            </FlowPane>
-            <HBox spacing="4" alignment="CENTER">
+        <VBox fx:id="settingArea">
+            <HBox spacing="4" alignment="CENTER_LEFT">
                 <padding>
                     <Insets top="4" bottom="2" left="4" right="4"/>
                 </padding>
@@ -23,7 +16,27 @@
                 </fx:define>
                 <RadioButton text="Tree view" toggleGroup="$viewTypeGroup" userData="tree" selected="true"/>
                 <RadioButton text="List view" toggleGroup="$viewTypeGroup" userData="list"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <ToggleButton text="Filter..." onAction="#toggleSearch" fx:id="toggleSearch"/>
             </HBox>
+            <VBox fx:id="searchArea">
+                <HBox alignment="CENTER" spacing="4">
+                    <padding>
+                        <Insets top="4" bottom="2" left="4" right="4"/>
+                    </padding>
+                    <TextField fx:id="filterText" onAction="#changeFilter" HBox.hgrow="ALWAYS"/>
+                    <Button text="Search" onAction="#changeFilter"/>
+                    <Button text="Clear" onAction="#clearFilter"/>
+                </HBox>
+                <HBox spacing="10" alignment="BASELINE_RIGHT">
+                    <padding>
+                        <Insets top="4" right="2" bottom="4" left="4"/>
+                    </padding>
+                    <CheckBox fx:id="searchInURL" text="URL" selected="true"/>
+                    <CheckBox fx:id="searchInHeaders" text="Headers"/>
+                    <CheckBox fx:id="searchInBody" text="Body"/>
+                </HBox>
+            </VBox>
         </VBox>
     </top>
     <center>

@@ -8,7 +8,6 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import net.dongliu.proxy.ui.component.*?>
-<?import java.net.URL?>
 <VBox xmlns:fx="http://javafx.com/fxml" fx:id="root" fx:controller="net.dongliu.proxy.ui.MainController"
       stylesheets="/styles/main.css">
     <MenuBar useSystemMenuBar="true">

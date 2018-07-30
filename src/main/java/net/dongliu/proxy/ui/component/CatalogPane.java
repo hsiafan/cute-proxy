@@ -12,9 +12,10 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import net.dongliu.proxy.data.HttpMessage;
-import net.dongliu.proxy.data.Message;
+import net.dongliu.proxy.data.*;
+import net.dongliu.proxy.store.Body;
 import net.dongliu.proxy.ui.UIUtils;
 import net.dongliu.proxy.utils.Networks;
 
@@ -33,6 +34,19 @@ import static net.dongliu.proxy.ui.RequestCopyUtils.copyRequestAsCurl;
  * @author Liu Dong
  */
 public class CatalogPane extends BorderPane {
+    @FXML
+    private ToggleButton toggleSearch;
+    @FXML
+    private VBox settingArea;
+    @FXML
+    private VBox searchArea;
+    @FXML
+    private CheckBox searchInURL;
+    @FXML
+    private CheckBox searchInHeaders;
+    @FXML
+    private CheckBox searchInBody;
+
     @FXML
     private TextField filterText;
     @FXML
@@ -62,6 +76,7 @@ public class CatalogPane extends BorderPane {
     @FXML
     void initialize() {
         // for filter
+        settingArea.getChildren().remove(searchArea);
         filter = it -> true;
         allMessages = new ArrayList<>();
 
@@ -144,8 +159,61 @@ public class CatalogPane extends BorderPane {
     @FXML
     private void changeFilter(ActionEvent e) {
         var keyword = filterText.getText().trim();
-        filter = m -> m.url().contains(keyword);
+        filter = m -> {
+            if (searchInURL.isSelected()) {
+                if (m.url().contains(keyword)) {
+                    return true;
+                }
+            }
+            if (searchInHeaders.isSelected()) {
+                if (m instanceof HttpMessage) {
+                    HttpHeaders httpHeaders = ((HttpMessage) m).requestHeader();
+                    for (Header header : httpHeaders.headers()) {
+                        if (header.value().contains(keyword)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            if (searchInBody.isSelected()) {
+                Body body;
+                if (m instanceof WebSocketMessage) {
+                    body = ((WebSocketMessage) m).body();
+                } else if (m instanceof HttpMessage) {
+                    body = ((HttpMessage) m).requestBody();
+                } else {
+                    throw new RuntimeException();
+                }
+                if (body.finished() && body.size() > 0 && body.type().isText()) {
+                    try {
+                        if (body.getAsString().contains(keyword)) {
+                            return true;
+                        }
+                    } catch (Exception ignore) {
+                    }
+                }
+            }
+            return false;
+        };
         onChangeFilter();
+    }
+
+    @FXML
+    private void clearFilter() {
+        filterText.setText("");
+        filter = m -> true;
+        onChangeFilter();
+    }
+
+    @FXML
+    private void toggleSearch(ActionEvent e) {
+        if (toggleSearch.isSelected()) {
+            searchArea.setVisible(true);
+            settingArea.getChildren().add(searchArea);
+        } else {
+            searchArea.setVisible(false);
+            settingArea.getChildren().remove(searchArea);
+        }
     }
 
     /**
