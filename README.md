@@ -7,15 +7,23 @@ Capture Http/Https/WebSocket traffics via Http Proxy.
 [Pre Build Native Releases for macOS](https://github.com/hsiafan/monkey-proxy/releases).
 
 ## Build By Yourself
-OpenJDK 10+ is required To build this project, javapackager tool is required to generate native images.
+OpenJDK 10+ is required To build this project.
 
-Create platform native application: 
+Create distribution and launch scripts using jlink:
 
 ```sh
-mvn clean package
+mvn clean package -Pjlink
 ```
 
-you will find native application image under path target/.
+Create native application image with jpackager:
+
+```sh
+mvn clean package -Pjpackager
+```
+
+jpackager tool is required to generate native images.
+
+The packaged artifacts could be found in target/ directory.
 
 
 ## Usage
