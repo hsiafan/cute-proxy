@@ -13,6 +13,7 @@
         <maven.compiler.source>10</maven.compiler.source>
         <maven.compiler.target>10</maven.compiler.target>
         <maven.compiler.release>10</maven.compiler.release>
+        <openjfx.version>11</openjfx.version>
         <netty.version>4.1.25.Final</netty.version>
         <slf4j.version>1.8.0-beta2</slf4j.version>
         <bouncycastle.version>1.55</bouncycastle.version>
@@ -22,7 +23,7 @@
         <dependency>
             <groupId>net.dongliu</groupId>
             <artifactId>commons</artifactId>
-            <version>6.10.0</version>
+            <version>6.10.1</version>
         </dependency>
         <!-- netty -->
         <dependency>
@@ -44,6 +45,28 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-handler-proxy</artifactId>
             <version>${netty.version}</version>
+        </dependency>
+
+        <!-- javafx -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${openjfx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${openjfx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${openjfx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${openjfx.version}</version>
         </dependency>
 
         <!-- decompress -->
