@@ -453,7 +453,7 @@
                                     <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <executable>/Users/clear/jdk/jdk.packager/jpackager</executable>
+                                    <executable>jpackager</executable>
                                     <arguments>
                                         <argument>create-image</argument>
                                         <argument>--output</argument>

@@ -1,7 +1,7 @@
 
 Capture Http/Https/WebSocket traffics via Http Proxy.
 
-![screen shot](https://raw.githubusercontent.com/hsiafan/monkey-proxy/master/images/screenshot_800.png)
+![screen shot](https://raw.githubusercontent.com/hsiafan/monkey-proxy/master/images/screenshot_1.png)
 
 ## Download
 [Pre Build Native Releases for macOS](https://github.com/hsiafan/monkey-proxy/releases).
