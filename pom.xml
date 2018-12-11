@@ -13,16 +13,21 @@
         <maven.compiler.source>10</maven.compiler.source>
         <maven.compiler.target>10</maven.compiler.target>
         <maven.compiler.release>10</maven.compiler.release>
+        <maven.dependency.version>2.8</maven.dependency.version>
+        <maven.exec.version>1.3.2</maven.exec.version>
+        <openjfx.version>11</openjfx.version>
         <netty.version>4.1.25.Final</netty.version>
         <slf4j.version>1.8.0-beta2</slf4j.version>
         <bouncycastle.version>1.55</bouncycastle.version>
+        <mainClass>net.dongliu.proxy.Main</mainClass>
+        <mainModuleName>net.dongliu.proxy</mainModuleName>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>net.dongliu</groupId>
             <artifactId>commons</artifactId>
-            <version>6.10.0</version>
+            <version>6.10.1</version>
         </dependency>
         <!-- netty -->
         <dependency>
@@ -44,6 +49,28 @@
             <groupId>io.netty</groupId>
             <artifactId>netty-handler-proxy</artifactId>
             <version>${netty.version}</version>
+        </dependency>
+
+        <!-- javafx -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${openjfx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${openjfx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${openjfx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-swing</artifactId>
+            <version>${openjfx.version}</version>
         </dependency>
 
         <!-- decompress -->
@@ -115,21 +142,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.ow2.asm</groupId>
-                        <artifactId>asm</artifactId>
-                        <version>6.1.1</version>
-                    </dependency>
-                </dependencies>
+                <version>3.8.0</version>
             </plugin>
-
-            <!-- copy all dependencies of your app to target folder, for call javapackager-->
+            <!-- copy all dependencies of your app to target folder, for calling jlink or jpackager-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.3</version>
+                <version>${maven.dependency.version}</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -146,6 +165,31 @@
                     <overWriteSnapshots>false</overWriteSnapshots>
                     <overWriteIfNewer>true</overWriteIfNewer>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>${maven.dependency.version}</version>
+                <executions>
+                    <execution>
+                        <id>copy-artifact</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>${project.packaging}</type>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.moditect</groupId>
@@ -320,67 +364,28 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- just call javapackager directly via maven exec plugin -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.3.2</version>
+                <version>${maven.exec.version}</version>
                 <executions>
                     <execution>
-                        <id>fx-createjar</id>
+                        <id>add-main-class</id>
                         <phase>package</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>javapackager</executable>
+                            <executable>jar</executable>
                             <arguments>
-                                <argument>-createjar</argument>
-                                <argument>-appclass</argument>
-                                <argument>net.dongliu.proxy.Main</argument>
-                                <argument>-classpath</argument>
-                                <argument>./*</argument>
-                                <argument>-srcdir</argument>
-                                <argument>${project.build.outputDirectory}/</argument>
-                                <argument>-outdir</argument>
-                                <argument>${project.build.directory}/libs</argument>
-                                <argument>-outfile</argument>
-                                <argument>${project.build.finalName}.jar</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>fx-deploy</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>javapackager</executable>
-                            <arguments>
-                                <argument>-deploy</argument>
-                                <argument>-name</argument>
-                                <argument>${project.name}</argument>
-                                <argument>-title</argument>
-                                <argument>${project.name}</argument>
-                                <argument>-vendor</argument>
-                                <argument>hsiafan</argument>
-                                <argument>--module-path</argument>
-                                <argument>${project.build.directory}/libs</argument>
-                                <argument>--module</argument>
-                                <argument>net.dongliu.proxy/net.dongliu.proxy.Main</argument>
-                                <argument>-outdir</argument>
-                                <argument>${project.build.directory}</argument>
-                                <argument>-outfile</argument>
-                                <argument>${project.name}</argument>
-                                <argument>-native</argument>
-                                <argument>image</argument>
-                                <argument>-nosign</argument>
-                                <argument>-BdropinResourcesRoot=${basedir}/src/main/deploy</argument>
-                                <argument>-BappVersion=${project.version}</argument>
-                                <argument>-BjlinkOptions=strip-debug &#xD;&#xA; compress=1</argument>
-                                <argument>-Bverbose=true</argument>
-                                <argument>-Bidentifier=net.dongliu.proxy</argument>
+                                <argument>--main-class</argument>
+                                <argument>${mainClass}</argument>
+                                <argument>--module-version</argument>
+                                <argument>${project.version}</argument>
+                                <argument>--update</argument>
+                                <argument>--file</argument>
+                                <argument>${project.build.directory}/libs/${project.build.finalName}.jar
+                                </argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -388,4 +393,129 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>jlink</id>
+            <build>
+                <plugins>
+                    <!-- the maven jar plugin current not add main-class to module info-->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${maven.exec.version}</version>
+                        <executions>
+                            <execution>
+                                <id>jlink</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>jlink</executable>
+                                    <arguments>
+                                        <argument>--add-modules</argument>
+                                        <argument>${mainModuleName},org.slf4j.simple</argument>
+                                        <argument>--module-path</argument>
+                                        <argument>${project.build.directory}/libs</argument>
+                                        <argument>--output</argument>
+                                        <argument>${project.build.directory}/${project.artifactId}</argument>
+                                        <argument>--launcher</argument>
+                                        <argument>monkey-proxy=${mainModuleName}</argument>
+                                        <argument>--compress</argument>
+                                        <argument>1</argument>
+                                        <argument>--strip-debug</argument>
+                                        <argument>--ignore-signing-information</argument>
+                                        <argument>--no-header-files</argument>
+                                        <argument>--no-man-pages</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>jpackager</id>
+            <build>
+                <plugins>
+                    <!-- just call jpackager directly via maven exec plugin -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${maven.exec.version}</version>
+                        <executions>
+                            <execution>
+                                <id>jpackager</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>jpackager</executable>
+                                    <arguments>
+                                        <argument>create-image</argument>
+                                        <argument>--output</argument>
+                                        <argument>${project.build.directory}</argument>
+                                        <argument>--name</argument>
+                                        <argument>${project.name}</argument>
+                                        <argument>${mainClass}</argument>
+                                        <argument>--version</argument>
+                                        <argument>${project.version}</argument>
+                                        <argument>--identifier</argument>
+                                        <argument>${project.groupId}.${project.artifactId}</argument>
+                                        <argument>--module-path</argument>
+                                        <argument>${project.build.directory}/libs</argument>
+                                        <argument>--module</argument>
+                                        <argument>${mainModuleName}</argument>
+                                        <argument>--add-modules</argument>
+                                        <argument>org.slf4j.simple</argument>
+                                        <argument>--vendor</argument>
+                                        <argument>${project.groupId}</argument>
+                                        <argument>--icon</argument>
+                                        <argument>${icon.path}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>mac</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <icon.path>src/main/deploy/package/macosx/MonkeyProxy.icns</icon.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                </os>
+            </activation>
+            <properties>
+                <icon.path>src/main/deploy/package/linux/MonkeyProxy.png</icon.path>
+            </properties>
+        </profile>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <icon.path>src/main/deploy/package/windows/MonkeyProxy.ico</icon.path>
+            </properties>
+        </profile>
+    </profiles>
 </project>

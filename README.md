@@ -1,21 +1,35 @@
 
 Capture Http/Https/WebSocket traffics via Http Proxy.
 
-![screen shot](https://raw.githubusercontent.com/hsiafan/monkey-proxy/master/images/screenshot_800.png)
+![screen shot](https://raw.githubusercontent.com/hsiafan/monkey-proxy/master/images/screenshot_1.png)
 
 ## Download
 [Pre Build Native Releases for macOS](https://github.com/hsiafan/monkey-proxy/releases).
 
 ## Build By Yourself
-Oracle JDK 10 is required To build this project, and generate native images.
+OpenJDK 11+ is required To build this project.
 
-Create platform native application: 
+Create distribution and launch scripts using jlink:
 
 ```sh
-mvn clean package
+mvn clean package -Pjlink
 ```
 
-you will find native application image under path target/.
+Create native application image with jpackager:
+
+```sh
+mvn clean package -Pjpackager
+```
+
+jpackager tool is required to generate native images, it should be include in jdk for OpenJdk 12+. For OpenJDK 11, you can download jpackager from:
+
+```
+http://download2.gluonhq.com/jpackager/11/jdk.packager-linux.zip
+http://download2.gluonhq.com/jpackager/11/jdk.packager-osx.zip
+http://download2.gluonhq.com/jpackager/11/jdk.packager-windows.zip
+``` 
+
+The packaged artifacts could be found in target/ directory.
 
 
 ## Usage
