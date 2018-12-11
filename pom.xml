@@ -7,12 +7,12 @@
     <artifactId>monkey-proxy</artifactId>
     <name>MonkeyProxy</name>
     <packaging>jar</packaging>
-    <version>0.13.1</version>
+    <version>0.14.0</version>
 
     <properties>
-        <maven.compiler.source>10</maven.compiler.source>
-        <maven.compiler.target>10</maven.compiler.target>
-        <maven.compiler.release>10</maven.compiler.release>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.release>11</maven.compiler.release>
         <maven.dependency.version>2.8</maven.dependency.version>
         <maven.exec.version>1.3.2</maven.exec.version>
         <openjfx.version>11</openjfx.version>
@@ -399,7 +399,6 @@
             <id>jlink</id>
             <build>
                 <plugins>
-                    <!-- the maven jar plugin current not add main-class to module info-->
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
@@ -440,7 +439,39 @@
             <id>jpackager</id>
             <build>
                 <plugins>
-                    <!-- just call jpackager directly via maven exec plugin -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${maven.exec.version}</version>
+                        <executions>
+                            <execution>
+                                <id>jlink</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>jlink</executable>
+                                    <arguments>
+                                        <argument>--add-modules</argument>
+                                        <argument>${mainModuleName},org.slf4j.simple</argument>
+                                        <argument>--module-path</argument>
+                                        <argument>${project.build.directory}/libs</argument>
+                                        <argument>--output</argument>
+                                        <argument>${project.build.directory}/${project.artifactId}</argument>
+                                        <argument>--launcher</argument>
+                                        <argument>monkey-proxy=${mainModuleName}</argument>
+                                        <argument>--compress</argument>
+                                        <argument>1</argument>
+                                        <argument>--strip-debug</argument>
+                                        <argument>--ignore-signing-information</argument>
+                                        <argument>--no-header-files</argument>
+                                        <argument>--no-man-pages</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
@@ -460,17 +491,21 @@
                                         <argument>${project.build.directory}</argument>
                                         <argument>--name</argument>
                                         <argument>${project.name}</argument>
-                                        <argument>${mainClass}</argument>
                                         <argument>--version</argument>
                                         <argument>${project.version}</argument>
                                         <argument>--identifier</argument>
                                         <argument>${project.groupId}.${project.artifactId}</argument>
+
+                                        <!-- jpackager not can not set jlink flags, so use runtime image created by jlink -->
+                                        <argument>--runtime-image</argument>
+                                        <argument>${project.build.directory}/monkey-proxy</argument>
                                         <argument>--module-path</argument>
                                         <argument>${project.build.directory}/libs</argument>
                                         <argument>--module</argument>
                                         <argument>${mainModuleName}</argument>
                                         <argument>--add-modules</argument>
                                         <argument>org.slf4j.simple</argument>
+
                                         <argument>--vendor</argument>
                                         <argument>${project.groupId}</argument>
                                         <argument>--icon</argument>

@@ -21,7 +21,7 @@ Create native application image with jpackager:
 mvn clean package -Pjpackager
 ```
 
-jpackager tool is required to generate native images, it should be include in jdk for OpenJdk 12+. For OpenJDK 11, you can download jpackager from:
+jpackager tool is required to generate native images, it should be included in jdk for OpenJDK 12+. For OpenJDK 11, you can download jpackager from:
 
 ```
 http://download2.gluonhq.com/jpackager/11/jdk.packager-linux.zip
