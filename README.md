@@ -1,5 +1,5 @@
 
-Capture Http/Https/WebSocket traffics via Http Proxy.
+Capture Http/Https/Http2/WebSocket traffics via Http Proxy.
 
 ![screen shot](https://raw.githubusercontent.com/hsiafan/monkey-proxy/master/images/screenshot_1.png)
 
