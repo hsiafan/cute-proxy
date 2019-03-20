@@ -9,19 +9,13 @@ Capture Http/Https/Http2/WebSocket traffics via Http Proxy.
 ## Build By Yourself
 OpenJDK 11+ is required To build this project.
 
-Create distribution and launch scripts using jlink:
+Create native application image using:
 
 ```sh
-mvn clean package -Pjlink
+mvn clean package
 ```
 
-Create native application image with jpackager:
-
-```sh
-mvn clean package -Pjpackager
-```
-
-jpackager tool is required to generate native images, it should be included in jdk for OpenJDK 12+. For OpenJDK 11, you can download jpackager from:
+jpackager tool is required to generate native images, it should be included in jdk for OpenJDK 13+. For OpenJDK 11, you can download jpackager from:
 
 ```
 http://download2.gluonhq.com/jpackager/11/jdk.packager-linux.zip
@@ -29,7 +23,7 @@ http://download2.gluonhq.com/jpackager/11/jdk.packager-osx.zip
 http://download2.gluonhq.com/jpackager/11/jdk.packager-windows.zip
 ``` 
 
-The packaged artifacts could be found in target/ directory.
+The packaged artifacts could be found at target/Monkey-Proxy.
 
 
 ## Usage
