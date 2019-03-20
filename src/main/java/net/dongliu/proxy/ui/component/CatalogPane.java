@@ -176,20 +176,22 @@ public class CatalogPane extends BorderPane {
                 }
             }
             if (searchInBody.isSelected()) {
-                Body body;
+                List<Body> bodies;
                 if (m instanceof WebSocketMessage) {
-                    body = ((WebSocketMessage) m).body();
+                    bodies = List.of(((WebSocketMessage) m).body());
                 } else if (m instanceof HttpMessage) {
-                    body = ((HttpMessage) m).requestBody();
+                    bodies = List.of(((HttpMessage) m).requestBody(), ((HttpMessage) m).responseBody());
                 } else {
                     throw new RuntimeException();
                 }
-                if (body.finished() && body.size() > 0 && body.type().isText()) {
-                    try {
-                        if (body.getAsString().contains(keyword)) {
-                            return true;
+                for (Body body : bodies) {
+                    if (body.finished() && body.size() > 0 && body.type().isText()) {
+                        try {
+                            if (body.getAsString().contains(keyword)) {
+                                return true;
+                            }
+                        } catch (Exception ignore) {
                         }
-                    } catch (Exception ignore) {
                     }
                 }
             }
