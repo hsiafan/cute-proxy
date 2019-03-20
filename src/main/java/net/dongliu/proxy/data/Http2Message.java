@@ -50,7 +50,7 @@ public class Http2Message extends HttpMessage implements Serializable {
         return requestBody;
     }
 
-    public Http2ResponseHeaders ResponseHeader() {
+    public Http2ResponseHeaders responseHeader() {
         return responseHeader;
     }
 

@@ -36,7 +36,7 @@ public class HttpRoundTripMessagePane extends BorderPane {
     private void initialize() {
         httpMessage.addListener((o, old, newValue) -> {
             requestBodyPane.setHeaders(newValue.requestHeader());
-            responseBodyPane.setHeaders(newValue.ResponseHeader());
+            responseBodyPane.setHeaders(newValue.responseHeader());
             requestBodyPane.setBody(newValue.requestBody());
             responseBodyPane.setBody(newValue.responseBody());
         });

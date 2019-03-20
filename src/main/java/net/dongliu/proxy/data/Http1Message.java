@@ -51,7 +51,7 @@ public class Http1Message extends HttpMessage implements Serializable {
         return requestBody;
     }
 
-    public Http1ResponseHeaders ResponseHeader() {
+    public Http1ResponseHeaders responseHeader() {
         return responseHeader;
     }
 

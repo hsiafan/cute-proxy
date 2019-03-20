@@ -14,7 +14,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import net.dongliu.proxy.data.*;
+import net.dongliu.proxy.data.Header;
+import net.dongliu.proxy.data.HttpMessage;
+import net.dongliu.proxy.data.Message;
+import net.dongliu.proxy.data.WebSocketMessage;
 import net.dongliu.proxy.store.Body;
 import net.dongliu.proxy.ui.UIUtils;
 import net.dongliu.proxy.utils.Networks;
@@ -167,10 +170,11 @@ public class CatalogPane extends BorderPane {
             }
             if (searchInHeaders.isSelected()) {
                 if (m instanceof HttpMessage) {
-                    HttpHeaders httpHeaders = ((HttpMessage) m).requestHeader();
-                    for (Header header : httpHeaders.headers()) {
-                        if (header.value().contains(keyword)) {
-                            return true;
+                    for (var httpHeaders : List.of(((HttpMessage) m).requestHeader(), ((HttpMessage) m).responseHeader())) {
+                        for (Header header : httpHeaders.headers()) {
+                            if (header.value().contains(keyword)) {
+                                return true;
+                            }
                         }
                     }
                 }

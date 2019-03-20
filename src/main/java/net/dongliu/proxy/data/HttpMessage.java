@@ -16,7 +16,7 @@ public abstract class HttpMessage extends Message {
 
     public abstract Body requestBody();
 
-    public abstract HttpHeaders ResponseHeader();
+    public abstract HttpHeaders responseHeader();
 
     public abstract Body responseBody();
 
