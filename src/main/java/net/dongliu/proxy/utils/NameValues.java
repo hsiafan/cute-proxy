@@ -44,6 +44,7 @@ public class NameValues {
                 String name = segment.substring(0, idx).trim();
                 String value = segment.substring(idx + 1).trim();
                 value = URLDecoder.decode(value, charset);
+                name = URLDecoder.decode(name, charset);
                 params.add(new Parameter(name, value));
             } else {
                 String value = URLDecoder.decode(segment, charset);
