@@ -62,7 +62,9 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
             int port = url.getPort();
             String authority = url.getAuthority();
             request.setUri(url.getFile());
-            request.headers().set("Host", host);
+            if (!request.headers().contains("Host")) {
+                request.headers().set("Host", host);
+            }
             stripRequest(request);
 
             if (port == -1) {
