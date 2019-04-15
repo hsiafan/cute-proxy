@@ -9,10 +9,10 @@ import io.netty.handler.proxy.ProxyHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
+import net.dongliu.commons.net.HostPort;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.netty.NettySettings;
 import net.dongliu.proxy.netty.NettyUtils;
-import net.dongliu.proxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,7 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
 
     private final Bootstrap bootstrap = new Bootstrap();
     private Channel clientOutChannel;
-    private NetAddress address;
+    private HostPort address;
 
     private final Queue<HttpContent> queue = new ArrayDeque<>();
 
@@ -70,7 +70,7 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
             if (port == -1) {
                 port = 80;
             }
-            NetAddress address = new NetAddress(host, port);
+            var address = new HostPort(host, port);
 
             if (clientOutChannel != null && clientOutChannel.isActive() && address.equals(this.address)) {
                 clientOutChannel.writeAndFlush(request);
@@ -127,7 +127,7 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private Future<Channel> newChannel(ChannelHandlerContext ctx, NetAddress address) {
+    private Future<Channel> newChannel(ChannelHandlerContext ctx, HostPort address) {
         Promise<Channel> promise = ctx.executor().newPromise();
         bootstrap.group(ctx.channel().eventLoop())
                 .channel(NioSocketChannel.class)
@@ -144,7 +144,7 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
                     }
                 });
 
-        bootstrap.connect(address.host(), address.port()).addListener((ChannelFutureListener) future -> {
+        bootstrap.connect(address.host(), address.ensurePort()).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {
                 ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, BAD_GATEWAY));
                 NettyUtils.closeOnFlush(ctx.channel());

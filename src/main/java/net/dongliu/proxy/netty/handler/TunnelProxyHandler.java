@@ -6,9 +6,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.proxy.ProxyHandler;
 import io.netty.util.concurrent.Promise;
+import net.dongliu.commons.net.HostPort;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.netty.NettySettings;
-import net.dongliu.proxy.utils.NetAddress;
 
 import java.util.function.Supplier;
 
@@ -45,7 +45,7 @@ public abstract class TunnelProxyHandler<T> extends SimpleChannelInboundHandler<
                 });
     }
 
-    protected void initTcpProxyHandlers(ChannelHandlerContext ctx, NetAddress address, Channel outChannel) {
+    protected void initTcpProxyHandlers(ChannelHandlerContext ctx, HostPort address, Channel outChannel) {
         ctx.pipeline().addLast(new SSLDetector(address, messageListener, outChannel, sslContextManager));
     }
 

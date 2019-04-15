@@ -11,18 +11,18 @@ import io.netty.handler.codec.http.websocketx.WebSocketFrameDecoder;
 import io.netty.handler.codec.http.websocketx.WebSocketFrameEncoder;
 import io.netty.handler.codec.http2.Http2Exception;
 import net.dongliu.commons.Strings;
+import net.dongliu.commons.net.HostPort;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.netty.codec.Http2EventCodec;
-import net.dongliu.proxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.SWITCHING_PROTOCOLS;
+import static java.util.Objects.requireNonNullElse;
 
 /**
  * Handle http upgrade(websocket, http2).
@@ -39,7 +39,7 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
     private boolean upgradeH2cSucceed;
 
     private final boolean ssl;
-    private final NetAddress address;
+    private final HostPort address;
     private final MessageListener messageListener;
     private final ChannelPipeline localPipeline;
 
@@ -47,7 +47,7 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
     private String method;
     private String path;
 
-    public HttpUpgradeHandler(boolean ssl, NetAddress address, MessageListener messageListener,
+    public HttpUpgradeHandler(boolean ssl, HostPort address, MessageListener messageListener,
                               ChannelPipeline localPipeline) {
         this.ssl = ssl;
         this.address = address;
@@ -96,12 +96,12 @@ public class HttpUpgradeHandler extends ChannelDuplexHandler {
         ctx.write(msg, promise);
     }
 
-    private static String getUrl(boolean ssl, NetAddress address, HttpRequest request) {
+    private static String getUrl(boolean ssl, HostPort address, HttpRequest request) {
         HttpHeaders headers = request.headers();
-        String host = Objects.requireNonNullElse(headers.get("Host"), address.host());
+        String host = requireNonNullElse(headers.get("Host"), address.host());
         StringBuilder sb = new StringBuilder(ssl ? "wss" : "ws").append("://").append(host);
         if (!host.contains(":")) {
-            if (!(ssl && address.port() == 443 || !ssl && address.port() == 80)) {
+            if (!(ssl && address.ensurePort() == 443 || !ssl && address.ensurePort() == 80)) {
                 sb.append(":").append(address.port());
             }
         }

@@ -1,7 +1,7 @@
 package net.dongliu.proxy.data;
 
+import net.dongliu.commons.net.HostPort;
 import net.dongliu.proxy.store.Body;
-import net.dongliu.proxy.utils.NetAddress;
 
 import java.io.Serializable;
 
@@ -19,15 +19,15 @@ public class Http2Message extends HttpMessage implements Serializable {
     private volatile Http2ResponseHeaders responseHeader;
     private volatile Body responseBody;
 
-    public Http2Message(NetAddress address, Http2RequestHeaders requestHeader, Body body) {
+    public Http2Message(HostPort address, Http2RequestHeaders requestHeader, Body body) {
         super(requestHeader.getHeader("Host").orElse(address.host()), getUrl(address, requestHeader));
         this.requestHeader = requireNonNull(requestHeader);
         this.requestBody = body;
     }
 
-    private static String getUrl(NetAddress address, Http2RequestHeaders requestHeader) {
+    private static String getUrl(HostPort address, Http2RequestHeaders requestHeader) {
         String scheme = requestHeader.scheme();
-        int port = address.port();
+        int port = address.ensurePort();
         StringBuilder sb = new StringBuilder(scheme).append("://");
         sb.append(requestHeader.getHeader("Host").orElse(address.host()));
         if (scheme.equals("https") && port != 443 || scheme.equals("http") && port != 80) {

@@ -1,7 +1,7 @@
 package net.dongliu.proxy.data;
 
+import net.dongliu.commons.net.HostPort;
 import net.dongliu.proxy.store.Body;
-import net.dongliu.proxy.utils.NetAddress;
 
 import java.io.Serializable;
 
@@ -19,18 +19,18 @@ public class Http1Message extends HttpMessage implements Serializable {
     private volatile Http1ResponseHeaders responseHeader;
     private volatile Body responseBody;
 
-    public Http1Message(String scheme, NetAddress address, Http1RequestHeaders requestHeader, Body requestBody) {
+    public Http1Message(String scheme, HostPort address, Http1RequestHeaders requestHeader, Body requestBody) {
         super(requestHeader.getHeader("Host").orElse(address.host()), getUrl(scheme, address, requestHeader));
         this.requestHeader = requireNonNull(requestHeader);
         this.requestBody = requireNonNull(requestBody);
     }
 
-    private static String getUrl(String scheme, NetAddress address, Http1RequestHeaders requestHeader) {
+    private static String getUrl(String scheme, HostPort address, Http1RequestHeaders requestHeader) {
         String host = requestHeader.getHeader("Host").orElse(address.host());
         StringBuilder sb = new StringBuilder(scheme).append("://").append(host);
         if (!host.contains(":")) {
-            if (!(scheme.equals("https") && address.port() == 443
-                    || scheme.equals("http") && address.port() == 80)) {
+            if (!(scheme.equals("https") && address.ensurePort() == 443
+                    || scheme.equals("http") && address.ensurePort() == 80)) {
                 sb.append(":").append(address.port());
             }
         }

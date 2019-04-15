@@ -12,11 +12,11 @@ import io.netty.handler.codec.http2.Http2Exception;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslHandler;
+import net.dongliu.commons.net.HostPort;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.netty.NettyUtils;
 import net.dongliu.proxy.netty.codec.Http2EventCodec;
 import net.dongliu.proxy.netty.detector.ProtocolDetector;
-import net.dongliu.proxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,12 +40,12 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
     private Queue<ByteBuf> queue;
     private boolean removed;
 
-    private final NetAddress address;
+    private final HostPort address;
     private final MessageListener messageListener;
     private final Channel outboundChannel;
     private final ServerSSLContextManager sslContextManager;
 
-    public SSLDetector(NetAddress address, MessageListener messageListener, Channel outboundChannel,
+    public SSLDetector(HostPort address, MessageListener messageListener, Channel outboundChannel,
                        ServerSSLContextManager sslContextManager) {
         this.address = address;
         this.messageListener = messageListener;
@@ -92,7 +92,7 @@ public class SSLDetector extends ChannelInboundHandlerAdapter {
         queue = new ArrayDeque<>(2);
 
         SslContext sslContext = ClientSSLContextManager.getInstance().get();
-        SslHandler sslHandler = sslContext.newHandler(ctx.alloc(), address.host(), address.port());
+        SslHandler sslHandler = sslContext.newHandler(ctx.alloc(), address.host(), address.ensurePort());
         outboundChannel.pipeline().addLast("ssl-handler", sslHandler);
         outboundChannel.pipeline().addLast(new ApplicationProtocolNegotiationHandler(HTTP_1_1) {
             @Override

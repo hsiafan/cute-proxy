@@ -9,9 +9,9 @@ import io.netty.handler.codec.socksx.v4.*;
 import io.netty.handler.proxy.ProxyHandler;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
+import net.dongliu.commons.net.HostPort;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.netty.NettyUtils;
-import net.dongliu.proxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class Socks4ProxyHandler extends TunnelProxyHandler<Socks4Message> {
                 ctx.pipeline().remove(Socks4ProxyHandler.this);
                 ctx.pipeline().remove(Socks4ServerEncoder.class);
                 ctx.pipeline().remove(Socks4ServerDecoder.class);
-                NetAddress address = new NetAddress(command.dstAddr(), command.dstPort());
+                var address = new HostPort(command.dstAddr(), command.dstPort());
                 initTcpProxyHandlers(ctx, address, outboundChannel);
             });
         });

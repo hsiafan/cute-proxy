@@ -1,5 +1,6 @@
 package net.dongliu.proxy.utils;
 
+import net.dongliu.commons.net.HostPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,20 +48,6 @@ public class Networks {
             return host;
         }
         return "*." + items[items.length - 3] + "." + items[items.length - 2] + "." + items[items.length - 1];
-    }
-
-    /**
-     * Split address to host and port
-     */
-    public static NetAddress parseAddress(String address) {
-        int idx = address.indexOf(":");
-        if (idx > 0) {
-            String host = address.substring(0, idx);
-            int port = Integer.parseInt(address.substring(idx + 1));
-            return new NetAddress(host, port);
-        } else {
-            return new NetAddress(address, -1);
-        }
     }
 
 

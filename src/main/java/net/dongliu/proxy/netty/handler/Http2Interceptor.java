@@ -5,6 +5,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http2.Http2Headers;
 import net.dongliu.commons.collection.Iterables;
+import net.dongliu.commons.net.HostPort;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.data.Header;
 import net.dongliu.proxy.data.Http2Message;
@@ -12,7 +13,6 @@ import net.dongliu.proxy.data.Http2RequestHeaders;
 import net.dongliu.proxy.data.Http2ResponseHeaders;
 import net.dongliu.proxy.netty.codec.frame.*;
 import net.dongliu.proxy.store.Body;
-import net.dongliu.proxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ public class Http2Interceptor extends ChannelDuplexHandler {
     private static final Logger logger = LoggerFactory.getLogger(Http2Interceptor.class);
 
     private Map<Integer, Http2Message> messageMap = new HashMap<>();
-    private final NetAddress address;
+    private final HostPort address;
     private final MessageListener messageListener;
     // if is from clear text upgrade
     private final boolean clearText;
@@ -38,7 +38,7 @@ public class Http2Interceptor extends ChannelDuplexHandler {
     private final String method;
     private final String path;
 
-    public Http2Interceptor(NetAddress address, MessageListener messageListener, boolean clearText) {
+    public Http2Interceptor(HostPort address, MessageListener messageListener, boolean clearText) {
         this.address = address;
         this.messageListener = messageListener;
         this.clearText = clearText;
@@ -46,7 +46,7 @@ public class Http2Interceptor extends ChannelDuplexHandler {
         this.path = "";
     }
 
-    public Http2Interceptor(NetAddress address, MessageListener messageListener, boolean clearText,
+    public Http2Interceptor(HostPort address, MessageListener messageListener, boolean clearText,
                             String method, String path) {
         this.address = address;
         this.messageListener = messageListener;

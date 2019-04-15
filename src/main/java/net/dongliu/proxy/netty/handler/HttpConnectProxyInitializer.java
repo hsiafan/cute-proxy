@@ -11,10 +11,9 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.proxy.ProxyHandler;
 import io.netty.util.concurrent.FutureListener;
 import io.netty.util.concurrent.Promise;
+import net.dongliu.commons.net.HostPort;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.netty.NettyUtils;
-import net.dongliu.proxy.utils.NetAddress;
-import net.dongliu.proxy.utils.Networks;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,8 +40,8 @@ public class HttpConnectProxyInitializer extends TunnelProxyHandler<HttpRequest>
         Promise<Channel> promise = ctx.executor().newPromise();
         Bootstrap bootstrap = initBootStrap(promise, ctx.channel().eventLoop());
 
-        NetAddress address = Networks.parseAddress(request.uri());
-        bootstrap.connect(address.host(), address.port()).addListener((ChannelFutureListener) future -> {
+        var address = HostPort.parse(request.uri());
+        bootstrap.connect(address.host(), address.ensurePort()).addListener((ChannelFutureListener) future -> {
             if (!future.isSuccess()) {
                 ctx.channel().writeAndFlush(new DefaultFullHttpResponse(HTTP_1_1, BAD_GATEWAY));
                 NettyUtils.closeOnFlush(ctx.channel());

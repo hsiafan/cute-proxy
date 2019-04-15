@@ -5,10 +5,10 @@ import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 import io.netty.handler.codec.http.*;
+import net.dongliu.commons.net.HostPort;
 import net.dongliu.proxy.MessageListener;
 import net.dongliu.proxy.data.*;
 import net.dongliu.proxy.store.Body;
-import net.dongliu.proxy.utils.NetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +27,10 @@ public class HttpInterceptor extends ChannelDuplexHandler {
     private Http1Message httpMessage;
 
     private final boolean ssl;
-    private final NetAddress address;
+    private final HostPort address;
     private final MessageListener messageListener;
 
-    public HttpInterceptor(boolean ssl, NetAddress address, MessageListener messageListener) {
+    public HttpInterceptor(boolean ssl, HostPort address, MessageListener messageListener) {
         this.ssl = ssl;
         this.address = address;
         this.messageListener = messageListener;

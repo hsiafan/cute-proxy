@@ -1,6 +1,5 @@
 package net.dongliu.proxy.utils;
 
-import net.dongliu.commons.Strings;
 import net.dongliu.commons.collection.Lists;
 import net.dongliu.proxy.data.NameValue;
 import net.dongliu.proxy.data.Parameter;
@@ -20,7 +19,7 @@ public class NameValues {
         int paddingLen = Math.min(maxLen, 20);
         return Lists.convert(nameValues, nv -> {
             int paddingCount = Math.max(paddingLen - nv.name().length(), 0);
-            String padding = Strings.repeat(" ", paddingCount);
+            String padding = " ".repeat(paddingCount);
             return nv.name() + padding + sep + nv.value();
         });
     }
