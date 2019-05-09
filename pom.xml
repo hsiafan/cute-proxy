@@ -27,7 +27,7 @@
         <dependency>
             <groupId>net.dongliu</groupId>
             <artifactId>commons</artifactId>
-            <version>7.6.3</version>
+            <version>7.7.5</version>
         </dependency>
         <!-- netty -->
         <dependency>
@@ -411,33 +411,29 @@
                         </configuration>
                     </execution>
                     <execution>
-                        <id>jpackager</id>
+                        <id>jpackage</id>
                         <phase>package</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
                         <configuration>
-                            <executable>jpackager</executable>
+                            <executable>jpackage</executable>
                             <arguments>
-                                <argument>create-image</argument>
+                                <argument>create-app-image</argument>
                                 <argument>--output</argument>
                                 <argument>${project.build.directory}</argument>
                                 <argument>--name</argument>
                                 <argument>${project.name}</argument>
-                                <argument>--version</argument>
+                                <argument>--app-version</argument>
                                 <argument>${project.version}</argument>
                                 <argument>--identifier</argument>
                                 <argument>${project.groupId}.${project.artifactId}</argument>
 
                                 <!-- jpackager not can not set jlink flags, so use runtime image created by jlink -->
                                 <argument>--runtime-image</argument>
-                                <argument>${project.build.directory}/monkey-proxy</argument>
-                                <argument>--module-path</argument>
-                                <argument>${project.build.directory}/libs</argument>
+                                <argument>${project.build.directory}/${project.artifactId}</argument>
                                 <argument>--module</argument>
                                 <argument>${mainModuleName}</argument>
-                                <argument>--add-modules</argument>
-                                <argument>org.slf4j.simple</argument>
 
                                 <argument>--vendor</argument>
                                 <argument>${project.groupId}</argument>

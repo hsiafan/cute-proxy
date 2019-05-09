@@ -79,7 +79,7 @@ public class Socks5ProxyHandler extends TunnelProxyHandler<Socks5Message> {
                 ctx.pipeline().remove("socks5-server-encoder");
                 ctx.pipeline().remove("socks5-command-decoder");
                 ctx.pipeline().remove(Socks5ProxyHandler.this);
-                var address = new HostPort(command.dstAddr(), command.dstPort());
+                var address = HostPort.of(command.dstAddr(), command.dstPort());
                 initTcpProxyHandlers(ctx, address, outboundChannel);
             });
         });

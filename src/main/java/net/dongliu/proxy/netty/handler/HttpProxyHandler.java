@@ -70,7 +70,7 @@ public class HttpProxyHandler extends ChannelInboundHandlerAdapter {
             if (port == -1) {
                 port = 80;
             }
-            var address = new HostPort(host, port);
+            var address = HostPort.of(host, port);
 
             if (clientOutChannel != null && clientOutChannel.isActive() && address.equals(this.address)) {
                 clientOutChannel.writeAndFlush(request);

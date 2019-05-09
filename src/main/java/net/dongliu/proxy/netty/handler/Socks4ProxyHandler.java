@@ -59,7 +59,7 @@ public class Socks4ProxyHandler extends TunnelProxyHandler<Socks4Message> {
                 ctx.pipeline().remove(Socks4ProxyHandler.this);
                 ctx.pipeline().remove(Socks4ServerEncoder.class);
                 ctx.pipeline().remove(Socks4ServerDecoder.class);
-                var address = new HostPort(command.dstAddr(), command.dstPort());
+                var address = HostPort.of(command.dstAddr(), command.dstPort());
                 initTcpProxyHandlers(ctx, address, outboundChannel);
             });
         });
