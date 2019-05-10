@@ -17,7 +17,7 @@ public class Main extends Application {
     public void start(Stage stage) throws Exception {
         VBox root = FXMLLoader.load(getClass().getResource("/fxml/main.fxml"));
         Scene scene = new Scene(root);
-        stage.setTitle("MonkeyProxy");
+        stage.setTitle("CuteProxy");
         stage.getIcons().add(new Image(this.getClass().getResourceAsStream("/icon.png")));
         stage.setScene(scene);
         stage.setMaximized(true);

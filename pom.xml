@@ -4,10 +4,10 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.dongliu</groupId>
-    <artifactId>monkey-proxy</artifactId>
-    <name>MonkeyProxy</name>
+    <artifactId>cute-proxy</artifactId>
+    <name>CuteProxy</name>
     <packaging>jar</packaging>
-    <version>0.14.1</version>
+    <version>1.0.0</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -400,45 +400,13 @@
                                 <argument>--output</argument>
                                 <argument>${project.build.directory}/${project.artifactId}</argument>
                                 <argument>--launcher</argument>
-                                <argument>monkey-proxy=${mainModuleName}</argument>
+                                <argument>${project.artifactId}=${mainModuleName}</argument>
                                 <argument>--compress</argument>
                                 <argument>1</argument>
                                 <argument>--strip-debug</argument>
                                 <argument>--ignore-signing-information</argument>
                                 <argument>--no-header-files</argument>
                                 <argument>--no-man-pages</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>jpackage</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>jpackage</executable>
-                            <arguments>
-                                <argument>create-app-image</argument>
-                                <argument>--output</argument>
-                                <argument>${project.build.directory}</argument>
-                                <argument>--name</argument>
-                                <argument>${project.name}</argument>
-                                <argument>--app-version</argument>
-                                <argument>${project.version}</argument>
-                                <argument>--identifier</argument>
-                                <argument>${project.groupId}.${project.artifactId}</argument>
-
-                                <!-- jpackager not can not set jlink flags, so use runtime image created by jlink -->
-                                <argument>--runtime-image</argument>
-                                <argument>${project.build.directory}/${project.artifactId}</argument>
-                                <argument>--module</argument>
-                                <argument>${mainModuleName}</argument>
-
-                                <argument>--vendor</argument>
-                                <argument>${project.groupId}</argument>
-                                <argument>--icon</argument>
-                                <argument>${icon.path}</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -449,6 +417,52 @@
 
     <profiles>
         <profile>
+            <id>jpackage</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${maven.exec.version}</version>
+                        <executions>
+                            <execution>
+                                <id>jpackage</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>jpackage</executable>
+                                    <arguments>
+                                        <argument>create-app-image</argument>
+                                        <argument>--output</argument>
+                                        <argument>${project.build.directory}</argument>
+                                        <argument>--name</argument>
+                                        <argument>${project.name}</argument>
+                                        <argument>--app-version</argument>
+                                        <argument>${project.version}</argument>
+                                        <argument>--identifier</argument>
+                                        <argument>${project.groupId}.${project.artifactId}</argument>
+
+                                        <!-- jpackager not can not set jlink flags, so use runtime image created by jlink -->
+                                        <argument>--runtime-image</argument>
+                                        <argument>${project.build.directory}/${project.artifactId}</argument>
+                                        <argument>--module</argument>
+                                        <argument>${mainModuleName}</argument>
+
+                                        <argument>--vendor</argument>
+                                        <argument>${project.groupId}</argument>
+                                        <argument>--icon</argument>
+                                        <argument>${icon.path}</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>mac</id>
             <activation>
                 <os>
@@ -456,7 +470,7 @@
                 </os>
             </activation>
             <properties>
-                <icon.path>src/main/deploy/package/macosx/MonkeyProxy.icns</icon.path>
+                <icon.path>src/main/deploy/package/macosx/CuteProxy.icns</icon.path>
             </properties>
         </profile>
         <profile>
@@ -468,7 +482,7 @@
                 </os>
             </activation>
             <properties>
-                <icon.path>src/main/deploy/package/linux/MonkeyProxy.png</icon.path>
+                <icon.path>src/main/deploy/package/linux/CuteProxy.png</icon.path>
             </properties>
         </profile>
         <profile>
@@ -479,7 +493,7 @@
                 </os>
             </activation>
             <properties>
-                <icon.path>src/main/deploy/package/windows/MonkeyProxy.ico</icon.path>
+                <icon.path>src/main/deploy/package/windows/CuteProxy.ico</icon.path>
             </properties>
         </profile>
     </profiles>

@@ -63,7 +63,7 @@ public class RootKeyStoreGenerator {
 
         Security.addProvider(new BouncyCastleProvider());
 
-        String appDName = "CN=MonkeyProxy, OU=MonkeyProxy, O=MonkeyProxy, L=Beijing, ST=Beijing, C=CN";
+        String appDName = "CN=CuteProxy, OU=CuteProxy, O=CuteProxy, L=Beijing, ST=Beijing, C=CN";
         X500Name issuerName = new X500Name(appDName);
         X500Name subjectName = new X500Name(appDName);
         Calendar calendar = Calendar.getInstance();
@@ -101,7 +101,7 @@ public class RootKeyStoreGenerator {
 
         X509Certificate[] chain = new X509Certificate[]{cert};
 
-        keyStore.setEntry("MonkeyProxy", new KeyStore.PrivateKeyEntry(privateKey, chain),
+        keyStore.setEntry("CuteProxy", new KeyStore.PrivateKeyEntry(privateKey, chain),
                 new KeyStore.PasswordProtection(Settings.rootKeyStorePassword));
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             keyStore.store(bos, password);

@@ -18,7 +18,7 @@ class MMappedStore extends DataStore {
 
     private static ByteBuffer createBuffer(int size) {
         try {
-            File file = File.createTempFile("monkey_proxy_", ".tmp");
+            File file = File.createTempFile("cute_proxy_", ".tmp");
             RandomAccessFile raf = new RandomAccessFile(file, "rw");
 
             if (!file.delete()) {

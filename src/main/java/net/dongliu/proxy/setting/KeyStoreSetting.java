@@ -29,7 +29,7 @@ public class KeyStoreSetting implements Serializable {
      * The default key store file path
      */
     private static Path defaultKeyStorePath() {
-        return Settings.getParentPath().resolve(Paths.get("MonkeyProxy.p12"));
+        return Settings.getParentPath().resolve(Paths.get("CuteProxy.p12"));
     }
 
     /**

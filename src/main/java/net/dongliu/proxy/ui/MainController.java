@@ -217,7 +217,7 @@ public class MainController {
     @FXML
     private void open(ActionEvent e) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("MonkeyProxy data", "*.mpd"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CuteProxy data", "*.mpd"));
         File file = fileChooser.showOpenDialog(this.root.getScene().getWindow());
         if (file == null) {
             return;
@@ -232,7 +232,7 @@ public class MainController {
     @FXML
     private void save(ActionEvent e) throws IOException {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("MonkeyProxy data", "*.mpd"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CuteProxy data", "*.mpd"));
         fileChooser.setInitialFileName("captured.mpd");
         File file = fileChooser.showSaveDialog(this.root.getScene().getWindow());
         if (file == null) {
@@ -250,7 +250,7 @@ public class MainController {
         byte[] data = generator.exportRootCert(true);
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Pem file", "*.pem"));
-        fileChooser.setInitialFileName("MonkeyProxy.pem");
+        fileChooser.setInitialFileName("CuteProxy.pem");
         File file = fileChooser.showSaveDialog(this.root.getScene().getWindow());
         if (file == null) {
             return;
@@ -264,7 +264,7 @@ public class MainController {
         byte[] data = generator.exportRootCert(false);
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Crt file", "*.crt"));
-        fileChooser.setInitialFileName("MonkeyProxy.crt");
+        fileChooser.setInitialFileName("CuteProxy.crt");
         File file = fileChooser.showSaveDialog(this.root.getScene().getWindow());
         if (file == null) {
             return;

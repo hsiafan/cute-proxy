@@ -1,41 +1,40 @@
 
 Capture Http/Https/Http2/WebSocket traffics via Http Proxy.
 
-![screen shot](https://raw.githubusercontent.com/hsiafan/monkey-proxy/master/images/screenshot_1.png)
+![screen shot](https://raw.githubusercontent.com/hsiafan/cute-proxy/master/images/screenshot_1.png)
 
 ## Download
-[Pre Build Native Releases for macOS](https://github.com/hsiafan/monkey-proxy/releases).
+[Pre Build Jlink Images and Native Images for macOS](https://github.com/hsiafan/cute-proxy/releases).
 
 ## Build By Yourself
-OpenJDK 11+ is required To build this project.
+OpenJDK 11+ is required To build this project, and generate jlink images.
 
-Create native application image using:
-
+Run:
 ```sh
 mvn clean package
 ```
+The jlink runtime image could be found at target/cute-proxy/.
 
-jpackager tool is required to generate native images, it should be included in jdk for OpenJDK 13+. For OpenJDK 11, you can download jpackager from:
+jpackage tool is required to generate platform specific native images, it should be included in jdk for OpenJDK 13+.
+Run: 
 
 ```
-http://download2.gluonhq.com/jpackager/11/jdk.packager-linux.zip
-http://download2.gluonhq.com/jpackager/11/jdk.packager-osx.zip
-http://download2.gluonhq.com/jpackager/11/jdk.packager-windows.zip
+ mvn clean package -Pjpackage
 ``` 
 
-The packaged artifacts could be found at target/Monkey-Proxy.
+The packaged artifacts could be found at target/Cute-Proxy(or target/Cute-Proxy.app for macOS).
 
 
 ## Usage
 
-MonkeyProxy start http proxy and socks proxy at the same port, by default is 2080.
+CuteProxy start http proxy and socks proxy at the same port, by default is 2080.
 Just press the start button to start the proxy, then set the application you want to capture http traffics to use the proxy.
 
 
 ## Https Traffics
-MonkeyProxy use mitm to capture https traffics, This need a self signed root certificate be installed and trusted.
+CuteProxy use mitm to capture https traffics, This need a self signed root certificate be installed and trusted.
 
-When MonkeyProxy start at the first time,it will create a new CA Root Certificate and private key, save to to keystore file $HOME/.MonkeyProxy/MonkeyProxy.p12.
+When CuteProxy start at the first time,it will create a new CA Root Certificate and private key, save to to keystore file $HOME/.CuteProxy/CuteProxy.p12.
 Also, you can specify a another key store file you want to use. 
 
 You need to import the CA Root Certificate into you operation system. The CA Root Cert can be got by export button.

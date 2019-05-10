@@ -43,7 +43,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
             return;
         }
 
-        if (uri.equals("/MonkeyProxy.crt")) {
+        if (uri.equals("/CuteProxy.crt")) {
             WebResponse response;
             if (sslContextManager != null) {
                 byte[] bytes;
@@ -60,7 +60,7 @@ public class HttpRequestHandler extends SimpleChannelInboundHandler<FullHttpRequ
             return;
         }
 
-        if (uri.equals("/MonkeyProxy.pem")) {
+        if (uri.equals("/CuteProxy.pem")) {
             WebResponse response;
             if (sslContextManager != null) {
                 byte[] bytes;

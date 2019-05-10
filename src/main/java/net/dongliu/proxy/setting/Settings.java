@@ -22,9 +22,9 @@ public class Settings {
     /**
      * alias name for self assigned cert
      */
-    public static final String certAliasName = "MonkeyProxy app";
+    public static final String certAliasName = "CuteProxy app";
 
-    private static final Path parentPath = Paths.get(System.getProperty("user.home"), ".MonkeyProxy");
+    private static final Path parentPath = Paths.get(System.getProperty("user.home"), ".CuteProxy");
 
     public static Path getParentPath() {
         if (!Files.exists(parentPath)) {
