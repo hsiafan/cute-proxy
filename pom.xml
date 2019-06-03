@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.dongliu</groupId>
     <artifactId>cute-proxy</artifactId>
-    <name>CuteProxy</name>
+    <name>Cute Proxy</name>
     <packaging>jar</packaging>
     <version>1.0.0</version>
 
@@ -27,7 +27,7 @@
         <dependency>
             <groupId>net.dongliu</groupId>
             <artifactId>commons</artifactId>
-            <version>7.7.5</version>
+            <version>7.8.1</version>
         </dependency>
         <!-- netty -->
         <dependency>
@@ -144,7 +144,19 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
             </plugin>
-            <!-- copy all dependencies of your app to target folder, for calling jlink or jpackager-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${mainClass}</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <!-- copy all dependencies of to target folder, for calling jlink or jpackager-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -188,7 +200,7 @@
             <plugin>
                 <groupId>org.moditect</groupId>
                 <artifactId>moditect-maven-plugin</artifactId>
-                <version>1.0.0.Beta1</version>
+                <version>1.0.0.Beta2</version>
                 <executions>
                     <execution>
                         <id>add-module-info-to-dependencies</id>
@@ -363,27 +375,6 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>${maven.exec.version}</version>
                 <executions>
-                    <!-- remove this if maven jar plugin support set modular main class -->
-                    <execution>
-                        <id>add-main-class</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>jar</executable>
-                            <arguments>
-                                <argument>--main-class</argument>
-                                <argument>${mainClass}</argument>
-                                <argument>--module-version</argument>
-                                <argument>${project.version}</argument>
-                                <argument>--update</argument>
-                                <argument>--file</argument>
-                                <argument>${project.build.directory}/libs/${project.build.finalName}.jar
-                                </argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>jlink</id>
                         <phase>package</phase>
