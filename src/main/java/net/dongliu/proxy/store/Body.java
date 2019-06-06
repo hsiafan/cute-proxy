@@ -75,6 +75,7 @@ public class Body implements Serializable {
                     bodyType = BodyType.bmp;
                     break;
                 case "x-icon":
+                case "image/vnd.microsoft.icon":
                     bodyType = BodyType.icon;
                     break;
                 default:
