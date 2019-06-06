@@ -7,7 +7,7 @@
     <artifactId>cute-proxy</artifactId>
     <name>Cute Proxy</name>
     <packaging>jar</packaging>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
@@ -83,13 +83,6 @@
             <groupId>org.brotli</groupId>
             <artifactId>dec</artifactId>
             <version>0.1.2</version>
-        </dependency>
-
-        <!-- image support for .ico -->
-        <dependency>
-            <groupId>org.jclarion</groupId>
-            <artifactId>image4j</artifactId>
-            <version>0.7</version>
         </dependency>
 
         <!-- for jsse -->
@@ -259,15 +252,6 @@
                                 </module>
                                 <module>
                                     <artifact>
-                                        <groupId>org.jclarion</groupId>
-                                        <artifactId>image4j</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/image4j/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
                                         <groupId>io.netty</groupId>
                                         <artifactId>netty-buffer</artifactId>
                                     </artifact>
@@ -398,6 +382,9 @@
                                 <argument>--ignore-signing-information</argument>
                                 <argument>--no-header-files</argument>
                                 <argument>--no-man-pages</argument>
+                                <!-- try to exclude unused swing and awt resources -->
+                                <argument>--exclude-resources=@${project.basedir}/exclude_resources.list</argument>
+                                <argument>--exclude-files=glob:/java.desktop/lib/*</argument>
                             </arguments>
                         </configuration>
                     </execution>

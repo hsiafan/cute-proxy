@@ -4,7 +4,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ScrollPane;
@@ -16,11 +15,10 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import net.dongliu.proxy.store.BodyType;
 import net.dongliu.proxy.ui.component.ProgressDialog;
-import net.sf.image4j.codec.ico.ICODecoder;
+import net.dongliu.proxy.ui.ico.IconDecoders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -70,9 +68,12 @@ public class UIUtils {
     }
 
     private static Image getIconImage(InputStream in) throws IOException {
-        var images = ICODecoder.read(in);
-        var image = Collections.max(images, Comparator.comparingInt(BufferedImage::getWidth));
-        return SwingFXUtils.toFXImage(image, null);
+//        var images = ICODecoder.read(in);
+//        var image = Collections.max(images, Comparator.comparingInt(BufferedImage::getWidth));
+
+//        return SwingFXUtils.toFXImage(image, null);
+        var image = Collections.max(IconDecoders.decode(in.readAllBytes()), Comparator.comparingDouble(Image::getWidth));
+        return image;
     }
 
     public static void showMessageDialog(String message) {

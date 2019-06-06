@@ -26,7 +26,6 @@ module net.dongliu.proxy {
     requires org.tukaani.xz;
 
     // dependency without stable module name
-    requires image4j;
     requires dec;
     requires gson;
     requires bcprov.jdk15on;
