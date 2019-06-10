@@ -2,7 +2,6 @@ module net.dongliu.proxy {
     requires javafx.fxml;
     requires javafx.graphics;
     requires javafx.controls;
-    requires javafx.swing;
     requires java.sql;
     requires jdk.charsets;
     requires jdk.crypto.cryptoki;
