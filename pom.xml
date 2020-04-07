@@ -27,7 +27,7 @@
         <dependency>
             <groupId>net.dongliu</groupId>
             <artifactId>commons</artifactId>
-            <version>7.8.1</version>
+            <version>8.1.5</version>
         </dependency>
         <!-- netty -->
         <dependency>
@@ -96,7 +96,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.5</version>
+            <version>2.8.6</version>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
@@ -144,243 +144,22 @@
                     </archive>
                 </configuration>
             </plugin>
-            <!-- copy all dependencies of to target folder, for calling jlink or jpackager-->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>${maven.dependency.version}</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
-                            <includeScope>compile</includeScope>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-artifact</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>${project.artifactId}</artifactId>
-                                    <version>${project.version}</version>
-                                    <type>${project.packaging}</type>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-
-            </plugin>
-            <plugin>
-                <groupId>org.moditect</groupId>
-                <artifactId>moditect-maven-plugin</artifactId>
-                <version>1.0.0.Beta2</version>
-                <executions>
-                    <execution>
-                        <id>add-module-info-to-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>add-module-info</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/libs</outputDirectory>
-                            <overwriteExistingFiles>true</overwriteExistingFiles>
-                            <modules>
-                                <module>
-                                    <artifact>
-                                        <groupId>org.bouncycastle</groupId>
-                                        <artifactId>bcprov-jdk15on</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/bcprov.jdk15on/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>org.bouncycastle</groupId>
-                                        <artifactId>bcpkix-jdk15on</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/bcpkix.jdk15on/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>org.tukaani</groupId>
-                                        <artifactId>xz</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/org.tukaani.xz/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>org.brotli</groupId>
-                                        <artifactId>dec</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/dec/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>com.google.code.gson</groupId>
-                                        <artifactId>gson</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/gson/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>io.netty</groupId>
-                                        <artifactId>netty-buffer</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/io.netty.buffer/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>io.netty</groupId>
-                                        <artifactId>netty-handler</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/io.netty.handler/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>io.netty</groupId>
-                                        <artifactId>netty-codec</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/io.netty.codec/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>io.netty</groupId>
-                                        <artifactId>netty-codec-http</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/io.netty.codec.http/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>io.netty</groupId>
-                                        <artifactId>netty-codec-http2</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/io.netty.codec.http2/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>io.netty</groupId>
-                                        <artifactId>netty-codec-socks</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/io.netty.codec.socks/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>io.netty</groupId>
-                                        <artifactId>netty-common</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/io.netty.common/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>io.netty</groupId>
-                                        <artifactId>netty-handler-proxy</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/io.netty.handler.proxy/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>io.netty</groupId>
-                                        <artifactId>netty-resolver</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/io.netty.resolver/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>io.netty</groupId>
-                                        <artifactId>netty-transport</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/io.netty.transport/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                                <module>
-                                    <artifact>
-                                        <groupId>org.jsoup</groupId>
-                                        <artifactId>jsoup</artifactId>
-                                    </artifact>
-                                    <moduleInfoFile>
-                                        ${basedir}/src/main/modules/org.jsoup/module-info.java
-                                    </moduleInfoFile>
-                                </module>
-                            </modules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>${maven.exec.version}</version>
+                <groupId>net.dongliu</groupId>
+                <artifactId>jlink-maven-plugin</artifactId>
+                <version>1.0.5</version>
                 <executions>
                     <execution>
                         <id>jlink</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>exec</goal>
+                            <goal>link</goal>
                         </goals>
                         <configuration>
-                            <executable>jlink</executable>
-                            <arguments>
-                                <argument>--add-modules</argument>
-                                <argument>${mainModuleName},org.slf4j.simple</argument>
-                                <argument>--module-path</argument>
-                                <argument>${project.build.directory}/libs</argument>
-                                <argument>--output</argument>
-                                <argument>${project.build.directory}/${project.artifactId}</argument>
-                                <argument>--launcher</argument>
-                                <argument>${project.artifactId}=${mainModuleName}</argument>
-                                <argument>--compress</argument>
-                                <argument>1</argument>
-                                <argument>--strip-debug</argument>
-                                <argument>--ignore-signing-information</argument>
-                                <argument>--no-header-files</argument>
-                                <argument>--no-man-pages</argument>
-                                <!-- try to exclude unused swing and awt resources -->
-                                <argument>--exclude-resources=@${project.basedir}/exclude_resources.list</argument>
-                                <argument>--exclude-files=glob:/java.desktop/lib/*</argument>
-                            </arguments>
+                            <compress>1</compress>
+                            <stripDebug>true</stripDebug>
+                            <excludeDesktop>true</excludeDesktop>
+                            <ignoreSigningInformation>true</ignoreSigningInformation>
                         </configuration>
                     </execution>
                 </executions>
@@ -394,80 +173,25 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <version>${maven.exec.version}</version>
+                        <groupId>net.dongliu</groupId>
+                        <artifactId>jlink-maven-plugin</artifactId>
+                        <version>1.0.5</version>
                         <executions>
                             <execution>
                                 <id>jpackage</id>
                                 <phase>package</phase>
                                 <goals>
-                                    <goal>exec</goal>
+                                    <goal>package</goal>
                                 </goals>
                                 <configuration>
-                                    <executable>jpackage</executable>
-                                    <arguments>
-                                        <argument>create-app-image</argument>
-                                        <argument>--output</argument>
-                                        <argument>${project.build.directory}</argument>
-                                        <argument>--name</argument>
-                                        <argument>${project.name}</argument>
-                                        <argument>--app-version</argument>
-                                        <argument>${project.version}</argument>
-                                        <argument>--identifier</argument>
-                                        <argument>${project.groupId}.${project.artifactId}</argument>
-
-                                        <!-- jpackager not can not set jlink flags, so use runtime image created by jlink -->
-                                        <argument>--runtime-image</argument>
-                                        <argument>${project.build.directory}/${project.artifactId}</argument>
-                                        <argument>--module</argument>
-                                        <argument>${mainModuleName}</argument>
-
-                                        <argument>--vendor</argument>
-                                        <argument>${project.groupId}</argument>
-                                        <argument>--icon</argument>
-                                        <argument>${icon.path}</argument>
-                                    </arguments>
+                                    <type>app-image</type>
+                                    <runtimeImage>${project.build.directory}/${project.build.finalName}</runtimeImage>
                                 </configuration>
                             </execution>
                         </executions>
                     </plugin>
                 </plugins>
             </build>
-        </profile>
-        <profile>
-            <id>mac</id>
-            <activation>
-                <os>
-                    <family>mac</family>
-                </os>
-            </activation>
-            <properties>
-                <icon.path>src/main/deploy/package/macosx/CuteProxy.icns</icon.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>unix</id>
-            <activation>
-                <os>
-                    <family>unix</family>
-                    <name>Linux</name>
-                </os>
-            </activation>
-            <properties>
-                <icon.path>src/main/deploy/package/linux/CuteProxy.png</icon.path>
-            </properties>
-        </profile>
-        <profile>
-            <id>windows</id>
-            <activation>
-                <os>
-                    <family>windows</family>
-                </os>
-            </activation>
-            <properties>
-                <icon.path>src/main/deploy/package/windows/CuteProxy.ico</icon.path>
-            </properties>
         </profile>
     </profiles>
 </project>

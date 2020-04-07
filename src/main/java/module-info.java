@@ -26,7 +26,7 @@ module net.dongliu.proxy {
 
     // dependency without stable module name
     requires dec;
-    requires gson;
+    requires com.google.gson;
     requires bcprov.jdk15on;
     requires bcpkix.jdk15on;
 
