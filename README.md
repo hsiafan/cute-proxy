@@ -7,13 +7,7 @@ Capture Http/Https/Http2/WebSocket traffics via Http Proxy.
 [Pre Build Jlink Images and Native Images for macOS](https://github.com/hsiafan/cute-proxy/releases).
 
 ## Build By Yourself
-JDK 11+ is required To build this project, and generate jlink images.
-
-Run:
-```sh
-mvn clean package
-```
-The jlink runtime image could be found at target/cute-proxy/.
+JDK 11+ is required To build this project.
 
 Jpackage tool is required to generate platform specific native images, it should be included in jdk for JDK 13+.
 Run: 
@@ -24,12 +18,9 @@ Run:
 
 The packaged artifacts could be found at target/Cute Proxy(or target/Cute Proxy.app for macOS).
 
-
 ## Usage
-
 Cute-Proxy start http proxy and socks proxy at the same port, by default is 2080.
 Just press the start button to start the proxy, then set the application you want to capture http traffics to use the proxy.
-
 
 ## Https Traffics
 Cute-Proxy use mitm to capture https traffics, This need a self signed root certificate be installed and trusted.

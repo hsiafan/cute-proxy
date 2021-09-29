@@ -6,8 +6,8 @@ import net.dongliu.proxy.utils.Networks;
 import org.bouncycastle.asn1.*;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.asn1.x509.*;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -216,7 +216,7 @@ public class KeyStoreGenerator {
     private static byte[] toBinaryData(TBSCertificate tbsCertificateStructure) throws IOException {
         byte[] data;
         try (var bos = new ByteArrayOutputStream()) {
-            var derOutputStream = new DEROutputStream(bos);
+            var derOutputStream = ASN1OutputStream.create(bos, ASN1Encoding.DER);
             try {
                 derOutputStream.writeObject(tbsCertificateStructure);
                 data = bos.toByteArray();
