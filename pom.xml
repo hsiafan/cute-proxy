@@ -18,7 +18,7 @@
         <openjfx.version>17.0.1</openjfx.version>
         <netty.version>4.1.77.Final</netty.version>
         <slf4j.version>1.8.0-beta2</slf4j.version>
-        <bouncycastle.version>1.55</bouncycastle.version>
+        <bouncycastle.version>1.67</bouncycastle.version>
         <mainClass>net.dongliu.proxy.Main</mainClass>
         <mainModuleName>net.dongliu.proxy</mainModuleName>
     </properties>
