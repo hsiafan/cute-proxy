@@ -18,10 +18,12 @@ public class Main extends Application {
         VBox root = FXMLLoader.load(getClass().getResource("/fxml/main.fxml"));
         Scene scene = new Scene(root);
         stage.setTitle("Cute Proxy");
-        stage.setMaximized(true);
         stage.getIcons().add(new Image(this.getClass().getResourceAsStream("/icon.png")));
         stage.setScene(scene);
 
+        //        stage.setMaximized(true);
+        stage.setWidth(1200);
+        stage.setHeight(800);
         stage.show();
         root.requestFocus();
 

@@ -10,6 +10,8 @@ module net.dongliu.proxy {
     requires net.dongliu.commons;
     requires org.slf4j;
     requires org.slf4j.simple;
+    requires com.google.gson;
+    requires org.tukaani.xz;
 
     // dependency with stable module name
     requires io.netty.handler;
@@ -22,11 +24,10 @@ module net.dongliu.proxy {
     requires io.netty.codec.http2;
     requires io.netty.codec.socks;
     requires org.jsoup;
-    requires org.tukaani.xz;
 
     // dependency without stable module name
     requires dec;
-    requires gson;
+
     requires bcprov.jdk15on;
     requires bcpkix.jdk15on;
 

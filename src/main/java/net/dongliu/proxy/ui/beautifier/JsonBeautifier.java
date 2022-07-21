@@ -29,7 +29,7 @@ public class JsonBeautifier implements Beautifier {
     @Override
     public String beautify(String s, Charset charset) {
         try {
-            JsonElement jsonElement = new JsonParser().parse(s);
+            JsonElement jsonElement = JsonParser.parseString(s);
             return gson.toJson(jsonElement);
         } catch (Exception e) {
             logger.debug("", e);
