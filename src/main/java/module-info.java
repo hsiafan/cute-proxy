@@ -28,8 +28,8 @@ module net.dongliu.proxy {
     // dependency without stable module name
     requires dec;
 
-    requires bcprov.jdk15on;
-    requires bcpkix.jdk15on;
+    requires org.bouncycastle.provider;
+    requires org.bouncycastle.pkix;
 
     // open for javafx reflection
     opens net.dongliu.proxy;

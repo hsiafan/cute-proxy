@@ -1,19 +1,9 @@
 package net.dongliu.proxy.ssl;
 
 
-import net.dongliu.proxy.setting.Settings;
-import net.dongliu.proxy.utils.Networks;
-import org.bouncycastle.asn1.*;
-import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
-import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x509.*;
-import org.bouncycastle.asn1.x509.Certificate;
-import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
-import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.requireNonNull;
+import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_friendlyName;
+import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_localKeyId;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,7 +13,16 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.*;
+import java.security.Key;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.SecureRandom;
+import java.security.Security;
+import java.security.Signature;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateCrtKey;
@@ -33,12 +32,44 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
-import static java.util.Objects.requireNonNull;
-import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_friendlyName;
-import static org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers.pkcs_9_at_localKeyId;
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.DERBMPString;
+import org.bouncycastle.asn1.DERBitString;
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.Certificate;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.Extensions;
+import org.bouncycastle.asn1.x509.ExtensionsGenerator;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.asn1.x509.TBSCertificate;
+import org.bouncycastle.asn1.x509.TBSCertificateStructure;
+import org.bouncycastle.asn1.x509.Time;
+import org.bouncycastle.asn1.x509.V3TBSCertificateGenerator;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
+import org.bouncycastle.crypto.params.RSAPrivateCrtKeyParameters;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.provider.X509CertificateObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.dongliu.proxy.setting.Settings;
+import net.dongliu.proxy.utils.Networks;
 
 /**
- * Dynamic generate self signed certificate for mitm proxy, signed by private key in the root certificate, with SAN names.
+ * Dynamic generate self signed certificate for mitm proxy, signed by private key in the root certificate, with SAN
+ * names.
  * JDK do not have an open api for building X509 certificate, so we use  Bouncy Castle here.
  */
 public class KeyStoreGenerator {
@@ -117,7 +148,6 @@ public class KeyStoreGenerator {
      * look at RFC 2818
      *
      * @param host add to san extension, can be generic
-     * @throws Exception
      */
     public KeyStore generateKeyStore(String host, int validityDays, char[] keyStorePassword) throws Exception {
         PrivateKeyAndCertChain keyAndCertChain = generateCertChain(host, validityDays);
@@ -134,7 +164,6 @@ public class KeyStoreGenerator {
      * look at RFC 2818
      *
      * @param host add to san extension, can be generic
-     * @throws Exception
      */
     public PrivateKeyAndCertChain generateCertChain(String host, int validityDays) throws Exception {
         logger.debug("Generating certificate for host {}", host);
@@ -200,12 +229,12 @@ public class KeyStoreGenerator {
         clientCertificate.setBagAttribute(pkcs_9_at_localKeyId,
                 jcaX509ExtensionUtils.createSubjectKeyIdentifier(publicKey));
 
-        return new PrivateKeyAndCertChain(privateKey, new X509Certificate[]{clientCertificate, rootCert});
+        return new PrivateKeyAndCertChain(privateKey, new X509Certificate[] {clientCertificate, rootCert});
     }
 
     private static byte[] signData(ASN1ObjectIdentifier sigOID, byte[] data,
-                                   RSAPrivateCrtKeyParameters privateKeyParameters,
-                                   SecureRandom secureRandom) throws Exception {
+            RSAPrivateCrtKeyParameters privateKeyParameters,
+            SecureRandom secureRandom) throws Exception {
         PrivateKey caPrivateKey = KeyFactory.getInstance("RSA").generatePrivate(getKeySpec(privateKeyParameters));
         Signature signature = Signature.getInstance(sigOID.getId());
         signature.initSign(caPrivateKey, secureRandom);
@@ -216,7 +245,7 @@ public class KeyStoreGenerator {
     private static byte[] toBinaryData(TBSCertificate tbsCertificateStructure) throws IOException {
         byte[] data;
         try (var bos = new ByteArrayOutputStream()) {
-            var derOutputStream = new DEROutputStream(bos);
+            var derOutputStream = ASN1OutputStream.create(bos, ASN1Encoding.DER);
             try {
                 derOutputStream.writeObject(tbsCertificateStructure);
                 data = bos.toByteArray();
@@ -235,7 +264,7 @@ public class KeyStoreGenerator {
 
     private static SubjectPublicKeyInfo getPublicKeyInfo(PublicKey publicKey) throws IOException {
         try (var bis = new ByteArrayInputStream(publicKey.getEncoded());
-             var asn1InputStream = new ASN1InputStream(bis)) {
+                var asn1InputStream = new ASN1InputStream(bis)) {
             return SubjectPublicKeyInfo.getInstance(asn1InputStream.readObject());
         }
     }
